@@ -12,7 +12,6 @@ var idx: int
 }
 
 {:main
-
   (while {(lt (get idx) count)} {
     (puti (fact (get idx)))
     (putl)
