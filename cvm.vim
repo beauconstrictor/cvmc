@@ -17,7 +17,7 @@ syntax keyword cvm_builtin
       \ gt lt ge le eq ne
       \ not and nand or nor bool-of
       \ dup drop swap over rot
-      \ putc puti puts putl
+      \ putc puti puts putl putb
 
 syntax keyword cvm_type
       \ int uint i16 u16

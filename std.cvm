@@ -11,9 +11,9 @@ const uint = 2
 {:if <condition true -- > (if-else {})}
 {:do-while <body condition -- > swap dup i while}
 
-{:bool-of <a -- NOT a> (if-else {true} {false})}
+{:bool-of <a -- NOT NOT a> (if-else {true} {false})}
 {:not <a -- NOT a> (if-else {false} {true})}
-{:and <a b -- a AND b> (if-else {if-else {true} {false}} {false})}
+{:and <a b -- a AND b> (if-else {(if-else {true} {false})} {drop false})}
 {:nand <a b -- a NAND b> (not and)}
 {:or <a b -- a OR b> (if-else {true} {if-else {true} {false}})}
 {:nor <a b -- a NOR b> (not or)}
@@ -31,6 +31,7 @@ const uint = 2
   })
   drop
 }
+{:putb <s -- > (if-else {(puts "true")} {(puts "false")})}
 
 {:putl <s -- > (putc 10)}
 
