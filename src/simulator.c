@@ -151,7 +151,6 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
       BINARY_OPERATOR(SUB, a - b)
 
       BINARY_OPERATOR(GT,  a > b)
-      BINARY_OPERATOR(EQ,  a == b)
 
       case OPCODE_DUP: {
         uint16_t val;
@@ -170,16 +169,6 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         POP(b);
         uint16_t a;
         POP(a);
-        PUSH(b);
-        PUSH(a);
-      } break;
-
-      case OPCODE_OVER: {
-        uint16_t b;
-        POP(b);
-        uint16_t a;
-        POP(a);
-        PUSH(a);
         PUSH(b);
         PUSH(a);
       } break;

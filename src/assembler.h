@@ -20,21 +20,19 @@
 #define OPCODE_SUB   0x06
 
 #define OPCODE_GT    0x07
-#define OPCODE_EQ    0x08
 
-#define OPCODE_DUP   0x09
-#define OPCODE_DROP  0x0a
-#define OPCODE_SWAP  0x0b
-#define OPCODE_OVER  0x0c
-#define OPCODE_ROT   0x0d
+#define OPCODE_DUP   0x08
+#define OPCODE_DROP  0x09
+#define OPCODE_SWAP  0x0a
+#define OPCODE_ROT   0x0b
 
-#define OPCODE_GET   0x0e
-#define OPCODE_SET   0x0f
-#define OPCODE_LOAD  0x10
-#define OPCODE_STORE 0x11
+#define OPCODE_GET   0x0c
+#define OPCODE_SET   0x0d
+#define OPCODE_LOAD  0x0e
+#define OPCODE_STORE 0x0f
 
-#define OPCODE_PUTI  0x12 // temporary!
-#define OPCODE_PUTC  0x13
+#define OPCODE_PUTC  0x10
+#define OPCODE_PUTI  0x11 // temporary!
 
 #define INSTRUCTIONS        \
   X("i",       OPCODE_I)     \
@@ -45,12 +43,10 @@
   X("sub",     OPCODE_SUB)   \
                              \
   X("gt",      OPCODE_GT)    \
-  X("eq",      OPCODE_EQ)    \
                              \
   X("dup",     OPCODE_DUP)   \
   X("drop",    OPCODE_DROP)  \
   X("swap",    OPCODE_SWAP)  \
-  X("over",    OPCODE_OVER)  \
   X("rot",     OPCODE_ROT)   \
                              \
   X("get",     OPCODE_GET)   \
