@@ -194,10 +194,24 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         PUSH(a);
       } break;
 
-      case OPCODE_GET: {
+      case OPCODE_LOAD: {
         uint16_t a;
         POP(a);
         PUSH(memory[a]);
+      } break;
+
+      case OPCODE_STORE: {
+        uint16_t val;
+        POP(val);
+        uint16_t a;
+        POP(a);
+        memory[a] = val & 0xff;
+      } break;
+
+      case OPCODE_GET: {
+        uint16_t a;
+        POP(a);
+        PUSH((memory[a] << 8) | memory[a+1]);
       } break;
 
       case OPCODE_SET: {
@@ -205,7 +219,8 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         POP(val);
         uint16_t a;
         POP(a);
-        memory[a] = val;
+        memory[a] = val >> 8;
+        memory[a+1] = val & 0xff;
       } break;
 
       case OPCODE_PUTI: {

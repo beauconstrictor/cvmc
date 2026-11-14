@@ -7,7 +7,9 @@ syntax keyword cvm_if
       \ if if-else
 
 syntax keyword cvm_keyword
-      \ var const import get set
+      \ var const
+      \ import
+      \ get set load store
 
 syntax keyword cvm_builtin
       \ i

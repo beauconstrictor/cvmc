@@ -13,8 +13,8 @@ const uint = 2
 {:not <n -- !n> (if-else {false} {true})}
 
 {:puts <s -- >
-  (while {(get dup)} {
-    (putc (get dup))
+  (while {(load dup)} {
+    (putc (load dup))
     inc
   })
   drop

@@ -30,32 +30,36 @@
 
 #define OPCODE_GET   0x0e
 #define OPCODE_SET   0x0f
+#define OPCODE_LOAD  0x10
+#define OPCODE_STORE 0x11
 
-#define OPCODE_PUTI  0x10 // temporary!
-#define OPCODE_PUTC  0x11
+#define OPCODE_PUTI  0x12 // temporary!
+#define OPCODE_PUTC  0x13
 
 #define INSTRUCTIONS        \
-  X("i",       OPCODE_I)    \
-  X("if-else", OPCODE_IF)   \
-  X("while",   OPCODE_WHIL) \
-                            \
-  X("add",     OPCODE_ADD)  \
-  X("sub",     OPCODE_SUB)  \
-                            \
-  X("gt",      OPCODE_GT)   \
-  X("eq",      OPCODE_EQ)   \
-                            \
-  X("dup",     OPCODE_DUP)  \
-  X("drop",    OPCODE_DROP) \
-  X("swap",    OPCODE_SWAP) \
-  X("over",    OPCODE_OVER) \
-  X("rot",     OPCODE_ROT) \
-                            \
-  X("get",     OPCODE_GET) \
-  X("set",     OPCODE_SET) \
-                            \
-  X("puti",    OPCODE_PUTI) \
-  X("putc",    OPCODE_PUTC) \
+  X("i",       OPCODE_I)     \
+  X("if-else", OPCODE_IF)    \
+  X("while",   OPCODE_WHIL)  \
+                             \
+  X("add",     OPCODE_ADD)   \
+  X("sub",     OPCODE_SUB)   \
+                             \
+  X("gt",      OPCODE_GT)    \
+  X("eq",      OPCODE_EQ)    \
+                             \
+  X("dup",     OPCODE_DUP)   \
+  X("drop",    OPCODE_DROP)  \
+  X("swap",    OPCODE_SWAP)  \
+  X("over",    OPCODE_OVER)  \
+  X("rot",     OPCODE_ROT)   \
+                             \
+  X("get",     OPCODE_GET)   \
+  X("set",     OPCODE_SET)   \
+  X("load",    OPCODE_LOAD)  \
+  X("store",   OPCODE_STORE) \
+                             \
+  X("puti",    OPCODE_PUTI)  \
+  X("putc",    OPCODE_PUTC)  \
 
 bool verify_syntax(Tokens *toks, Error *error);
 // make sure to verify syntax before calling!
