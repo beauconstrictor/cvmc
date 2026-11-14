@@ -11,6 +11,12 @@ const uint = 2
 {:do-while <body condition -- > swap dup i while}
 
 {:not <n -- !n> (if-else {false} {true})}
+{:and <a b -- a&&b> (if-else {if-else {true} {false}} {false})}
+
+{:lt <a b -- a lt b> (gt swap)}
+{:le <a b -- a le b> (not gt)}
+{:ge <a b -- a ge b> (not lt)}
+{:ne <a b -- a != b> (not eq)}
 
 {:puts <s -- >
   (while {(load dup)} {
@@ -23,7 +29,7 @@ const uint = 2
 {:putl <s -- > puts (putc 10)}
 
 {:dec <n -- n-1> (sub 1)}
-{:inc <n -- n-1> (add 1)}
+{:inc <n -- n+1> (add 1)}
 
 {:mul <a b -- a*b>
   (swap 0)

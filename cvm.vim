@@ -14,7 +14,8 @@ syntax keyword cvm_keyword
 syntax keyword cvm_builtin
       \ i
       \ add sub inc dec mul
-      \ gt eq
+      \ gt lt ge le eq ne
+      \ not
       \ dup drop swap over rot
       \ putc puti puts putl
 
