@@ -292,11 +292,12 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
 
     long size = read_number(&rval, error);
     if (error->set) return false;
+    size_t length = 1;
     if (is_array) {
-      size_t length = read_number(&toks->items[i+3], error);
+      length = read_number(&toks->items[i+3], error);
       if (error->set) return false;
-      size *= length;
     }
+    size *= length;
 
     if (allocator + size > ALLOC_MAX) {
       *error = (Error) {
@@ -307,15 +308,24 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
       return false;
     }
   
+    if (!append_token_symbol(syms, &lval, allocator)) return false;
+
     char *sizeof_name = malloc(lval.length + 2);
     snprintf(sizeof_name, sizeof(sizeof_name), "#%.*s", (int)lval.length, lval.start);
-
-    if (!append_token_symbol(syms, &lval, allocator)) return false;
     if (!append_symbol((Symbol) {
       .name = sizeof_name,
       .length = lval.length + 1,
       .value = size
     }, syms)) return false;
+
+    char *lenof_name = malloc(lval.length + 2);
+    snprintf(lenof_name, sizeof(lenof_name), "$%.*s", (int)lval.length, lval.start);
+    if (!append_symbol((Symbol) {
+      .name = lenof_name,
+      .length = lval.length + 1,
+      .value = length
+    }, syms)) return false;
+
     allocator += size;
 
     for (int x = 0; x < 4; x++)
