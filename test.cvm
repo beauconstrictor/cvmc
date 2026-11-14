@@ -1,6 +1,7 @@
 import std
 
 const COUNT = 9
+var test: int
 
 {:fact <n -- !n>
   (if-else (eq dup 0) {
@@ -20,5 +21,5 @@ const COUNT = 9
     inc
   })
 
-  (puts "\b\b\x ")
+  (puts "\b\b \b")
 }

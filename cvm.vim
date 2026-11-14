@@ -16,6 +16,10 @@ syntax keyword cvm_builtin
       \ dup drop swap over rot
       \ putc puti puts putl
 
+syntax keyword cvm_type
+      \ int uint i16 u16
+      \ char byte i8 u8
+
 highlight link cvm_loop Repeat
 highlight link cvm_if Conditional
 highlight link cvm_keyword Keyword
@@ -35,3 +39,5 @@ highlight link cvm_definition Define
 
 syntax keyword cvm_bool true false
 highlight link cvm_bool Boolean
+
+highlight link cvm_type Type

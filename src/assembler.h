@@ -7,6 +7,8 @@
 #include "parser.h"
 #include "tokeniser.h"
 
+#define ENTRY_POINT "main"
+
 #define OPCODE_I     0x00
 #define OPCODE_PUSH  0x01
 #define OPCODE_RET   0x02

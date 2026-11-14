@@ -168,6 +168,10 @@ int main(int argc, char **argv) {
 
   if (!assemble(out, &syms, &toks, &error)) check_error(&error);
 
+  long main_addr;
+  if (!lookup_symbol(ENTRY_POINT, sizeof(ENTRY_POINT)-1, &syms, &main_addr))
+    cli_error("missing 'main' entry point", argv[0]);
+
   if (dump_syms) {
     FILE *syms_out = get_handle(symtable, argv[0], false);
     if (syms_out == out) fprintf(out, "\n");

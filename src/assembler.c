@@ -16,8 +16,6 @@
 #define PC_MIN 0x0800
 #define PC_MAX 0x3b7f
 
-#define ENTRY_POINT "main"
-
 #define X(mnemonic, opcode) \
   [opcode] = mnemonic,
 const char *mnemonics[] = {
@@ -44,8 +42,6 @@ bool verify_syntax(Tokens *toks, Error *error) {
       GIVE_ERROR_WITH_LEXEME("unexpected '%.*s' outside of definition", tok);
 
     switch (tok.kind) {
-      case TOKEN_LSQUARE:
-      case TOKEN_RSQUARE:
       case TOKEN_STRING:
       case TOKEN_ASSIGN:
       case TOKEN_CONST:
@@ -126,8 +122,6 @@ bool arrange_definitions(Symbols *syms, Tokens *toks, Error *error) {
 
     switch (tok.kind) {
       // all eliminated by the preprocessor
-      case TOKEN_LSQUARE:
-      case TOKEN_RSQUARE:
       case TOKEN_IMPORT:
       case TOKEN_LBRACE:
       case TOKEN_STRING:
@@ -135,6 +129,7 @@ bool arrange_definitions(Symbols *syms, Tokens *toks, Error *error) {
       case TOKEN_CONST:
       case TOKEN_LPARA:
       case TOKEN_RPARA:
+      case TOKEN_COLON:
       case TOKEN_ADDR:
       case TOKEN_VAR:
         break;
@@ -254,12 +249,8 @@ bool assemble(FILE *f, Symbols *syms, Tokens *toks, Error *error) {
   }
   
   long main_addr;
-  if (!lookup_symbol(ENTRY_POINT, sizeof(ENTRY_POINT)-1, syms, &main_addr)) {
-    Token tok = toks->items[toks->count];
-    GIVE_ERROR("missing '" ENTRY_POINT "' entry point", tok);
-  }
-
-  fprintf(f, "!%04x\nT\n", (unsigned)main_addr);
+  if (lookup_symbol(ENTRY_POINT, sizeof(ENTRY_POINT)-1, syms, &main_addr))
+    fprintf(f, "!%04x\nT\n", (unsigned)main_addr);
 
   #undef EMIT_BYTE
   #undef EMIT_WORD

@@ -190,86 +190,7 @@ bool destringify(Tokens *toks, Error *error) {
   return true;
 }
 
-bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
-  size_t allocator = ALLOC_START;
-
-  size_t i = 0;
-
-  while (i < toks->count) {
-    Token tok = toks->items[i];
-
-    if (tok.kind == TOKEN_CONST) {
-      if (toks->count < i + 4
-        || toks->items[i+1].kind != TOKEN_WORD
-        || toks->items[i+2].kind != TOKEN_ASSIGN
-        || toks->items[i+3].kind != TOKEN_NUMBER) {
-        *error = (Error) {
-          .location = tok.location,
-          .message = "expected assignment after " CONST_WORD,
-          .set = true,
-        };
-        return false;
-      }
-
-      Token lval  = toks->items[i+1];
-      Token rval = toks->items[i+3];
-
-      long value = read_number(&rval, error);
-      if (error->set) return false;
-
-      if (!append_token_symbol(syms, &lval, value)) return false;
-
-      // we have to make sure to delete them _after_ any errors.
-      // otherwise their locations won't exist anymore to print them.
-      for (int x = 0; x < 4; x++)
-        if (!remove_token(toks, i)) return false;
-
-      continue;
-
-    } else if (tok.kind == TOKEN_VAR) {
-      if (toks->count < i + 5
-        || toks->items[i+1].kind != TOKEN_WORD
-        || toks->items[i+2].kind != TOKEN_LSQUARE
-        || toks->items[i+3].kind != TOKEN_NUMBER
-        || toks->items[i+4].kind != TOKEN_RSQUARE) {
-        *error = (Error) {
-          .location = tok.location,
-          .message = "expected declaration after " VAR_WORD,
-          .set = true,
-        };
-        return false;
-      }
-
-      Token lval = toks->items[i+1];
-      Token rval = toks->items[i+3];
-
-      long size = read_number(&rval, error);
-      if (error->set) return false;
-
-      if (allocator + size > ALLOC_MAX) {
-        *error = (Error) {
-          .location = tok.location,
-          .message = "insufficient space for variable allocation" VAR_WORD,
-          .set = true,
-        };
-        return false;
-      }
-
-      if (!append_token_symbol(syms, &lval, allocator)) return false;
-      allocator += size;
-
-      for (int x = 0; x < 5; x++)
-        if (!remove_token(toks, i)) return false;
- 
-      continue;
-    }
-
-    i++;
-  }
-
-  // TODO: right here, sort symbols lexicographically so we can do a
-  //       binary search lookup and detect duplicates. use strncmp!
-
+bool substitute(Tokens *toks, Symbols *syms) {
   for (size_t i = 0; i < toks->count; i++) {
     Token tok = toks->items[i];
     if (tok.kind != TOKEN_WORD) continue;
@@ -293,6 +214,89 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
   }
   
   return true;
+}
+
+bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
+  size_t allocator = ALLOC_START;
+
+  size_t i = 0;
+  while (i < toks->count) {
+    Token tok = toks->items[i];
+
+    if (tok.kind != TOKEN_CONST) {
+      i++;
+      continue;
+    }
+
+    if (toks->count < i + 4
+      || toks->items[i+1].kind != TOKEN_WORD
+      || toks->items[i+2].kind != TOKEN_ASSIGN
+      || toks->items[i+3].kind != TOKEN_NUMBER) {
+      *error = (Error) {
+        .location = tok.location,
+        .message = "expected assignment after " CONST_WORD,
+        .set = true,
+      };
+      return false;
+    }
+
+    Token lval  = toks->items[i+1];
+    Token rval = toks->items[i+3];
+
+    long value = read_number(&rval, error);
+    if (error->set) return false;
+
+    if (!append_token_symbol(syms, &lval, value)) return false;
+
+    // we have to make sure to delete them _after_ any errors.
+    // otherwise their locations won't exist anymore to print them.
+    for (int x = 0; x < 4; x++)
+      if (!remove_token(toks, i)) return false;
+  }
+
+  if (!substitute(toks, syms)) return false;
+
+  i = 0;
+  while (i < toks->count) {
+    Token tok = toks->items[i];
+
+    if (tok.kind != TOKEN_VAR) {
+      i++;
+      continue;
+    }
+
+    if (toks->count < i + 4)
+      GIVE_ERROR("expected declaration after " VAR_WORD, tok);
+    if (toks->items[i+1].kind != TOKEN_WORD)
+      GIVE_ERROR("expected declaration after " VAR_WORD, toks->items[i+1]);
+    if (toks->items[i+2].kind != TOKEN_COLON)
+      GIVE_ERROR("expected declaration after " VAR_WORD, toks->items[i+2]);
+    if (toks->items[i+3].kind != TOKEN_NUMBER)
+      GIVE_ERROR("expected declaration after " VAR_WORD, toks->items[i+3]);
+
+    Token lval = toks->items[i+1];
+    Token rval = toks->items[i+3];
+
+    long size = read_number(&rval, error);
+    if (error->set) return false;
+
+    if (allocator + size > ALLOC_MAX) {
+      *error = (Error) {
+        .location = tok.location,
+        .message = "insufficient space for variable allocation" VAR_WORD,
+        .set = true,
+      };
+      return false;
+    }
+
+    if (!append_token_symbol(syms, &lval, allocator)) return false;
+    allocator += size;
+
+    for (int x = 0; x < 4; x++)
+      if (!remove_token(toks, i)) return false;
+  }
+
+  return substitute(toks, syms);
 }
 
 struct Blocks {
@@ -498,9 +502,6 @@ bool deimport(Tokens *toks, Error *error) {
 }
 
 bool preprocessor(Tokens *toks, Symbols *syms, Error *error) {
-  (void)toks;
-  (void)error;
-
   if (!deimport(toks, error))          return false;
   if (!deparenthesise(toks, error))    return false;
   if (!destringify(toks, error))       return false;

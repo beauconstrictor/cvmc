@@ -184,8 +184,6 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       continue;
     };
 
-    if (*s == '[') FLUSH_WITH_BRACK(LSQUARE);
-    if (*s == ']') FLUSH_WITH_BRACK(RSQUARE);
     if (*s == '{') FLUSH_WITH_BRACK(LBRACE);
     if (*s == '}') FLUSH_WITH_BRACK(RBRACE);
     if (*s == '(') FLUSH_WITH_BRACK(LPARA);
@@ -218,7 +216,7 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       EXHAUST(isdigit);
       FLUSH_TOK(TOKEN_NUMBER);
       continue;
-    } else if (*s == ':' && start == s) {
+    } else if (*s == ':' && isalnum((unsigned char)s[1]) && start == s) {
       EXHAUST_CHRS(UPPER_LETTERS LOWER_LETTERS DIGITS "-_.");
       start++;
       FLUSH_TOK(TOKEN_DEFINITION);
@@ -257,6 +255,8 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       continue;
     }
 
+    if (*s == ':') FLUSH_WITH_BRACK(COLON);
+
     SPECIAL_WORD(CONST_WORD, TOKEN_CONST);
     SPECIAL_WORD(VAR_WORD, TOKEN_VAR);
     SPECIAL_WORD(IMPORT_WORD, TOKEN_IMPORT);
@@ -292,7 +292,7 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
 // i will make a string version in the future
 void delexer(Tokens *toks, FILE *f) {
   int nesting = 0;
-  bool assignment = false;
+  bool declaration = false;
 
   for (size_t i = 0; i < toks->count; i++) {
     Token tok = toks->items[i];
@@ -318,17 +318,14 @@ void delexer(Tokens *toks, FILE *f) {
         fprintf(f, "_%.*s ", (int)tok.length, tok.start);
       } break;
 
+      case TOKEN_COLON:
       case TOKEN_ASSIGN: {
         fprintf(f, "= ");
-        assignment = true;
+        declaration = true;
       } break;
 
       case TOKEN_ADDR: {
         fprintf(f, "&");
-      } break;
-
-      case TOKEN_RSQUARE: {
-        fprintf(f, "]\n");
       } break;
 
       case TOKEN_STRING: {
@@ -358,9 +355,10 @@ void delexer(Tokens *toks, FILE *f) {
       } break;
     }
 
-    if (assignment && tok.kind != TOKEN_ASSIGN) {
+    if (declaration && tok.kind != TOKEN_ASSIGN
+        && tok.kind != TOKEN_COLON) {
       fprintf(f, "\n");
-      assignment = false;
+      declaration = false;
     }
   }
 }
