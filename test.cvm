@@ -12,8 +12,7 @@ var idx: int
 }
 
 {:main
-  (puti (abs 5)) putl
-  (puti (abs -3)) putl
+  (puti #idx)
 
   <(while {(lt (get idx) count)} {
     (puti (fact (get idx)))

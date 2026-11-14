@@ -288,8 +288,16 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
       };
       return false;
     }
+  
+    char *sizeof_name = malloc(lval.length + 2);
+    snprintf(sizeof_name, sizeof(sizeof_name), "#%.*s", (int)lval.length, lval.start);
 
     if (!append_token_symbol(syms, &lval, allocator)) return false;
+    if (!append_symbol((Symbol) {
+      .name = sizeof_name,
+      .length = lval.length + 1,
+      .value = size
+    }, syms)) return false;
     allocator += size;
 
     for (int x = 0; x < 4; x++)
