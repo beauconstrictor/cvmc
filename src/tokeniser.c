@@ -188,6 +188,8 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
     if (*s == '}') FLUSH_WITH_BRACK(RBRACE);
     if (*s == '(') FLUSH_WITH_BRACK(LPARA);
     if (*s == ')') FLUSH_WITH_BRACK(RPARA);
+    if (*s == '[') FLUSH_WITH_BRACK(LSQUARE);
+    if (*s == ']') FLUSH_WITH_BRACK(RSQUARE);
 
     if (*s == '=') FLUSH_WITH_BRACK(ASSIGN);
     if (*s == '&') FLUSH_WITH_BRACK(ADDR);

@@ -1,7 +1,7 @@
 import std
 
 const count = 8
-var idx: int
+var idx[5]: int
 
 {:fact <n -- n!>
   (if-else (lt dup 2) {

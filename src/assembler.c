@@ -123,6 +123,8 @@ bool arrange_definitions(Symbols *syms, Tokens *toks, Error *error) {
     switch (tok.kind) {
       // all eliminated by the preprocessor
       case TOKEN_IMPORT:
+      case TOKEN_LSQUARE:
+      case TOKEN_RSQUARE:
       case TOKEN_LBRACE:
       case TOKEN_STRING:
       case TOKEN_ASSIGN:

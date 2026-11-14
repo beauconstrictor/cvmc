@@ -12,15 +12,17 @@
 
 #define TOKEN_TYPES \
   X(DEFINITION) \
+  X(LSQUARE) \
+  X(RSQUARE) \
   X(IMPORT) \
   X(NUMBER) \
   X(STRING) \
   X(LBRACE) \
-  X(ASSIGN) \
   X(RBRACE) \
+  X(ASSIGN) \
   X(LPARA) \
-  X(CONST) \
   X(RPARA) \
+  X(CONST) \
   X(COLON) \
   X(WORD) \
   X(ADDR) \

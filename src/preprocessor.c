@@ -265,20 +265,38 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
       continue;
     }
 
-    if (toks->count < i + 4)
-      GIVE_ERROR("expected declaration after " VAR_WORD, tok);
-    if (toks->items[i+1].kind != TOKEN_WORD)
-      GIVE_ERROR("expected declaration after " VAR_WORD, toks->items[i+1]);
-    if (toks->items[i+2].kind != TOKEN_COLON)
-      GIVE_ERROR("expected declaration after " VAR_WORD, toks->items[i+2]);
-    if (toks->items[i+3].kind != TOKEN_NUMBER)
-      GIVE_ERROR("expected declaration after " VAR_WORD, toks->items[i+3]);
+    bool is_array = false;
+
+    if (toks->count >= i + 7
+     && toks->items[i+1].kind == TOKEN_WORD
+     && toks->items[i+2].kind == TOKEN_LSQUARE
+     && toks->items[i+3].kind == TOKEN_NUMBER
+     && toks->items[i+4].kind == TOKEN_RSQUARE
+     && toks->items[i+5].kind == TOKEN_COLON
+     && toks->items[i+6].kind == TOKEN_NUMBER)
+      is_array = true;
+    
+    if (!is_array) {
+      if (toks->count < i + 4)
+        GIVE_ERROR("expected declaration after " VAR_WORD, tok);
+      if (toks->items[i+1].kind != TOKEN_WORD)
+        GIVE_ERROR("expected declaration after " VAR_WORD, toks->items[i+1]);
+      if (toks->items[i+2].kind != TOKEN_COLON)
+        GIVE_ERROR("expected declaration after " VAR_WORD, toks->items[i+2]);
+      if (toks->items[i+3].kind != TOKEN_NUMBER)
+        GIVE_ERROR("expected declaration after " VAR_WORD, toks->items[i+3]);
+    }
 
     Token lval = toks->items[i+1];
-    Token rval = toks->items[i+3];
+    Token rval = is_array ? toks->items[i+6] : toks->items[i+3];
 
     long size = read_number(&rval, error);
     if (error->set) return false;
+    if (is_array) {
+      size_t length = read_number(&toks->items[i+3], error);
+      if (error->set) return false;
+      size *= length;
+    }
 
     if (allocator + size > ALLOC_MAX) {
       *error = (Error) {
@@ -302,6 +320,9 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
 
     for (int x = 0; x < 4; x++)
       if (!remove_token(toks, i)) return false;
+    if (is_array)
+      for (int x = 0; x < 3; x++)
+        if (!remove_token(toks, i)) return false;
   }
 
   return substitute(toks, syms);
