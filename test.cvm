@@ -4,14 +4,18 @@ const count = 8
 var idx: int
 
 {:fact <n -- !n>
-  (if-else (eq dup 0) {
+  (if-else (lt dup 2) {
     drop 1
-  } {(if (gt dup 1) {
+  } {
     (mul (fact (dec dup)))
-  })})
+  })
 }
 
 {:main
-  (set idx -1)
-  (puti (get idx))
+
+  (while {(lt (get idx) count)} {
+    (puti (fact (get idx)))
+    (putl)
+    (set idx (inc (get idx)))
+  })
 }
