@@ -142,11 +142,20 @@ bool destringify(Tokens *toks, Error *error) {
       }
 
       if (in_escape) {
-        c = escapes[(int)c];
+        c = escapes[(unsigned char)c];
         if (c == 0) {
           char err_msg[256];
-          snprintf(err_msg, sizeof(err_msg), "invalid escape sequence: '\\%c'", c);
-          GIVE_ERROR(err_msg, tok);
+          snprintf(err_msg, sizeof(err_msg), "invalid escape sequence: '\\%c'", *s);
+          *error = (Error) {
+            .location = {
+              .line = tok.location.line,
+              .col = tok.location.col + s - tok.start,
+              .path = tok.location.path,
+            },
+            .message = err_msg,
+            .set = true,
+          };
+          return false;
         } if (c == -1) c = 0;
         in_escape = false;
       }
