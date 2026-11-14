@@ -68,12 +68,16 @@ void print_error(const Error *error) {
 
   // TODO: this looks fucked with tabs
 
+  int col = error->location.col;
+
   fprintf(stderr, "%5zu %s|%s %s", error->location.line, cols.dim,
       cols.reset, line);
   fprintf(stderr, "%s%5s | %s", cols.dim, "", cols.reset);
-  for (size_t i = 0; i < error->location.col-1; i++)
-    fputc(' ', stderr);
-  fprintf(stderr, "%s^%s\n\n", cols.yellow, cols.reset);
+  if (col > 0) {
+    for (int i = 0; i < col-1; i++)
+      fputc(' ', stderr);
+    fprintf(stderr, "%s^%s\n\n", cols.yellow, cols.reset);
+  }
 
   fclose(f);
 }

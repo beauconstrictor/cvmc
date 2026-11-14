@@ -173,11 +173,6 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       comment_level--;
     }
 
-    if (*s == '\n') {
-      line++;
-      linestart = s + 1;
-    };
-
     if (comment_level > 0 || *s == '>') {
       s++;
       start = s;
@@ -208,8 +203,15 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       };
       return false;
     }
-  
-    if (isaspace(*s)) {
+ 
+    if (*s == '\n') {
+      FLUSH_TOK(TOKEN_WORD);
+      line++;
+      linestart = s + 1;
+      start = s + 1;
+      s++;
+      continue;
+    } if (isaspace(*s)) {
       FLUSH_TOK(TOKEN_WORD);
       start = s + 1;
     } else if ((isdigit((unsigned char)*s)

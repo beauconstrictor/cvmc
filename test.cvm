@@ -1,22 +1,10 @@
 import std
 
-const count = 8
-var idx[5]: int
-
-{:fact <n -- n!>
-  (if-else (lt dup 2) {
-    drop 1
-  } {
-    (mul (fact (dec dup)))
-  })
-}
-
 {:main
-  (puti $idx)
+ 'a'
 
-  <(while {(lt (get idx) count)} {
-    (puti (fact (get idx)))
-    (putl)
-    (set idx (inc (get idx)))
-  })>
+  (while 0 {(ge dup 0)} {
+    (puti dup) putl
+    inc
+  })
 }
