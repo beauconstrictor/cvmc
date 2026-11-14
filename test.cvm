@@ -3,7 +3,7 @@ import std
 const count = 8
 var idx: int
 
-{:fact <n -- !n>
+{:fact <n -- n!>
   (if-else (lt dup 2) {
     drop 1
   } {
