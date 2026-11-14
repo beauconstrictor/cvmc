@@ -12,6 +12,6 @@ var idx: int
 }
 
 {:main
-  (set idx (neg 1))
+  (set idx -1)
   (puti (get idx))
 }
