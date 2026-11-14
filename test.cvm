@@ -1,7 +1,7 @@
 import std
 
 const count = 8
-var n: int
+var idx: int
 
 {:fact <n -- !n>
   (if-else (eq dup 0) {
@@ -14,12 +14,7 @@ var n: int
 {:main
   (puts "first 9 factorials: ")
 
-  (while 0 {(not (eq dup COUNT))} {
-    (puti (fact dup))
-    (puts ", ")
-
-    inc
-  })
+  (while {( (get idx)
 
   (puts "\b\b \b")
 }

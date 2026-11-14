@@ -3,6 +3,7 @@ const false = 0
 
 const char = 1
 const byte = 1
+const bool = 1
 
 const int = 2
 const uint = 2
@@ -10,8 +11,12 @@ const uint = 2
 {:if <condition true -- > (if-else {})}
 {:do-while <body condition -- > swap dup i while}
 
-{:not <n -- !n> (if-else {false} {true})}
-{:and <a b -- a&&b> (if-else {if-else {true} {false}} {false})}
+{:bool-of <a -- NOT a> (if-else {true} {false})}
+{:not <a -- NOT a> (if-else {false} {true})}
+{:and <a b -- a AND b> (if-else {if-else {true} {false}} {false})}
+{:nand <a b -- a NAND b> (not and)}
+{:or <a b -- a OR b> (if-else {true} {if-else {true} {false}})}
+{:nor <a b -- a NOR b> (not or)}
 
 {:lt <a b -- a lt b> (gt swap)}
 {:le <a b -- a le b> (not gt)}

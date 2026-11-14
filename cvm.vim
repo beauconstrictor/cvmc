@@ -15,13 +15,13 @@ syntax keyword cvm_builtin
       \ i
       \ add sub inc dec mul
       \ gt lt ge le eq ne
-      \ not
+      \ not and nand or nor bool-of
       \ dup drop swap over rot
       \ putc puti puts putl
 
 syntax keyword cvm_type
       \ int uint i16 u16
-      \ char byte i8 u8
+      \ char byte bool i8 u8
 
 highlight link cvm_loop Repeat
 highlight link cvm_if Conditional
