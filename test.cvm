@@ -1,8 +1,6 @@
 import std
 
 {:main
- 'a'
-
   (while 0 {(ge dup 0)} {
     (puti dup) putl
     inc

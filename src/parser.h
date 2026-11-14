@@ -38,6 +38,7 @@ typedef struct {
   size_t capacity;
 } Symbols;
 
+extern const int escapes[256];
 
 bool append_symbol(Symbol sym, Symbols *syms);
 // uses the token's lexeme as the name

@@ -39,6 +39,9 @@ highlight link cvm_str_literal String
 syntax match cvm_int_literal "\<-\?\d\+\>"
 highlight link cvm_int_literal Number
 
+syntax region cvm_char_literal start=+'+ skip=+\\.+ end=+'+
+highlight link cvm_char_literal Character
+
 syntax match cvm_definition /{:\zs[a-zA-Z0-9_.-]\+/
 highlight link cvm_definition Define
 

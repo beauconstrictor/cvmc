@@ -34,17 +34,6 @@
 #define ALLOC_START 0x38b0
 #define ALLOC_MAX   0x6fff
 
-const int escapes[256] = {
-  ['\\'] = '\\',
-  ['b'] =  '\b',
-  ['n'] =  '\n',
-  ['r'] =  '\r',
-  ['0'] =  -1,
-  ['f'] =  '\f',
-  ['t'] =  '\t',
-  ['e'] =  '\033',
-};
-
 bool deparenthesise(Tokens *toks, Error *error) {
   Tokens prefix_words = create_tokens();
 

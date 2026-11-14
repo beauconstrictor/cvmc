@@ -220,6 +220,16 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       EXHAUST(isdigit);
       FLUSH_TOK(TOKEN_NUMBER);
       continue;
+    } else if (*s == '\'' && s[1] && s[2] == '\'') {
+      EXHAUST_UNTIL("'");
+      s++;
+      FLUSH_TOK(TOKEN_NUMBER);
+      continue;
+    } else if (*s == '\'' && s[1] == '\\' && s[2] && s[3] == '\'') {
+      EXHAUST_UNTIL("'");
+      s++;
+      FLUSH_TOK(TOKEN_NUMBER);
+      continue;
     } else if (*s == ':' && isalnum((unsigned char)s[1]) && start == s) {
       EXHAUST_CHRS(UPPER_LETTERS LOWER_LETTERS DIGITS "-_.");
       start++;

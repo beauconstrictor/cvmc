@@ -11,6 +11,17 @@
  *       in the symbol resolution system (or maybe even a hashmap)
  */
 
+const int escapes[256] = {
+  ['\\'] = '\\',
+  ['b'] =  '\b',
+  ['n'] =  '\n',
+  ['r'] =  '\r',
+  ['0'] =  -1,
+  ['f'] =  '\f',
+  ['t'] =  '\t',
+  ['e'] =  '\033',
+};
+
 bool append_symbol(Symbol sym, Symbols *syms) {
   if (syms->count < syms->capacity) {
     syms->items[syms->count++] = sym;
@@ -58,6 +69,22 @@ long read_number(const Token *tok, Error *error) {
   char *end;
   errno = 0;
   long value = strtol(buf, &end, 10);
+
+  if (tok->length == 3 && tok->start[0] == '\'' && tok->start[2] == '\'')
+    return (long)tok->start[1];
+  if (tok->length == 4 && tok->start[0] == '\'' && tok->start[1] == '\\' && tok->start[3] == '\'') {
+    char c = escapes[(unsigned char)tok->start[2]];
+    if (c == 0) {
+      *error = (Error) {
+        .location = tok->location,
+        .message = "invalid escape sequence",
+        .set = true,
+      };
+      if (c == -1) c = 0;
+      return -1;
+    }
+    return c;
+  }
 
   if (end != buf + tok->length) {
     *error = (Error) {
