@@ -34,7 +34,7 @@
 #define ALLOC_START 0x38b0
 #define ALLOC_MAX   0x6fff
 
-const int escapes[] = {
+const int escapes[256] = {
   ['\\'] = '\\',
   ['b'] =  '\b',
   ['n'] =  '\n',
@@ -142,7 +142,9 @@ bool destringify(Tokens *toks, Error *error) {
       }
 
       if (in_escape) {
+        printf("escaped: \\%c ", c);
         c = escapes[(unsigned char)c];
+        printf("as %d\n", c);
         if (c == 0) {
           char err_msg[256];
           snprintf(err_msg, sizeof(err_msg), "invalid escape sequence: '\\%c'", *s);
@@ -156,7 +158,8 @@ bool destringify(Tokens *toks, Error *error) {
             .set = true,
           };
           return false;
-        } if (c == -1) c = 0;
+        }
+        if (c == -1) c = 0;
         in_escape = false;
       }
 
