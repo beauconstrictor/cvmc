@@ -142,9 +142,7 @@ bool destringify(Tokens *toks, Error *error) {
       }
 
       if (in_escape) {
-        printf("escaped: \\%c ", c);
         c = escapes[(unsigned char)c];
-        printf("as %d\n", c);
         if (c == 0) {
           char err_msg[256];
           snprintf(err_msg, sizeof(err_msg), "invalid escape sequence: '\\%c'", *s);
