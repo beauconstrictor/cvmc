@@ -19,10 +19,10 @@ const uint = 2
 {:nor <a b -- a NOR b> (not or)}
 
 {:eq <a b -- a == b> sub (if-else {true} {false})}
+{:ne <a b -- a != b> sub (if-else {false} {true})}
 {:lt <a b -- a lt b> (gt swap)}
 {:le <a b -- a le b> (not gt)}
 {:ge <a b -- a ge b> (not lt)}
-{:ne <a b -- a != b> (not eq)}
 
 {:puts <s -- >
   (while {(load dup)} {
@@ -41,6 +41,7 @@ const uint = 2
 {:inc <n -- n+1> (add 1)}
 
 {:neg <n -- -n> (sub (swap 0))}
+{:abs <n -- |n|> (if (lt dup 0) {neg})}
 
 {:mul <a b -- a*b>
   (swap 0)

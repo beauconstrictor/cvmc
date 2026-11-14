@@ -1,6 +1,7 @@
 import std
 
 const count = 8
+var idx: int
 
 {:fact <n -- n!>
   (if-else (lt dup 2) {
@@ -11,9 +12,12 @@ const count = 8
 }
 
 {:main
-  (while 0 {(lt dup count)} {
-    (puti (fact dup))
+  (puti (abs 5)) putl
+  (puti (abs -3)) putl
+
+  <(while {(lt (get idx) count)} {
+    (puti (fact (get idx)))
     (putl)
-    inc
-  })
+    (set idx (inc (get idx)))
+  })>
 }
