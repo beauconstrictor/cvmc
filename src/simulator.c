@@ -60,10 +60,12 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
 
   #define BINARY_OPERATOR(opcode, operation) \
         case OPCODE_##opcode: { \
-          uint16_t b; \
-          POP(b); \
-          uint16_t a; \
-          POP(a); \
+          uint16_t ub; \
+          POP(ub); \
+          uint16_t ua; \
+          POP(ua); \
+          int16_t a = ua; \
+          int16_t b = ub; \
           PUSH(operation); \
         } break;
 
@@ -226,7 +228,7 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
       case OPCODE_PUTI: {
         uint16_t val;
         POP(val);
-        printf("%u", val);
+        printf("%d", (int16_t)val);
       } break;
 
       case OPCODE_PUTC: {

@@ -1,7 +1,6 @@
 import std
 
-const COUNT = 9
-var test: int
+const COUNT = 8
 
 {:fact <n -- !n>
   (if-else (eq dup 0) {
