@@ -36,6 +36,8 @@ const uint = 2
 {:dec <n -- n-1> (sub 1)}
 {:inc <n -- n+1> (add 1)}
 
+{:neg <n -- -n> (sub (swap 0))}
+
 {:mul <a b -- a*b>
   (swap 0)
 

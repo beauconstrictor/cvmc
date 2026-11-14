@@ -12,9 +12,6 @@ var idx: int
 }
 
 {:main
-  (puts "first 9 factorials: ")
-
-  (while {( (get idx)
-
-  (puts "\b\b \b")
+  (set idx (neg 1))
+  (puti (get idx))
 }

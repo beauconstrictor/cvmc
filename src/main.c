@@ -63,7 +63,9 @@ void show_ir(Tokens *toks, CompilationMode mode, bool raw_tokens,
   } else if (raw_tokens) {
     for (size_t i = 0; i < toks->count; i++) {
       Token tok = toks->items[i];
-      printf("%s %.*s\n", token_kind_name(tok.kind), (int)tok.length, tok.start);
+      printf("%s %.*s @ %s:%zu:%zu\n", token_kind_name(tok.kind),
+          (int)tok.length, tok.start, tok.location.path,
+          tok.location.line, tok.location.col);
     }
 
   } else {

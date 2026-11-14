@@ -478,7 +478,7 @@ bool deimport(Tokens *toks, Error *error) {
     else if (next.kind != TOKEN_WORD)
       GIVE_ERROR("expected name after import", next);
 
-    char path[PATH_MAX];
+    char *path = malloc(PATH_MAX);
     Tokens new_toks = {0};
     snprintf(path, sizeof(path), "%.*s.cvm", (int)next.length, next.start);
 
