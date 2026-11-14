@@ -1,5 +1,7 @@
 syntax clear
 
+setlocal iskeyword+=-
+
 syntax keyword cvm_loop
       \ while do-while
 
