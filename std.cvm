@@ -98,7 +98,7 @@ const uint = 2
   (abs rot)
   (abs rot)
   raw-div-mod
-  stack
+  (swap (set-sgn rot rot swap))
 }
 
 {:div <a b -- a/b> (drop div-mod)}

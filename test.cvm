@@ -1,7 +1,5 @@
 import std
 
 {:main
-  (puts "quotient: ") (puti (div -10 -2)) putl
-  swap
-  (puts "of: ") puti (puts " / ") puti putl
+  (puts "quotient: ") (puti (div 10 -2)) putl
 }
