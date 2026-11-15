@@ -37,6 +37,9 @@ highlight link cvm_comment Comment
 syntax region cvm_str_literal start=/"/ skip=/\\"/ end=/"/
 highlight link cvm_str_literal String
 
+syntax match cvm_str_escape "\\."
+highlight link cvm_str_escape SpecialChar
+
 syntax match cvm_int_literal "\<-\?\d\+\>"
 highlight link cvm_int_literal Number
 
