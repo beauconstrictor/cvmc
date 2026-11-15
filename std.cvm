@@ -18,8 +18,8 @@ const uint = 2
 {:or <a b -- a OR b> (if-else {true} {if-else {true} {false}})}
 {:nor <a b -- a NOR b> (not or)}
 
-{:eq <a b -- a == b> sub (if-else {true} {false})}
-{:ne <a b -- a != b> sub (if-else {false} {true})}
+{:eq <a b -- a == b> sub (if-else {false} {true})}
+{:ne <a b -- a != b> sub (if-else {true} {false})}
 {:lt <a b -- a lt b> (gt swap)}
 {:le <a b -- a le b> (not gt)}
 {:ge <a b -- a ge b> (not lt)}
@@ -42,6 +42,13 @@ const uint = 2
 
 {:neg <n -- -n> (sub (swap 0))}
 {:abs <n -- |n|> (if (lt dup 0) {neg})}
+{:sgn <n -- n'> 
+  (if (ne dup 0) {(if-else (gt 0) {
+    1
+  } {
+    -1
+  })})
+}
 
 {:mul <a b -- a*b>
   (swap 0)
@@ -55,8 +62,8 @@ const uint = 2
   drop swap drop
 }
 
-< NOTE: (for now), division is only correct on positive numbers>
-{:div-mod <a b -- a/b a%b>
+<does not correctly handle negatives>
+{:raw-div-mod <a b -- a/b a%b>
   (rot (rot 0))
 
   (while {(ge over over)} {
@@ -68,6 +75,14 @@ const uint = 2
   })
 
   drop
+}
+
+<corrects the signs before and after passing to raw-div-mod>
+{:div-mod
+  abs
+  (abs over)
+  swap
+  raw-div-mod
 }
 
 {:div <a b -- a/b> (drop div-mod)}

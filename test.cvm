@@ -1,6 +1,5 @@
 import std
 
 {:main
-  (div 22 2)
-  puti putl
+  (puti (div 10 -2)) putl
 }
