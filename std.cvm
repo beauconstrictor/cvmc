@@ -24,6 +24,8 @@ const uint = 2
 {:le <a b -- a le b> (not gt)}
 {:ge <a b -- a ge b> (not lt)}
 
+{:at <arr size idx -- ptr> (add mul)}
+
 {:puts <s -- >
   (while {(load dup)} {
     (putc (load dup))

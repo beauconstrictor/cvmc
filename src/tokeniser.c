@@ -334,7 +334,7 @@ void delexer(Tokens *toks, FILE *f) {
 
       case TOKEN_COLON:
       case TOKEN_ASSIGN: {
-        fprintf(f, "= ");
+        fprintf(f, "%.*s ", (int)tok.length, tok.start);
         declaration = true;
       } break;
 
@@ -372,6 +372,7 @@ void delexer(Tokens *toks, FILE *f) {
     if (declaration && tok.kind != TOKEN_ASSIGN
         && tok.kind != TOKEN_COLON) {
       fprintf(f, "\n");
+      PRINT_NESTING();
       declaration = false;
     }
   }

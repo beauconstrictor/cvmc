@@ -179,6 +179,70 @@ bool destringify(Tokens *toks, Error *error) {
   return true;
 }
 
+bool delocalise(Tokens *toks, Error *error, size_t start,
+    const char *initial_prefix, bool is_nested) {
+  (void)error;
+
+  char prefix[1024];
+
+  if (toks->count > start && toks->items[start].kind == TOKEN_DEFINITION) {
+    Token tok = toks->items[start];
+    snprintf(prefix, sizeof(prefix), "%s%s%.*s", initial_prefix,
+        strlen(initial_prefix) ? "." : "",
+        (int)tok.length, tok.start);
+  } else if (is_nested) {
+    snprintf(prefix, sizeof(prefix), "%s%zu", initial_prefix, start);
+  }
+
+  Symbols syms = {0};
+
+  int nesting = 0;
+
+  for (size_t i = start; i < toks->count; i++) {
+    Token *tok = toks->items + i;
+    bool has_next = toks->count > i + 1;
+    Token next;
+    if (has_next) next = toks->items[i+1];
+
+    if (tok->kind == TOKEN_LBRACE)
+      nesting++;
+    if (tok->kind == TOKEN_RBRACE)
+      nesting--;
+    if (nesting < 0) break;
+
+    if (tok->kind == TOKEN_VAR && nesting == 0
+        && has_next && next.kind == TOKEN_WORD)
+      append_token_symbol(&syms, &next, 0);
+
+    if (tok->kind == TOKEN_WORD
+        && lookup_symbol(tok->start, tok->length, &syms, NULL)
+        && strlen(prefix) > 0) {
+      size_t len = tok->length + strlen(prefix) + 1;
+      char *prefixed = malloc(len)+1;
+      snprintf(prefixed, len+1, "%s.%.*s", prefix, (int)tok->length, tok->start);
+      tok->length = len;
+      tok->start  = prefixed;
+    }
+  }
+
+  nesting = 0;
+
+  for (size_t i = start; i < toks->count; i++) {
+    Token tok = toks->items[i];
+
+    if (tok.kind == TOKEN_LBRACE)
+      nesting++;
+    if (tok.kind == TOKEN_RBRACE)
+      nesting--;
+    if (nesting < 0) break;
+
+    if (tok.kind != TOKEN_LBRACE) continue;
+    delocalise(toks, error, i+1, prefix, true);
+  }
+
+  return true;
+}
+
 bool substitute(Tokens *toks, Symbols *syms) {
   for (size_t i = 0; i < toks->count; i++) {
     Token tok = toks->items[i];
@@ -530,11 +594,14 @@ bool deimport(Tokens *toks, Error *error) {
 }
 
 bool preprocessor(Tokens *toks, Symbols *syms, Error *error) {
-  if (!deimport(toks, error))          return false;
-  if (!deparenthesise(toks, error))    return false;
-  if (!destringify(toks, error))       return false;
-  if (!desymbolise(toks, syms, error)) return false;
-  if (!deanonymify(toks, error))       return false;
+  (void)syms;
+
+  // if (!deimport(toks, error))          return false;
+  // if (!deparenthesise(toks, error))    return false;
+  // if (!destringify(toks, error))       return false;
+  if (!delocalise(toks, error, 0, "", false)) return false;
+  // if (!desymbolise(toks, syms, error)) return false;
+  // if (!deanonymify(toks, error))       return false;
 
   return true;
 }

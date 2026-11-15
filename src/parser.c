@@ -55,7 +55,7 @@ bool lookup_symbol(const char *s, size_t length, Symbols *syms, long *value) {
     if (length != sym.length) continue;
     if (strncmp(s, sym.name, length) != 0) continue;
 
-    *value = sym.value;
+    if (value != NULL) *value = sym.value;
     return true;
   }
 
