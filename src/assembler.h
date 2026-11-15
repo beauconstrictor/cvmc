@@ -32,7 +32,9 @@
 #define OPCODE_STORE 0x0f
 
 #define OPCODE_PUTC  0x10
+
 #define OPCODE_PUTI  0x11 // temporary!
+#define OPCODE_STACK 0x12 // temporary!
 
 #define INSTRUCTIONS        \
   X("i",       OPCODE_I)     \
@@ -56,6 +58,8 @@
                              \
   X("puti",    OPCODE_PUTI)  \
   X("putc",    OPCODE_PUTC)  \
+                             \
+  X("stack",   OPCODE_STACK) \
 
 bool verify_syntax(Tokens *toks, Error *error);
 // make sure to verify syntax before calling!

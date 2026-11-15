@@ -165,7 +165,7 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
             .col = s - linestart + 1,
             .path = path,
           },
-          .message = "'>' encountered outside of comment",
+          .message = "unexpected '>' outside of comment",
           .set = true,
         };
         return false;

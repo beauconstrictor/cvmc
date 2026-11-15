@@ -43,12 +43,26 @@ const uint = 2
 {:neg <n -- -n> (sub (swap 0))}
 {:abs <n -- |n|> (if (lt dup 0) {neg})}
 {:sgn <n -- n'> 
-  (if (ne dup 0) {(if-else (gt 0) {
-    1
-  } {
-    -1
-  })})
+  (if (ne dup 0) {
+    (if-else (gt 0) {
+      1
+    } {
+      -1
+    })
+  })
 }
+{:set-sgn <a b -- a'>
+  (if-else (eq dup 0) {
+    drop drop 0
+  } {
+    (if-else (gt 0) {
+      abs
+    } {
+      (neg abs)
+    })
+  })
+}
+
 
 {:mul <a b -- a*b>
   (swap 0)
@@ -77,12 +91,14 @@ const uint = 2
   drop
 }
 
-<corrects the signs before and after passing to raw-div-mod>
 {:div-mod
-  abs
-  (abs over)
-  swap
+  (sgn over)
+  (sgn over)
+  (if-else (eq) {1} {-1})
+  (abs rot)
+  (abs rot)
   raw-div-mod
+  stack
 }
 
 {:div <a b -- a/b> (drop div-mod)}

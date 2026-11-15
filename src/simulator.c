@@ -226,6 +226,14 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         putchar(val);
       } break;
 
+      case OPCODE_STACK: {
+        printf("<");
+        for (size_t i = 0; i < dstack->head; i++) {
+          printf("%d ", (int16_t)dstack->data[i]);
+        }
+        printf("\b>\n");
+      } break;
+
       default: {
         snprintf(err_msg, sizeof(err_msg),
             "unsupported opcode: 0x%02x @ %d (0x%04x)", opcode,
