@@ -55,6 +55,7 @@ const uint = 2
   drop swap drop
 }
 
+< NOTE: (for now), division is only correct on positive numbers>
 {:div-mod <a b -- a/b a%b>
   (rot (rot 0))
 
