@@ -34,7 +34,7 @@ highlight link cvm_builtin Function
 syntax region cvm_comment start=/</ end=/>/ contains=cvm_comment
 highlight link cvm_comment Comment
 
-syntax region cvm_str_literal start=/"/ skip=/\\"/ end=/"/
+syntax region cvm_str_literal start=/"/ skip=/\\"/ end=/"/ contains=cvm_str_escape
 highlight link cvm_str_literal String
 
 syntax match cvm_str_escape "\\."
@@ -43,7 +43,7 @@ highlight link cvm_str_escape SpecialChar
 syntax match cvm_int_literal "\<-\?\d\+\>"
 highlight link cvm_int_literal Number
 
-syntax region cvm_char_literal start=+'+ skip=+\\.+ end=+'+
+syntax region cvm_char_literal start=+'+ skip=+\\.+ end=+'+ contains=cvm_str_escape
 highlight link cvm_char_literal Character
 
 syntax match cvm_definition /{:\zs[a-zA-Z0-9_.-]\+/
