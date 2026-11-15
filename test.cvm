@@ -1,8 +1,23 @@
 import std
 
-{:main
-  (while 0 {(ge dup 0)} {
-    (puti dup) putl
-    inc
+{:div-mod <a b -- a/b a%b>
+  (rot (rot 0))
+
+  (while {(ge over over)} {
+    over over
+    sub
+    rot
+    drop swap rot inc
+    rot rot
   })
+
+  drop
+}
+
+{:div <a b -- a/b> (drop div-mod)}
+{:mod <a b -- a%b> (drop (swap div-mod))}
+
+{:main
+  (mod 22 5)
+  puti putl
 }

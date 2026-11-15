@@ -47,18 +47,27 @@ const uint = 2
   (swap 0)
 
   (while {dup} {
-    rot
-    rot
-    swap
-    dup
-    rot
-    add
-    rot
-    dec
+    rot rot
+    swap dup rot add
+    rot dec
   })
   
-  drop
-  swap
+  drop swap drop
+}
+
+{:div-mod <a b -- a/b a%b>
+  (rot (rot 0))
+
+  (while {(ge over over)} {
+    over over
+    sub
+    rot
+    drop swap rot inc
+    rot rot
+  })
+
   drop
 }
 
+{:div <a b -- a/b> (drop div-mod)}
+{:mod <a b -- a%b> (drop (swap div-mod))}
