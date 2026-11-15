@@ -15,7 +15,8 @@ syntax keyword cvm_keyword
 
 syntax keyword cvm_builtin
       \ i
-      \ add sub inc dec mul
+      \ neg abs sgn set-sgn
+      \ add sub inc dec mul div mod
       \ gt lt ge le eq ne
       \ not and nand or nor bool-of
       \ dup drop swap over rot
