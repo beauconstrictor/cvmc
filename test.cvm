@@ -1,19 +1,7 @@
+import std
 
-{:subroutine
-  {
-    var test: 1
+const val = 230
 
-    {
-      var test: 1
-
-      {
-        var test: 1
-        test
-      }
-
-      test
-    }
-
-    test
-  }
+{:main
+  (puti val)
 }

@@ -214,12 +214,6 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         memory[a+1] = val & 0xff;
       } break;
 
-      case OPCODE_PUTI: {
-        uint16_t val;
-        POP(val);
-        printf("%d", (int16_t)val);
-      } break;
-
       case OPCODE_PUTC: {
         uint16_t val;
         POP(val);

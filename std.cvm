@@ -15,8 +15,25 @@ const ptr = 2
 const callable = 2
 const str = 2
 
+<some std functions do not have a signature. in this case, this
+ function is 'internal', and should not be used.>
+
+<some functions set errno instead of returning normally. in this
+ case, their actual return values may not make any sense, but they
+ will always have the same net stack effect no matter what.
+
+ if a function sets errno, this will be documented in the signature.
+
+ to check if a function returned an error, (clear errno) beforehand,
+ and check (ne (get errno) errno_succ)>
+
+const errno_succ = 0
+const errno_0div = 1
+
+var errno: int
+
 {:if <condition true -- > (if-else {})}
-{:do-while <body condition -- > swap dup i while}
+{:do-while <body condition -- > swap dup call while}
 
 {:bool-of <a -- NOT NOT a> (if-else {true} {false})}
 {:not <a -- NOT a> (if-else {false} {true})}
@@ -32,6 +49,7 @@ const str = 2
 {:ge <a b -- a ge b> (not lt)}
 
 {:at <arr size idx -- ptr> (add mul)}
+{:clear <ptr -- > (set 0)}
 
 {:puts <s -- >
   (while {(load dup)} {
@@ -40,8 +58,19 @@ const str = 2
   })
   drop
 }
-{:putb <s -- > (if-else {(puts "true")} {(puts "false")})}
 
+{:puti <n -- >
+  (if (lt dup 0) {
+    (putc '-')
+  })
+  abs
+  (if (gt dup 9) {
+    (puti (div dup 10))
+  })
+  (putc (add (mod 10) '0'))
+}
+
+{:putb <s -- > (if-else {(puts "true")} {(puts "false")})}
 {:putl <s -- > (putc '\n')}
 
 {:over <a b -- a b a> swap dup rot swap}
@@ -73,6 +102,8 @@ const str = 2
 }
 
 
+<somehow, this actually DOES work with signed values, despite no
+ specific handling for them>
 {:mul <a b -- a*b>
   (swap 0)
 
@@ -101,14 +132,19 @@ const str = 2
 }
 
 {:div-mod
-  (sgn over)
-  (sgn over)
-  (if-else (eq) {1} {-1})
-  (abs rot)
-  (abs rot)
-  raw-div-mod
-  (swap (set-sgn rot rot swap))
+  (if-else (eq dup 0) {
+    (set errno errno_0div)
+  } {
+    (sgn over)
+    (sgn over)
+    (if-else (eq) {1} {-1})
+    (abs rot)
+    (abs rot)
+    raw-div-mod
+    (swap (set-sgn rot rot swap))
+    })
+
 }
 
-{:div <a b -- a/b> (drop div-mod)}
-{:mod <a b -- a%b> (drop (swap div-mod))}
+{:div <a b -- a/b> <sets errno> (drop div-mod)}
+{:mod <a b -- a%b> <sets errno> (drop (swap div-mod))}

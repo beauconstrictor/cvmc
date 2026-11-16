@@ -33,8 +33,7 @@
 
 #define OPCODE_PUTC  0x10
 
-#define OPCODE_PUTI  0x11 // temporary!
-#define OPCODE_STACK 0x12 // temporary!
+#define OPCODE_STACK 0x11 // temporary!
 
 #define INSTRUCTIONS         \
   X("call",    OPCODE_CALL)  \
@@ -56,7 +55,6 @@
   X("load",    OPCODE_LOAD)  \
   X("store",   OPCODE_STORE) \
                              \
-  X("puti",    OPCODE_PUTI)  \
   X("putc",    OPCODE_PUTC)  \
                              \
   X("stack",   OPCODE_STACK) \
