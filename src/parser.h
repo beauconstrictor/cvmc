@@ -26,6 +26,9 @@
     return false; \
   } while (false) \
 
+#define PRINT_TOKEN(tok) \
+  printf("%s %.*s\n", token_kind_name((tok)->kind), (int)(tok)->length, (tok)->start);
+
 typedef struct {
   const char *name;
   size_t length;

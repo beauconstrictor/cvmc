@@ -183,7 +183,7 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
     const char *initial_prefix, bool is_nested) {
   (void)error;
 
-  char prefix[1024];
+  char prefix[1024] = "";
 
   if (toks->count > start && toks->items[start].kind == TOKEN_DEFINITION) {
     Token tok = toks->items[start];
@@ -191,7 +191,7 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
         strlen(initial_prefix) ? "." : "",
         (int)tok.length, tok.start);
   } else if (is_nested) {
-    snprintf(prefix, sizeof(prefix), "%s%zu", initial_prefix, start);
+    snprintf(prefix, sizeof(prefix), "%s." SCOPE_PREFIX "%zu", initial_prefix, start);
   }
 
   Symbols syms = {0};
@@ -201,8 +201,8 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
   for (size_t i = start; i < toks->count; i++) {
     Token *tok = toks->items + i;
     bool has_next = toks->count > i + 1;
-    Token next;
-    if (has_next) next = toks->items[i+1];
+    Token *next;
+    if (has_next) next = toks->items + i+1;
 
     if (tok->kind == TOKEN_LBRACE)
       nesting++;
@@ -211,14 +211,23 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
     if (nesting < 0) break;
 
     if (tok->kind == TOKEN_VAR && nesting == 0
-        && has_next && next.kind == TOKEN_WORD)
-      append_token_symbol(&syms, &next, 0);
+        && has_next && next->kind == TOKEN_WORD) {
+      append_token_symbol(&syms, next, 0);
 
-    if (tok->kind == TOKEN_WORD
+      if (is_nested) {   
+        size_t len = snprintf(NULL, 0, "%s.%.*s", prefix, (int)next->length, next->start);
+        char *prefixed = malloc(len + 1);
+        snprintf(prefixed, len+1, "%s.%.*s", prefix, (int)next->length, next->start);
+        next->length = len;
+        next->start  = prefixed;
+      }
+
+      i++;
+    } else if (tok->kind == TOKEN_WORD
         && lookup_symbol(tok->start, tok->length, &syms, NULL)
         && strlen(prefix) > 0) {
-      size_t len = tok->length + strlen(prefix) + 1;
-      char *prefixed = malloc(len)+1;
+      size_t len = snprintf(NULL, 0, "%s.%.*s", prefix, (int)tok->length, tok->start);
+      char *prefixed = malloc(len + 1);
       snprintf(prefixed, len+1, "%s.%.*s", prefix, (int)tok->length, tok->start);
       tok->length = len;
       tok->start  = prefixed;
@@ -237,7 +246,7 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
     if (nesting < 0) break;
 
     if (tok.kind != TOKEN_LBRACE) continue;
-    delocalise(toks, error, i+1, prefix, true);
+    if (nesting == 1) delocalise(toks, error, i+1, prefix, true);
   }
 
   return true;

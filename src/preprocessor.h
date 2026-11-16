@@ -6,6 +6,7 @@
 #include "errors.h"
 
 #define ANON_PREFIX "___anon_"
+#define SCOPE_PREFIX "___scope_"
 
 bool preprocessor(Tokens *toks, Symbols *syms, Error *error);
 
