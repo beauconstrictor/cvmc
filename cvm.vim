@@ -14,7 +14,7 @@ syntax keyword cvm_keyword
       \ get set load store
 
 syntax keyword cvm_builtin
-      \ i
+      \ call
       \ neg abs sgn set-sgn
       \ add sub inc dec mul div mod
       \ gt lt ge le eq ne
@@ -23,7 +23,7 @@ syntax keyword cvm_builtin
       \ putc puti puts putl putb
 
 syntax keyword cvm_type
-      \ int uint i16 u16
+      \ int uint i16 u16 ptr callable str
       \ char byte bool i8 u8
 
 highlight link cvm_loop Repeat

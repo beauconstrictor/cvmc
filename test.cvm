@@ -1,5 +1,36 @@
-import std
+const true = 1
+const false = 0
+
+const int = 2
+const callable = 2
+
+{:inc <n -- n+1> (add 1)}
+{:not <a -- NOT a> (if-else {false} {true})}
+{:le <a b -- a le b> (not gt)}
+{:putl <s -- > (putc '\n')}
+
+{:repeat
+  var i: int
+  var max: int
+  var body: callable
+
+  (set max swap)
+  (set body swap)
+  (set i 0)
+
+  (while {
+    (set i (inc (get i)))
+    (le (get i) (get max))
+  } (get body))
+}
 
 {:main
-  (puts "Hello, world!")
+  var i: int
+
+  (set i 1)
+
+  (repeat {
+    (puti (get i)) putl
+    (set i (inc (get i)))
+  } 10)
 }

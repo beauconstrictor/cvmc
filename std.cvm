@@ -1,12 +1,19 @@
 const true = 1
 const false = 0
 
+const i8 = 1
+const u8 = 1
 const char = 1
 const byte = 1
 const bool = 1
 
+const i16 = 2
+const u16 = 2
 const int = 2
 const uint = 2
+const ptr = 2
+const callable = 2
+const str = 2
 
 {:if <condition true -- > (if-else {})}
 {:do-while <body condition -- > swap dup i while}

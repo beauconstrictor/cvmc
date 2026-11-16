@@ -241,7 +241,7 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
     if (nesting < 0) break;
 
     if (tok.kind != TOKEN_LBRACE) continue;
-    if (nesting == 0) delocalise(toks, error, i+1, prefix, true);
+    if (nesting == 1) delocalise(toks, error, i+1, prefix, true);
   }
 
   return true;
