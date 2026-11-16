@@ -1,36 +1,19 @@
-const true = 1
-const false = 0
 
-const int = 2
-const callable = 2
+{:subroutine
+  {
+    var test: 1
 
-{:inc <n -- n+1> (add 1)}
-{:not <a -- NOT a> (if-else {false} {true})}
-{:le <a b -- a le b> (not gt)}
-{:putl <s -- > (putc '\n')}
+    {
+      var test: 1
 
-{:repeat
-  var i: int
-  var max: int
-  var body: callable
+      {
+        var test: 1
+        test
+      }
 
-  (set max swap)
-  (set body swap)
-  (set i 0)
+      test
+    }
 
-  (while {
-    (set i (inc (get i)))
-    (le (get i) (get max))
-  } (get body))
-}
-
-{:main
-  var i: int
-
-  (set i 1)
-
-  (repeat {
-    (puti (get i)) putl
-    (set i (inc (get i)))
-  } 10)
+    test
+  }
 }

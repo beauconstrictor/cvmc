@@ -190,20 +190,27 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
   }
 
   Symbols syms = {0};
+  Symbols shadowed = {0};
 
   int nesting = 0;
 
   for (size_t i = start; i < toks->count; i++) {
     Token *tok = toks->items + i;
-    bool has_next = toks->count > i + 1;
+
+    bool has_next = toks->count > i+1;
     Token *next;
     if (has_next) next = toks->items + i+1;
+
+    bool has_prev = toks->count > i-1;
+    Token *prev;
+    if (has_prev) prev = toks->items + i-1;
 
     if (tok->kind == TOKEN_LBRACE)
       nesting++;
     if (tok->kind == TOKEN_RBRACE)
       nesting--;
     if (nesting < 0) break;
+    if (nesting == 0) shadowed = (Symbols){0};
 
     if (tok->kind == TOKEN_VAR && nesting == 0
         && has_next && next->kind == TOKEN_WORD) {
@@ -221,6 +228,14 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
     } else if (tok->kind == TOKEN_WORD
         && lookup_symbol(tok->start, tok->length, &syms, NULL)
         && strlen(prefix) > 0) {
+
+      if (has_prev && prev->kind == TOKEN_VAR) {
+        append_token_symbol(&shadowed, tok, 0);
+        continue;
+      } else if (lookup_symbol(tok->start, tok->length, &shadowed, NULL)) {
+        continue;
+      }
+
       size_t len = snprintf(NULL, 0, "%s.%.*s", prefix, (int)tok->length, tok->start);
       char *prefixed = malloc(len + 1);
       snprintf(prefixed, len+1, "%s.%.*s", prefix, (int)tok->length, tok->start);
