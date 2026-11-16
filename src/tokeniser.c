@@ -343,7 +343,7 @@ void delexer(Tokens *toks, FILE *f) {
       } break;
 
       case TOKEN_STRING: {
-        fprintf(f, "\"%.*s\"", (int)tok.length, tok.start);
+        fprintf(f, "\"%.*s\" ", (int)tok.length, tok.start);
       } break;
 
       case TOKEN_LBRACE: {
