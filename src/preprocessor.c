@@ -391,7 +391,7 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
     }, syms)) return false;
 
     char *lenof_name = malloc(lval.length + 2);
-    snprintf(lenof_name, sizeof(lenof_name), "$%.*s", (int)lval.length, lval.start);
+    snprintf(lenof_name, lval.length + 2, "$%.*s", (int)lval.length, lval.start);
     if (!append_symbol((Symbol) {
       .name = lenof_name,
       .length = lval.length + 1,
