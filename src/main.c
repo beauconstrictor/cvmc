@@ -11,6 +11,20 @@
 #include "simulator.h"
 #include "preprocessor.h"
 
+/*
+ * before full release, do these things:
+ *
+ * TODO: detect redefinitions, and block them
+ * TODO: allow you to specify from the command line that certain
+ *       instructions exist (and give their opcodes), so the compiler
+ *       can target more ambitious vm implementations that implement
+ *       some of the std directly. if a definition is prefixed with !,
+ *       then it is allowed to be 'overwritten' by one of these
+ *       special instructions. meaning:
+ * TODO: definitions not prefixed with ! need to throw if they are 
+ *       named after an instruction
+ */
+
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \
               "Try passing '-h' for more information.\n"
 

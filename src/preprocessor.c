@@ -383,7 +383,7 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
     if (!append_token_symbol(syms, &lval, allocator)) return false;
 
     char *sizeof_name = malloc(lval.length + 2);
-    snprintf(sizeof_name, sizeof(sizeof_name), "#%.*s", (int)lval.length, lval.start);
+    snprintf(sizeof_name, lval.length + 2, "#%.*s", (int)lval.length, lval.start);
     if (!append_symbol((Symbol) {
       .name = sizeof_name,
       .length = lval.length + 1,
