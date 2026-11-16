@@ -32,7 +32,7 @@
              "\n" \
              "Use '-' in place of paths to use the standard output.\n" \
 
-#define VERSION "%s (S6 Compact Virtual Machine) version 0.1.0\n" \
+#define VERSION "%s (Compact Virtual Machine Compiler) version 0.1.0\n" \
                 "Licensed under the FOSS MIT license.\n" \
                 "\n" \
                 "Written by Beau Constrictor; see\n" \
