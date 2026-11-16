@@ -241,7 +241,7 @@ bool assemble(FILE *f, Symbols *syms, Tokens *toks, Error *error) {
         if (error->set) return false;
         EMIT_BYTE(OPCODE_PUSH);
         EMIT_WORD((int)addr);
-        EMIT_BYTE(OPCODE_I);
+        EMIT_BYTE(OPCODE_CALL);
       } break;
 
       // TODO: add base words

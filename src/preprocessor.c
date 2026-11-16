@@ -16,12 +16,14 @@
 //   -> recursively include the contents of imported files
 
 #include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 #include <stdbool.h>
 
 #include "tokeniser.h"
+#include "assembler.h"
 #include "parser.h"
 #include "errors.h"
 
@@ -161,12 +163,11 @@ bool destringify(Tokens *toks, Error *error) {
       s++;
     }
 
-    if (!insert_token(toks, ++i, (Token) {
-        .kind = TOKEN_BYTE,
-        .start = "0",
-        .length = 1,
-        .location = tok.location,
-    })) return false;
+    assert(OPCODE_RET == 0x00); // as long as the implicit return at
+                                // the end of all blocks is opcode 0,
+                                // then it serves as an automatic
+                                // null-terminator, so we don't need
+                                // to add one
 
     if (!insert_token(toks, ++i, (Token) {
         .kind = TOKEN_RBRACE,
@@ -246,7 +247,7 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
     if (nesting < 0) break;
 
     if (tok.kind != TOKEN_LBRACE) continue;
-    if (nesting == 1) delocalise(toks, error, i+1, prefix, true);
+    if (nesting == 0) delocalise(toks, error, i+1, prefix, true);
   }
 
   return true;

@@ -9,9 +9,9 @@
 
 #define ENTRY_POINT "main"
 
-#define OPCODE_I     0x00
-#define OPCODE_PUSH  0x01
-#define OPCODE_RET   0x02
+#define OPCODE_RET   0x00
+#define OPCODE_CALL  0x01
+#define OPCODE_PUSH  0x02
 
 #define OPCODE_IF    0x03
 #define OPCODE_WHIL  0x04
@@ -36,8 +36,8 @@
 #define OPCODE_PUTI  0x11 // temporary!
 #define OPCODE_STACK 0x12 // temporary!
 
-#define INSTRUCTIONS        \
-  X("i",       OPCODE_I)     \
+#define INSTRUCTIONS         \
+  X("call",    OPCODE_CALL)  \
   X("if-else", OPCODE_IF)    \
   X("while",   OPCODE_WHIL)  \
                              \

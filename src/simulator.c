@@ -99,7 +99,7 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
     #endif // TRACER
 
     switch (opcode) {
-      case OPCODE_I: {
+      case OPCODE_CALL: {
         uint16_t subroutine;
         POP(subroutine);
         CALL(subroutine);
