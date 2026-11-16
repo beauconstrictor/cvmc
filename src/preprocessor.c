@@ -1,19 +1,13 @@
-// 1. deparenthesisation
-//   -> keep a stack of the first word after parentheses, then
-//      move it to the closing paren
-//
-// 2. destringifying
-//   -> convert string literals to anonymous blocks
-//
-// 3. desymbolification
-//   -> replace constants with their values
-//
-// 4. deanonymification
-//   -> move anonymous blocks to global named blocks, with internal
-//      names like ___anon_0
-//
-// 5. deimportation
-//   -> recursively include the contents of imported files
+/*
+ * preprocessing steps:
+ *
+ * 1. deimportation: insert the contents of imported files (namespacing in the future?)
+ * 2. deparenthesisation: convert prefix expressions to postfix
+ * 3. destringification: convert string literals to blocks containing immediate bytes
+ * 4. delocalisation: give all variables global names from their positions
+ * 5. desymbolisation: remove constants and variables (resolve to their values)
+ * 6. deanonymification: extract nested anonymous blocks into the global scope
+ */
 
 #include <stdio.h>
 #include <assert.h>
@@ -582,7 +576,7 @@ bool deimport(Tokens *toks, Error *error) {
 
     char *path = malloc(PATH_MAX);
     Tokens new_toks = {0};
-    snprintf(path, sizeof(path), "%.*s.cvm", (int)next.length, next.start);
+    snprintf(path, PATH_MAX, "%.*s.cvm", (int)next.length, next.start);
 
     if (!remove_token(toks, i)) return false;
     if (!remove_token(toks, i)) return false;
@@ -603,15 +597,21 @@ bool deimport(Tokens *toks, Error *error) {
   return true;
 }
 
-bool preprocessor(Tokens *toks, Symbols *syms, Error *error) {
+bool preprocessor(Tokens *toks, Symbols *syms, Error *error, int stage) {
   (void)syms;
 
-  // if (!deimport(toks, error))          return false;
-  // if (!deparenthesise(toks, error))    return false;
-  // if (!destringify(toks, error))       return false;
+  if (!deimport(toks, error))                 return false;
+  if (stage == 1)                             return true;
+  if (!deparenthesise(toks, error))           return false;
+  if (stage == 2)                             return true;
+  if (!destringify(toks, error))              return false;
+  if (stage == 3)                             return true;
   if (!delocalise(toks, error, 0, "", false)) return false;
-  // if (!desymbolise(toks, syms, error)) return false;
-  // if (!deanonymify(toks, error))       return false;
+  if (stage == 4)                             return true;
+  if (!desymbolise(toks, syms, error))        return false;
+  if (stage == 5)                             return true;
+  if (!deanonymify(toks, error))              return false;
+  if (stage == 6)                             return true;
 
   return true;
 }

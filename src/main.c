@@ -26,7 +26,7 @@
              "\n" \
              "Modes:\n" \
              "\t-l  Stop compilation after lexing\n" \
-             "\t-p  Stop compilation after preprocessing\n" \
+             "\t-pX Stop compilation after a specific preprocessing stage (0 for all)\n" \
              "\t-c  Fully compile program (default)\n" \
              "\t-i  Immediately interpret program\n" \
              "\n" \
@@ -105,8 +105,9 @@ int main(int argc, char **argv) {
 
   bool raw_tokens = false;
   bool dump_syms  = false;
+  int  pp_stage   = 0;
 
-  while ((opt = getopt(argc, argv, "hvo:tplcis:")) != -1) {
+  while ((opt = getopt(argc, argv, "hvo:tp:lcis:")) != -1) {
     switch (opt) {
       case 'h': {
         show_help(argv[0]);
@@ -124,6 +125,8 @@ int main(int argc, char **argv) {
       } break;
       case 'p': {
         mode = MODE_PREPROCESS;
+        if (strlen(optarg) > 0)
+          pp_stage = atoi(optarg);
       } break;
       case 'c': {
         mode = MODE_COMPILE;
@@ -157,7 +160,7 @@ int main(int argc, char **argv) {
     return 0;
   }
   Symbols vars = {0};
-  if (!preprocessor(&toks, &vars, &error)) check_error(&error);
+  if (!preprocessor(&toks, &vars, &error, pp_stage)) check_error(&error);
   if (mode == MODE_PREPROCESS) {
     show_ir(&toks, mode, raw_tokens, dump_syms, argv[0]);
     return 0;

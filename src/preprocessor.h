@@ -8,6 +8,6 @@
 #define ANON_PREFIX "___anon_"
 #define SCOPE_PREFIX "___scope_"
 
-bool preprocessor(Tokens *toks, Symbols *syms, Error *error);
+bool preprocessor(Tokens *toks, Symbols *syms, Error *error, int stage);
 
 #endif // PREPROCESSOR_H
