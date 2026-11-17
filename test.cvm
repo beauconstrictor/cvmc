@@ -5,4 +5,5 @@ import std
 
   (puts "enter a number: ") (gets buf (size buf))
   (puti (geti buf))
+  break
 }

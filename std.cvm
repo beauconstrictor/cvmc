@@ -162,7 +162,7 @@ var errno: int
     swap
     (add (sub '0'))
     (set acc swap)
-  })
+  }) drop
   
   (get acc)
 }

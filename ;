@@ -1,0 +1,9 @@
+import std
+
+{:main
+  var buf[256]: char
+
+  (puts "enter a number: ") (gets buf (size buf))
+  (puti (geti buf))
+  (puti)
+}
