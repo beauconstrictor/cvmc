@@ -25,10 +25,10 @@ const str = 2
  if a function sets errno, this will be documented in the signature.
 
  to check if a function returned an error, (clear errno) beforehand,
- and check (ne (get errno) errno_succ)>
+ and use (check-errno); if it is set, your function failed>
 
-const errno_success  = 0
-const errno_div_zero = 1
+const errno-success  = 0
+const errno-div-zero = 1
 
 var errno: int
 
@@ -53,27 +53,7 @@ var errno: int
 {:at <arr size idx -- ptr> (add mul)}
 {:clear <ptr -- > (set 0)}
 
-{:puts <s -- >
-  (while {(load dup)} {
-    (putc (load dup))
-    inc
-  })
-  drop
-}
-
-{:puti <n -- >
-  (if (lt dup 0) {
-    (putc '-')
-  })
-  abs
-  (if (gt dup 9) {
-    (puti (div dup 10))
-  })
-  (putc (add (mod 10) '0'))
-}
-
-{:putb <b -- > (if-else {(puts "true")} {(puts "false")})}
-{:putl < -- > (putc '\n')}
+{:check-err < -- errno!=0> (ne (get errno) errno-success)}
 
 {:over <a b -- a b a> swap dup rot swap}
 
@@ -84,25 +64,16 @@ var errno: int
 {:abs <n -- |n|> (if (lt dup 0) {neg})}
 {:sgn <n -- n'> 
   (if (ne dup 0) {
-    (if-else (gt 0) {
-      1
-    } {
-      -1
-    })
+    (if-else (gt 0) {1} {-1})
   })
 }
 {:set-sgn <a b -- a'>
   (if-else (eq dup 0) {
     drop drop 0
   } {
-    (if-else (gt 0) {
-      abs
-    } {
-      (neg abs)
-    })
+    (if-else (gt 0) {abs} {(neg abs)})
   })
 }
-
 
 <somehow, this actually does work with signed values, despite no
  specific handling for them>
@@ -135,7 +106,7 @@ var errno: int
 
 {:div-mod
   (if-else (eq dup 0) {
-    (set errno errno_div_zero)
+    (set errno errno-div-zero)
   } {
     (sgn over)
     (sgn over)
@@ -177,3 +148,20 @@ var errno: int
     (set dst (inc (get dst)))
   })
 }
+
+{:puts <s -- > (while {(dup getc)} {putc}) drop}
+
+{:puti <n -- >
+  (if (lt dup 0) {
+    (putc '-')
+  })
+  abs
+  (if (gt dup 9) {
+    (puti (div dup 10))
+  })
+  (putc (add (mod 10) '0'))
+}
+
+{:putb <b -- > (if-else {(puts "true")} {(puts "false")})}
+{:putl < -- > (putc '\n')}
+

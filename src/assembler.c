@@ -217,7 +217,7 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks, Error *error)
         long addr;
         if (!lookup_symbol(next.start, next.length, syms, &addr)) {
           if (get_opcode(&next) != -1) {
-            GIVE_ERROR_WITH_LEXEME("'%.*s' is an instruction, not a function", tok);
+            GIVE_ERROR_WITH_LEXEME("'%.*s' is an instruction, not a function", next);
           } else
             GIVE_ERROR_WITH_LEXEME("undefined symbol: '%.*s'", next);
         }

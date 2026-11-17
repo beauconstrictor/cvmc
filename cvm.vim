@@ -17,7 +17,7 @@ syntax keyword cvm_keyword
       \ errno
 
 syntax keyword cvm_constant
-      \ errno_success errno_div_zero
+      \ errno-success errno-div-zero
 
 syntax keyword cvm_builtin
       \ call
