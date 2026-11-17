@@ -178,6 +178,8 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
     const char *initial_prefix, bool is_nested) {
   (void)error;
 
+  static char buf[256];
+
   char prefix[1024] = "";
 
   if (toks->count > start && toks->items[start].kind == TOKEN_DEFINITION) {
@@ -214,7 +216,10 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
 
     if (tok->kind == TOKEN_VAR && nesting == 0
         && has_next && next->kind == TOKEN_WORD) {
-      append_token_symbol(&syms, next, 0);
+      bool redefined = false;
+      append_token_symbol(&syms, next, 0, &redefined);
+      if (redefined)
+        GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", *next);
 
       if (is_nested) {   
         size_t len = snprintf(NULL, 0, "%s.%.*s", prefix, (int)next->length, next->start);
@@ -230,7 +235,10 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
         && strlen(prefix) > 0) {
 
       if (has_prev && prev->kind == TOKEN_VAR) {
-        append_token_symbol(&shadowed, tok, 0);
+        bool redefined = false;
+        append_token_symbol(&shadowed, tok, 0, &redefined);
+        if (redefined)
+          GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", *tok);
         continue;
       } else if (lookup_symbol(tok->start, tok->length, &shadowed, NULL)) {
         continue;
@@ -330,7 +338,10 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
     if (error->set) return false;
 
     if (!verify_symbol_name(&lval, error)) return false;
-    if (!append_token_symbol(syms, &lval, value)) return false;
+    bool redefined = false;
+    if (!append_token_symbol(syms, &lval, value, &redefined)) return false;
+    if (redefined)
+      GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", lval);
 
     // we have to make sure to delete them _after_ any errors.
     // otherwise their locations won't exist anymore to print them.
@@ -393,15 +404,20 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
     }
   
     if (!verify_symbol_name(&lval, error)) return false;
-    if (!append_token_symbol(syms, &lval, allocator)) return false;
+    bool redefined = false;
+    if (!append_token_symbol(syms, &lval, allocator, &redefined)) return false;
+
+    if (redefined)
+      GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", tok);
 
     char *sizeof_name = malloc(lval.length + 2);
     snprintf(sizeof_name, lval.length + 2, "#%.*s", (int)lval.length, lval.start);
+
     if (!append_symbol((Symbol) {
       .name = sizeof_name,
       .length = lval.length + 1,
       .value = size
-    }, syms)) return false;
+    }, syms, NULL)) return false;
 
     char *lenof_name = malloc(lval.length + 2);
     snprintf(lenof_name, lval.length + 2, "$%.*s", (int)lval.length, lval.start);
@@ -409,7 +425,7 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
       .name = lenof_name,
       .length = lval.length + 1,
       .value = length
-    }, syms)) return false;
+    }, syms, NULL)) return false;
 
     allocator += size;
 

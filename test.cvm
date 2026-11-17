@@ -1,5 +1,9 @@
 import std
 
+{:puti}
+
+"asdf<>sd"
+
 {:main
   (puti 1 dup)
   (putc '+')

@@ -23,7 +23,10 @@ const int escapes[256] = {
   ['e'] =  '\033',
 };
 
-bool append_symbol(Symbol sym, Symbols *syms) {
+bool append_symbol(Symbol sym, Symbols *syms, bool *redefined) {
+  if (lookup_symbol(sym.name, sym.length, syms, NULL) && redefined != NULL)
+    *redefined = true;
+
   if (syms->count < syms->capacity) {
     syms->items[syms->count++] = sym;
     return true;
@@ -41,12 +44,12 @@ bool append_symbol(Symbol sym, Symbols *syms) {
   return true;
 }
 
-bool append_token_symbol(Symbols *syms, Token *tok, long value) {
+bool append_token_symbol(Symbols *syms, Token *tok, long value, bool *redefined) {
   return append_symbol((Symbol) {
     .name   = tok->start,
     .length = tok->length,
     .value  = value,
-  }, syms);
+  }, syms, redefined);
 }
 
 bool lookup_symbol(const char *s, size_t length, Symbols *syms, long *value) {

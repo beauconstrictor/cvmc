@@ -52,9 +52,9 @@ typedef struct {
 
 extern const int escapes[256];
 
-bool append_symbol(Symbol sym, Symbols *syms);
+bool append_symbol(Symbol sym, Symbols *syms, bool *redefined);
 // uses the token's lexeme as the name
-bool append_token_symbol(Symbols *syms, Token *tok, long value);
+bool append_token_symbol(Symbols *syms, Token *tok, long value, bool *redefined);
 bool lookup_symbol(const char *s, size_t length, Symbols *syms, long *value);
 
 long read_number(const Token *tok, Error *error);

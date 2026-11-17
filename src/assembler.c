@@ -39,7 +39,7 @@ bool verify_syntax(Tokens *toks, Error *error) {
     if (has_next) next = toks->items[i+1];
 
     if (tok.kind != TOKEN_LBRACE && nesting < 1)
-      GIVE_ERROR_WITH_LEXEME("unexpected '%.*s' outside of definition", tok);
+      GIVE_ERROR("unexpected word outside of definition", tok);
 
     switch (tok.kind) {
       case TOKEN_STRING:
@@ -109,6 +109,8 @@ int get_opcode(Token *tok) {
 }
 
 bool arrange_definitions(Symbols *syms, Tokens *toks, Error *error) {
+  static char buf[256];
+
   uint16_t pc = PC_MIN;
   bool is_addr_of = false;
 
@@ -137,7 +139,10 @@ bool arrange_definitions(Symbols *syms, Tokens *toks, Error *error) {
         break;
 
       case TOKEN_DEFINITION: {
-        if (!append_token_symbol(syms, &tok, pc)) return false;
+        bool redefined = false;
+        if (!append_token_symbol(syms, &tok, pc, &redefined)) return false;
+        if (redefined)
+          GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", tok);
       } break;
 
       case TOKEN_NUMBER: {
