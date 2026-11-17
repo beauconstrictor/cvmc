@@ -12,8 +12,12 @@ syntax keyword cvm_keyword
       \ size len
       \ var const
       \ import
-      \ get set load store
+      \ get set load store at clear
       \ break
+      \ errno
+
+syntax keyword cvm_constant
+      \ errno_success errno_div_zero
 
 syntax keyword cvm_builtin
       \ call
@@ -24,7 +28,7 @@ syntax keyword cvm_builtin
       \ dup drop swap over rot
       \ putc puti puts putl putb
       \ gets getc geti
-      \ slen scpy
+      \ slen send scpy
 
 syntax keyword cvm_type
       \ int uint i16 u16 ptr callable str
@@ -34,6 +38,7 @@ highlight link cvm_loop Repeat
 highlight link cvm_if Conditional
 highlight link cvm_keyword Keyword
 highlight link cvm_builtin Function
+highlight link cvm_constant Constant
 
 syntax region cvm_comment start=/</ end=/>/ contains=cvm_comment
 highlight link cvm_comment Comment
