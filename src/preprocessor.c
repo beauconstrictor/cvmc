@@ -289,6 +289,8 @@ bool substitute(Tokens *toks, Symbols *syms) {
 }
 
 bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
+  static char buf[256]; // for lexeme error message
+
   size_t allocator = ALLOC_START;
 
   size_t i = 0;
@@ -405,6 +407,32 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
     if (is_array)
       for (int x = 0; x < 3; x++)
         if (!remove_token(toks, i)) return false;
+  }
+
+  for (size_t i = 0; i < toks->count; i++) {
+    Token *tok = toks->items + i;
+
+    bool has_next = toks->count > i+1;
+    Token *next;
+    if (has_next) next = toks->items + i+1;
+
+    if (tok->kind != TOKEN_WORD) continue;
+    if (!has_next ||
+        (strncmp(next->start, "size", next->length) != 0
+         && strncmp(next->start, "len", next->length) != 0)) continue;
+    
+    if (!lookup_symbol(tok->start, tok->length, syms, NULL))
+      GIVE_ERROR_WITH_LEXEME("undefined symbol: '%.*s'", *tok);
+
+    char prefix = next->start[0] == 's' ? '#' : '$';
+    remove_token(toks, i+1);
+
+    size_t len = snprintf(NULL, 0, "%c%.*s", prefix, (int)tok->length, tok->start) + 1;
+    char *name = malloc(len);
+    if (name == NULL) return false;
+    snprintf(name, len, "%c%.*s", prefix, (int)tok->length, tok->start);
+    tok->start = name;
+    tok->length = len-1;
   }
 
   return substitute(toks, syms);

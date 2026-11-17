@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -218,6 +219,21 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         uint16_t val;
         POP(val);
         putchar(val);
+      } break;
+
+      case OPCODE_GETS: {
+        uint16_t size;
+        POP(size);
+        uint16_t addr;
+        POP(addr);
+        if (addr > 65535-size)
+          return "gets buffer too large";
+        assert(sizeof(char) == sizeof(uint8_t));
+        char *buf = (char *)(memory + addr);
+        if (fgets(buf, size, stdin) == NULL && size > 0)
+          buf[0] = '\0';
+        else
+          buf[strcspn(buf, "\n")] = '\0';
       } break;
 
       case OPCODE_STACK: {

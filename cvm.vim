@@ -9,6 +9,7 @@ syntax keyword cvm_if
       \ if if-else
 
 syntax keyword cvm_keyword
+      \ size len
       \ var const
       \ import
       \ get set load store
@@ -17,10 +18,11 @@ syntax keyword cvm_builtin
       \ call
       \ neg abs sgn set-sgn
       \ add sub inc dec mul div mod
-      \ gt lt ge le eq ne
+      \ gt lt ge le eq ne ui
       \ not and nand or nor bool-of
       \ dup drop swap over rot
       \ putc puti puts putl putb
+      \ gets
 
 syntax keyword cvm_type
       \ int uint i16 u16 ptr callable str

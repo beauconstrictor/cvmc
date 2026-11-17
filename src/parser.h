@@ -17,9 +17,9 @@
 
 #define GIVE_ERROR_WITH_LEXEME(msg, tok) \
   do { \
-    snprintf(buf, sizeof(buf), msg, (int)tok.length, tok.start); \
+    snprintf(buf, sizeof(buf), msg, (int)(tok).length, (tok).start); \
     *error = (Error) { \
-      .location = tok.location, \
+      .location = (tok).location, \
       .message = buf, \
       .set = true, \
     }; \

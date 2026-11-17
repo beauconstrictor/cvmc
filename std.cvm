@@ -48,6 +48,8 @@ var errno: int
 {:le <a b -- a le b> (not gt)}
 {:ge <a b -- a ge b> (not lt)}
 
+{:ui <a b -- a-32768 b-32768> (sub 32768) swap (sub 32768) swap}
+
 {:at <arr size idx -- ptr> (add mul)}
 {:clear <ptr -- > (set 0)}
 

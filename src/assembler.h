@@ -32,8 +32,9 @@
 #define OPCODE_STORE 0x0f
 
 #define OPCODE_PUTC  0x10
+#define OPCODE_GETS  0x11
 
-#define OPCODE_STACK 0x11 // temporary!
+#define OPCODE_STACK 0x12 // temporary!
 
 #define INSTRUCTIONS         \
   X("call",    OPCODE_CALL)  \
@@ -56,6 +57,7 @@
   X("store",   OPCODE_STORE) \
                              \
   X("putc",    OPCODE_PUTC)  \
+  X("gets",    OPCODE_GETS)  \
                              \
   X("stack",   OPCODE_STACK) \
 

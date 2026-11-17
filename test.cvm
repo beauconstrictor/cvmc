@@ -1,7 +1,10 @@
 import std
 
-const val = 230
+{:print puts}
 
 {:main
-  (puti val)
+  var buf[256]: char
+
+  (puts "type something: ") (gets buf (size buf))
+  (puts "you typed: ") (puts buf) putl
 }
