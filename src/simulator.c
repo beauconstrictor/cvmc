@@ -185,10 +185,6 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
 
   bool single_step = false;
 
-  for (;;) {
-    if (addr >= memsize) return "segmentation fault";
-    uint8_t opcode = memory[addr];
-
     Instruction inst = {
       .mnemonic = "unknown",
       .a = 0,
@@ -199,6 +195,10 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
       .c_is_callable = false,
       .op_count = 0,
     };
+
+  for (;;) {
+    if (addr >= memsize) return "segmentation fault";
+    uint8_t opcode = memory[addr];
 
     switch (opcode) {
       case OPCODE_CALL: {
@@ -465,6 +465,17 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
       } break;
 
       default: {
+        inst = (Instruction){
+          .mnemonic = "unknown",
+          .a = 0,
+          .b = 0,
+          .c = 0,
+          .a_is_callable = false,
+          .b_is_callable = false,
+          .c_is_callable = false,
+          .op_count = 0,
+        };
+
         snprintf(err_msg, sizeof(err_msg),
             "unsupported opcode: 0x%02x @ %d (0x%04x)", opcode,
             addr, addr);
