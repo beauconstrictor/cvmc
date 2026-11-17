@@ -41,6 +41,15 @@ typedef struct {
   size_t capacity;
 } Symbols;
 
+typedef struct {
+    const char *red;
+    const char *bold;
+    const char *yellow;
+    const char *magenta;
+    const char *dim;
+    const char *reset;
+} Colours;
+
 extern const int escapes[256];
 
 bool append_symbol(Symbol sym, Symbols *syms);
@@ -51,5 +60,8 @@ bool lookup_symbol(const char *s, size_t length, Symbols *syms, long *value);
 long read_number(const Token *tok, Error *error);
 
 char *read_file(const char *path);
+
+bool colour_allowed(void);
+Colours get_colours(void);
 
 #endif // PARSER_H

@@ -4,6 +4,9 @@
 #include <stdbool.h>
 
 #include "assembler.h"
+#include "parser.h"
+
+#include "simulator.h"
 
 // #define TRACER
 
@@ -50,8 +53,111 @@ bool dstack_pop(DStack *dstack, uint16_t *val) {
   return true;
 }
 
+typedef enum {
+  DEBUGGER_CONTINUE,
+  DEBUGGER_STEP
+} DebuggerMode;
+
+typedef struct {
+  const char *mnemonic;
+  uint16_t a;
+  uint16_t b;
+  uint16_t c;
+  bool a_is_callable;
+  bool b_is_callable;
+  bool c_is_callable;
+  int op_count;
+} Instruction;
+
+void dump_stack(FILE *f, DStack *dstack) {
+  Colours cols = get_colours();
+
+  fprintf(f, "%s<", cols.bold);
+  for (size_t i = 0; i < dstack->head; i++)
+    fprintf(f, "%d ", dstack->data[i]);
+  if (dstack->head > 0) fprintf(f, "\b");
+  fprintf(f, ">%s\n", cols.reset);
+}
+
+
+const char *get_name(uint16_t addr, int *len, Symbols *syms) {
+  const char *name = "unknown";
+
+  for (size_t i = 0; i < syms->count; i++) {
+    Symbol s = syms->items[i];
+    if (s.value > addr) break;
+    name = s.name;
+    *len = s.length;
+  }
+
+  return name;
+}
+
+void dump_inst(FILE *f, Instruction *inst, Symbols *syms) {
+  Colours cols = get_colours();
+
+  #define PRINT_OPERAND(letter) \
+    do { \
+      if (inst->letter##_is_callable) {\
+        name = get_name(inst->letter, &len, syms); \
+        fprintf(f, "%.*s ", len, name); \
+      } else { \
+        fprintf(f, "%d ", inst->letter); \
+      } \
+    } while (false)
+
+  int len;
+  const char *name;
+
+  fprintf(f, "%s%s%s ", cols.yellow, inst->mnemonic, cols.reset);
+  if (inst->op_count > 0) PRINT_OPERAND(a);
+  if (inst->op_count > 1) PRINT_OPERAND(b);
+  if (inst->op_count > 2) PRINT_OPERAND(c);
+}
+
+DebuggerMode debugger(Instruction inst, DStack *dstack, Symbols *syms) {
+  #define COMMAND(name) \
+    (strcmp(buf, name) == 0 || (buf[0] == name[0] && buf[1] == '\0'))
+
+  fflush(stdout);
+
+  Colours cols = get_colours();
+ 
+  dump_inst(stderr, &inst, syms);
+  fprintf(stderr, "\t%sresulting stack: %s", cols.dim, cols.reset);
+  dump_stack(stderr, dstack);
+
+  fprintf(stderr, "%stype 'help' for help %s%s(dbg) %s", cols.dim,
+      cols.reset, cols.bold, cols.reset);
+
+  static char buf[256];
+  char inp[256];
+  fgets(inp, sizeof(inp), stdin);
+  inp[strcspn(inp, "\n")] = '\0';
+  if (strlen(inp) > 0) strcpy(buf, inp);
+
+  if (COMMAND("help")) {
+    fprintf(stderr, "help - show this help\n");
+    fprintf(stderr, "step - execute a single instruction\n");
+    fprintf(stderr, "continue - resume program\n");
+    fprintf(stderr, "abort - exit to command line\n");
+    return debugger(inst, dstack, syms);
+  } else if (COMMAND("step")) {
+    return DEBUGGER_STEP;
+  } else if (COMMAND("continue")) {
+    return DEBUGGER_CONTINUE;
+  } else if (COMMAND("abort")) {
+    cli_error("abort", "dbg");
+    exit(0);
+    return DEBUGGER_CONTINUE;
+  } else {
+    fprintf(stderr, "%s%sdbg: %sunknown command\n", cols.red, cols.bold, cols.reset);
+    return debugger(inst, dstack, syms);
+  }
+}
+
 const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
-    int memsize) {
+    int memsize, Symbols *syms) {
   static char err_msg[256];
 
   #define POP(var) \
@@ -73,36 +179,39 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
   #define CALL(addr) \
     do { \
         const char *error = execute(dstack, addr, memory, \
-            memsize); \
+            memsize, syms); \
         if (error) return error; \
     } while (false)
 
+  bool single_step = false;
 
   for (;;) {
     if (addr >= memsize) return "segmentation fault";
     uint8_t opcode = memory[addr];
 
-    #ifdef TRACER
-      printf("<%d (0x%04x) '%s", addr, addr, mnemonics[opcode]);
-
-      if (opcode == OPCODE_PUSH) {
-        uint16_t val = (memory[addr+1] << 8) | memory[addr + 2];
-        printf(" %d (0x%04x)", val, val);
-      }
-      printf("'>");
-
-      if (dstack->head > 0)
-        printf(" ~ ");
-      for (size_t i = 0; i < dstack->head; i++) {
-        printf("%d ", dstack->data[i]);
-      }
-      printf("\n");
-    #endif // TRACER
+    Instruction inst = {
+      .mnemonic = "unknown",
+      .a = 0,
+      .b = 0,
+      .c = 0,
+      .a_is_callable = false,
+      .b_is_callable = false,
+      .c_is_callable = false,
+      .op_count = 0,
+    };
 
     switch (opcode) {
       case OPCODE_CALL: {
         uint16_t subroutine;
         POP(subroutine);
+
+        inst = (Instruction){
+          .mnemonic = "call",
+          .a = subroutine,
+          .a_is_callable = true,
+          .op_count = 1,
+        };
+
         CALL(subroutine);
       } break;
 
@@ -111,9 +220,19 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         uint16_t val = (memory[addr+1] << 8) | memory[addr + 2];
         addr += 2;
         PUSH(val);
+
+        inst = (Instruction){
+          .mnemonic = "number",
+          .a = val,
+          .op_count = 1,
+        };
       } break;
 
       case OPCODE_RET: {
+        inst = (Instruction){
+          .mnemonic = "ret",
+        };
+
         return NULL;
       } break;
 
@@ -124,6 +243,15 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         POP(true_block);
         uint16_t condition;
         POP(condition);
+
+        inst = (Instruction){
+          .mnemonic = "if-else",
+          .a = condition,
+          .b = true_block,
+          .c = false_block,
+          .a_is_callable = 1,
+          .op_count = 3,
+        };
 
         if (condition == 0)
           CALL(false_block);
@@ -137,7 +265,15 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         uint16_t checker;
         POP(checker);
         uint16_t condition;
-  
+ 
+        inst = (Instruction){
+          .mnemonic = "while",
+          .a = checker,
+          .b = subroutine,
+          .a_is_callable = 1,
+          .op_count = 2,
+        };
+
         CALL(checker);
         POP(condition);
 
@@ -158,11 +294,23 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         POP(val);
         PUSH(val);
         PUSH(val);
+
+        inst = (Instruction){
+          .mnemonic = "dup",
+          .a = val,
+          .op_count = 1,
+        };
       } break;
 
       case OPCODE_DROP: {
         uint16_t val;
         POP(val);
+
+        inst = (Instruction){
+          .mnemonic = "drop",
+          .a = val,
+          .op_count = 1,
+        };
       } break;
 
       case OPCODE_SWAP: {
@@ -172,6 +320,13 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         POP(a);
         PUSH(b);
         PUSH(a);
+
+        inst = (Instruction){
+          .mnemonic = "swap",
+          .a = a,
+          .b = b,
+          .op_count = 2,
+        };
       } break;
 
       case OPCODE_ROT: {
@@ -184,12 +339,26 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         PUSH(b);
         PUSH(c);
         PUSH(a);
+
+        inst = (Instruction){
+          .mnemonic = "rot",
+          .a = a,
+          .b = b,
+          .c = c,
+          .op_count = 3,
+        };
       } break;
 
       case OPCODE_LOAD: {
         uint16_t a;
         POP(a);
         PUSH(memory[a]);
+
+        inst = (Instruction){
+          .mnemonic = "load",
+          .a = a,
+          .op_count = 1,
+        };
       } break;
 
       case OPCODE_STORE: {
@@ -198,12 +367,29 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         uint16_t a;
         POP(a);
         memory[a] = val & 0xff;
+        
+        inst = (Instruction){
+          .mnemonic = "store",
+          .a = a,
+          .b = val,
+          .op_count = 2,
+        };
       } break;
 
       case OPCODE_GET: {
         uint16_t a;
         POP(a);
+
+        if (a == 65535)
+          return "memory read out of bounds";
+
         PUSH((memory[a] << 8) | memory[a+1]);
+
+        inst = (Instruction){
+          .mnemonic = "get",
+          .a = a,
+          .op_count = 1,
+        };
       } break;
 
       case OPCODE_SET: {
@@ -211,14 +397,31 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         POP(val);
         uint16_t a;
         POP(a);
+
+        if (a == 65535)
+          return "memory write out of bounds";
+
         memory[a] = val >> 8;
         memory[a+1] = val & 0xff;
+
+        inst = (Instruction){
+          .mnemonic = "set",
+          .a = a,
+          .b = val,
+          .op_count = 2,
+        };
       } break;
 
       case OPCODE_PUTC: {
         uint16_t val;
         POP(val);
         putchar(val);
+
+        inst = (Instruction){
+          .mnemonic = "putc",
+          .a = val,
+          .op_count = 1,
+        };
       } break;
 
       case OPCODE_GETS: {
@@ -234,14 +437,31 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
           buf[0] = '\0';
         else
           buf[strcspn(buf, "\n")] = '\0';
+
+        inst = (Instruction){
+          .mnemonic = "gets",
+          .a = addr,
+          .b = size,
+          .op_count = 2,
+        };
+
       } break;
 
-      case OPCODE_STACK: {
-        printf("<");
-        for (size_t i = 0; i < dstack->head; i++) {
-          printf("%d ", (int16_t)dstack->data[i]);
-        }
-        printf("\b>\n");
+      case OPCODE_BREAK: {
+        Colours cols = get_colours();
+        int name_len;
+        const char *name = get_name(addr, &name_len, syms);
+
+        fprintf(stderr, "%s%sdbg: %sbreakpoint hit in '%s%.*s%s' (address %d) \n",
+            cols.red, cols.bold, cols.reset,
+            cols.yellow, name_len, name, cols.reset,
+            addr);
+
+        DebuggerMode mode = debugger(inst, dstack, syms);
+
+        if (mode == DEBUGGER_STEP) 
+          single_step = true;
+
       } break;
 
       default: {
@@ -252,20 +472,24 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
       } break;
     }
 
+    if (single_step && memory[addr] != OPCODE_BREAK) {
+      DebuggerMode mode = debugger(inst, dstack, syms);
+      single_step = mode == DEBUGGER_STEP;
+    }
+
     addr++;
   }
+
+  #undef PUSH
+  #undef POP
 }
 
-const char *simulate(const char *s) {
+const char *simulate(const char *s, Symbols *syms) {
   int addr = -1;
 
   uint8_t memory[65536] = {0};
 
   DStack dstack = {0};
-
-  #ifdef TRACER
-    printf("%s\n", s);
-  #endif // TRACER
 
   while (*s) {
     char c = *s++;
@@ -281,7 +505,7 @@ const char *simulate(const char *s) {
       addr = read_hex_addr(s);
       s += 4;
     } else if (c == '!') {
-      const char *error = execute(&dstack, read_hex_addr(s), memory, sizeof(memory));
+      const char *error = execute(&dstack, read_hex_addr(s), memory, sizeof(memory), syms);
       if (error) return error;
     }
   }

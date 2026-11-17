@@ -1,6 +1,8 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
-const char *simulate(const char *s);
+#include "parser.h"
+
+const char *simulate(const char *s, Symbols *syms);
 
 #endif // SIMULATOR_H

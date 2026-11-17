@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
   if (mode == MODE_INTERPRET) {
     char *tape = read_file(output);
     if (tape == NULL) cli_error("no such file", argv[0]);
-    const char *error = simulate(tape);
+    const char *error = simulate(tape, &syms);
     if (error) cli_error(error, argv[0]);
   }
 

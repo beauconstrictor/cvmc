@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <stdbool.h>
 
 #include "tokeniser.h"
@@ -146,5 +147,33 @@ char *read_file(const char *path) {
   }
 
   return contents;
+}
+
+bool colour_allowed(void) {
+  const char *no_color = getenv("NO_COLOR");
+
+  if (no_color != NULL && no_color[0] != '\0')
+      return false;
+  if (!isatty(STDERR_FILENO))
+      return 0;
+
+  const char *term = getenv("TERM");
+
+  if (term == NULL || strcmp(term, "dumb") == 0)
+    return false;
+
+  return true;
+}
+
+Colours get_colours(void) {
+    bool colour = colour_allowed();
+    return (Colours) {
+        .red     = colour ? "\033[31m" : "",
+        .bold    = colour ? "\033[1m"  : "",
+        .yellow  = colour ? "\033[33m" : "",
+        .magenta = colour ? "\033[35m" : "",
+        .dim     = colour ? "\033[2m"  : "",
+        .reset   = colour ? "\033[0m"  : "",
+    };
 }
 

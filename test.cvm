@@ -1,10 +1,9 @@
 import std
 
-{:print puts}
-
 {:main
   var buf[256]: char
 
   (puts "type something: ") (gets buf (size buf))
+  break
   (puts "you typed: ") (puts buf) putl
 }

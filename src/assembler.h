@@ -34,7 +34,7 @@
 #define OPCODE_PUTC  0x10
 #define OPCODE_GETS  0x11
 
-#define OPCODE_STACK 0x12 // temporary!
+#define OPCODE_BREAK 0xff // NOT to be implemented in other vm implementations
 
 #define INSTRUCTIONS         \
   X("call",    OPCODE_CALL)  \
@@ -59,7 +59,7 @@
   X("putc",    OPCODE_PUTC)  \
   X("gets",    OPCODE_GETS)  \
                              \
-  X("stack",   OPCODE_STACK) \
+  X("break",   OPCODE_BREAK) \
 
 bool verify_syntax(Tokens *toks, Error *error);
 // make sure to verify syntax before calling!

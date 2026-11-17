@@ -23,6 +23,7 @@ syntax keyword cvm_builtin
       \ dup drop swap over rot
       \ putc puti puts putl putb
       \ gets
+      \ break
 
 syntax keyword cvm_type
       \ int uint i16 u16 ptr callable str
