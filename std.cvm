@@ -27,20 +27,20 @@ const str = 2
  to check if a function returned an error, (clear errno) beforehand,
  and check (ne (get errno) errno_succ)>
 
-const errno_succ = 0
-const errno_0div = 1
+const errno_success  = 0
+const errno_div_zero = 1
 
 var errno: int
 
 {:if <condition true -- > (if-else {})}
 {:do-while <body condition -- > swap dup call while}
 
-{:bool-of <a -- NOT NOT a> (if-else {true} {false})}
-{:not <a -- NOT a> (if-else {false} {true})}
-{:and <a b -- a AND b> (if-else {(if-else {true} {false})} {drop false})}
-{:nand <a b -- a NAND b> (not and)}
-{:or <a b -- a OR b> (if-else {true} {if-else {true} {false}})}
-{:nor <a b -- a NOR b> (not or)}
+{:bool-of <a -- not not a> (if-else {true} {false})}
+{:not <a -- not a> (if-else {false} {true})}
+{:and <a b -- a and b> (if-else {(if-else {true} {false})} {drop false})}
+{:nand <a b -- a nand b> (not and)}
+{:or <a b -- a or b> (if-else {true} {if-else {true} {false}})}
+{:nor <a b -- a nor b> (not or)}
 
 {:eq <a b -- a == b> sub (if-else {false} {true})}
 {:ne <a b -- a != b> sub (if-else {true} {false})}
@@ -48,7 +48,7 @@ var errno: int
 {:le <a b -- a le b> (not gt)}
 {:ge <a b -- a ge b> (not lt)}
 
-{:ui <a b -- a-32768 b-32768> (sub 32768) swap (sub 32768) swap}
+{:ucmp <a b -- a-32768 b-32768> (sub 32768) swap (sub 32768) swap}
 
 {:at <arr size idx -- ptr> (add mul)}
 {:clear <ptr -- > (set 0)}
@@ -72,8 +72,8 @@ var errno: int
   (putc (add (mod 10) '0'))
 }
 
-{:putb <s -- > (if-else {(puts "true")} {(puts "false")})}
-{:putl <s -- > (putc '\n')}
+{:putb <b -- > (if-else {(puts "true")} {(puts "false")})}
+{:putl < -- > (putc '\n')}
 
 {:over <a b -- a b a> swap dup rot swap}
 
@@ -104,7 +104,7 @@ var errno: int
 }
 
 
-<somehow, this actually DOES work with signed values, despite no
+<somehow, this actually does work with signed values, despite no
  specific handling for them>
 {:mul <a b -- a*b>
   (swap 0)
@@ -135,7 +135,7 @@ var errno: int
 
 {:div-mod
   (if-else (eq dup 0) {
-    (set errno errno_0div)
+    (set errno errno_div_zero)
   } {
     (sgn over)
     (sgn over)
