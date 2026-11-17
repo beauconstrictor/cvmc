@@ -150,3 +150,19 @@ var errno: int
 
 {:div <a b -- a/b> <sets errno> (drop div-mod)}
 {:mod <a b -- a%b> <sets errno> (drop (swap div-mod))}
+
+{:getc <buf -- after c> (load dup) swap inc swap}
+{:geti <buf -- after i>
+  var acc: int
+  (set acc 0)
+
+  (while {(and (ge (dup getc) '0') (le over '9'))} {
+    (get acc)
+    (mul 10)
+    swap
+    (add (sub '0'))
+    (set acc swap)
+  })
+  
+  (get acc)
+}

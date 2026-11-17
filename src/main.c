@@ -14,7 +14,8 @@
 /*
  * before full release, do these things:
  *
- * TODO: detect redefinitions, and block them
+ * TODO: compile the std into the compiler itself, so it doesn't need
+ *       to be in cwd
  * TODO: allow you to specify from the command line that certain
  *       instructions exist (and give their opcodes), so the compiler
  *       can target more ambitious vm implementations that implement
@@ -23,6 +24,11 @@
  *       special instructions. meaning:
  * TODO: definitions not prefixed with ! need to throw if they are 
  *       named after an instruction
+ * TODO: use an arena allocator, so i can actually start freeing
+ *       things, like all good c programmers should
+ * TODO: apparently malloc doesn't set errno. shit.
+ * TODO: make simulator.execute use a return stack, so the debugger
+ *       can print stack traces
  */
 
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \
@@ -185,7 +191,7 @@ int main(int argc, char **argv) {
   Symbols syms = {0};
   FILE *out = get_handle(output, argv[0], false);
 
-  if (!assemble(out, &syms, &toks, &error)) check_error(&error);
+  if (!assemble(out, &syms, &vars, &toks, &error)) check_error(&error);
 
   long main_addr;
   if (!lookup_symbol(ENTRY_POINT, sizeof(ENTRY_POINT)-1, &syms, &main_addr))

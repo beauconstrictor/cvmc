@@ -14,7 +14,7 @@
  */
 
 #define PC_MIN 0x0800
-#define PC_MAX 0x3b7f
+#define PC_MAX 0x38af
 
 #define X(mnemonic, opcode) \
   [opcode] = mnemonic,
@@ -108,7 +108,7 @@ int get_opcode(Token *tok) {
   return -1;
 }
 
-bool arrange_definitions(Symbols *syms, Tokens *toks, Error *error) {
+bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks, Error *error) {
   static char buf[256];
 
   uint16_t pc = PC_MIN;
@@ -141,7 +141,7 @@ bool arrange_definitions(Symbols *syms, Tokens *toks, Error *error) {
       case TOKEN_DEFINITION: {
         bool redefined = false;
         if (!append_token_symbol(syms, &tok, pc, &redefined)) return false;
-        if (redefined)
+        if (redefined || lookup_symbol(tok.start, tok.length, vars, NULL))
           GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", tok);
       } break;
 
@@ -178,8 +178,8 @@ bool arrange_definitions(Symbols *syms, Tokens *toks, Error *error) {
   return true;
 }
 
-bool assemble(FILE *f, Symbols *syms, Tokens *toks, Error *error) {
-  if (!arrange_definitions(syms, toks, error)) return false;
+bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks, Error *error) {
+  if (!arrange_definitions(syms, vars, toks, error)) return false;
 
   #define EMIT_BYTE(byte) fprintf(f,"%02x ", byte &   0xff);
   #define EMIT_WORD(word) fprintf(f,"%02x %02x ", (word & 0xff00) >> 8, word & 0xff);

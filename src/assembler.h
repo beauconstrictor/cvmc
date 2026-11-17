@@ -63,7 +63,7 @@
 
 bool verify_syntax(Tokens *toks, Error *error);
 // make sure to verify syntax before calling!
-bool assemble(FILE *f, Symbols *syms, Tokens *toks, Error *error);
+bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks, Error *error);
 
 extern const char *mnemonics[];
 

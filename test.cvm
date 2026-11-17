@@ -1,14 +1,8 @@
 import std
 
-{:puti}
-
-"asdf<>sd"
-
 {:main
-  (puti 1 dup)
-  (putc '+')
-  (puti 2 dup)
-  (putc '=')
-  (puti add)
-  putl
+  var buf[256]: char
+
+  (puts "enter a number: ") (gets buf (size buf))
+  (puti (geti buf))
 }

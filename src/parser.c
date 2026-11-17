@@ -84,9 +84,9 @@ long read_number(const Token *tok, Error *error) {
         .message = "invalid escape sequence",
         .set = true,
       };
-      if (c == -1) c = 0;
       return -1;
     }
+    if (c == -1) c = 0;
     return c;
   }
 
