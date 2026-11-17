@@ -145,9 +145,7 @@ var errno: int
     raw-div-mod
     (swap (set-sgn rot rot swap))
     })
-
 }
-
 {:div <a b -- a/b> <sets errno> (drop div-mod)}
 {:mod <a b -- a%b> <sets errno> (drop (swap div-mod))}
 
@@ -173,4 +171,14 @@ var errno: int
     (swap (inc swap))
   })
   drop
+}
+
+{:scpy <src dst -- >
+  var dst: str
+  (set dst swap)
+
+  (while {(dup getc)} {
+    (store (get dst) swap)
+    (set dst (inc (get dst)))
+  })
 }

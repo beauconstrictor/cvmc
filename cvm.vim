@@ -9,11 +9,11 @@ syntax keyword cvm_if
       \ if if-else
 
 syntax keyword cvm_keyword
-      \ break
       \ size len
       \ var const
       \ import
       \ get set load store
+      \ break
 
 syntax keyword cvm_builtin
       \ call
@@ -23,7 +23,8 @@ syntax keyword cvm_builtin
       \ not and nand or nor bool-of
       \ dup drop swap over rot
       \ putc puti puts putl putb
-      \ gets
+      \ gets getc geti
+      \ slen scpy
 
 syntax keyword cvm_type
       \ int uint i16 u16 ptr callable str

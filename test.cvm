@@ -1,8 +1,10 @@
 import std
 
 {:main
-  var buf[256]: char
+  var src[256]: char
+  var dst[256]: char
 
-  (puts "enter a number: ") (gets buf (size buf))
-  (puti (slen buf)) putl
+  (puts "enter some text: ") (gets src (size src))
+  (scpy src dst)
+  (puts dst)
 }
