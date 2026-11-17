@@ -166,3 +166,11 @@ var errno: int
   
   (get acc)
 }
+
+{:slen <s -- len>
+  (swap 0)
+  (while &getc {
+    (swap (inc swap))
+  })
+  drop
+}

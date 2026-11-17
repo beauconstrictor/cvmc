@@ -4,6 +4,5 @@ import std
   var buf[256]: char
 
   (puts "enter a number: ") (gets buf (size buf))
-  (puti (geti buf))
-  break
+  (puti (slen buf)) putl
 }
