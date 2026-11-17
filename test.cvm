@@ -1,9 +1,10 @@
 import std
 
 {:main
-  var buf[256]: char
-
-  (puts "type something: ") (gets buf (size buf))
-  break
-  (puts "you typed: ") (puts buf) putl
+  (puti 1 dup)
+  (putc '+')
+  (puti 2 dup)
+  (putc '=')
+  (puti add)
+  putl
 }

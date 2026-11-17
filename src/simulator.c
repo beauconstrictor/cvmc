@@ -174,6 +174,12 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
           int16_t a = ua; \
           int16_t b = ub; \
           PUSH(operation); \
+          inst = (Instruction){ \
+            .mnemonic = #operation, \
+            .a = a, \
+            .b = b, \
+            .op_count = 2, \
+          }; \
         } break;
 
   #define CALL(addr) \
@@ -186,14 +192,14 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
   bool single_step = false;
 
     Instruction inst = {
-      .mnemonic = "unknown",
-      .a = 0,
+      .mnemonic = "call",
+      .a = addr,
       .b = 0,
       .c = 0,
-      .a_is_callable = false,
+      .a_is_callable = true,
       .b_is_callable = false,
       .c_is_callable = false,
-      .op_count = 0,
+      .op_count = 1,
     };
 
   for (;;) {

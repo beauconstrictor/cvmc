@@ -129,7 +129,7 @@ bool destringify(Tokens *toks, Error *error) {
       if (in_escape) {
         c = escapes[(unsigned char)c];
         if (c == 0) {
-          char err_msg[256];
+          static char err_msg[256];
           snprintf(err_msg, sizeof(err_msg), "invalid escape sequence: '\\%c'", *s);
           *error = (Error) {
             .location = {
