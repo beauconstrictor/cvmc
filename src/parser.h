@@ -8,7 +8,7 @@
 #define GIVE_ERROR(msg, tok) \
   do { \
     *error = (Error) { \
-      .location = tok.location, \
+      .location = (tok).location, \
       .message = msg, \
       .set = true, \
     }; \

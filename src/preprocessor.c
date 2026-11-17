@@ -288,6 +288,15 @@ bool substitute(Tokens *toks, Symbols *syms) {
   return true;
 }
 
+bool verify_symbol_name(Token *tok, Error *error) {
+  if (memchr(tok->start, '#', tok->length))
+    GIVE_ERROR("'#' is not allowed in symbol names", *tok);
+  if (memchr(tok->start, '$', tok->length))
+    GIVE_ERROR("'$' is not allowed in symbol names", *tok);
+
+  return true;
+}
+
 bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
   static char buf[256]; // for lexeme error message
 
@@ -320,6 +329,7 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
     long value = read_number(&rval, error);
     if (error->set) return false;
 
+    if (!verify_symbol_name(&lval, error)) return false;
     if (!append_token_symbol(syms, &lval, value)) return false;
 
     // we have to make sure to delete them _after_ any errors.
@@ -382,6 +392,7 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
       return false;
     }
   
+    if (!verify_symbol_name(&lval, error)) return false;
     if (!append_token_symbol(syms, &lval, allocator)) return false;
 
     char *sizeof_name = malloc(lval.length + 2);
