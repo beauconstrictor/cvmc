@@ -15,6 +15,8 @@ const ptr = 2
 const callable = 2
 const str = 2
 
+const case = 0 <stack sentinel>
+
 <some std functions do not have a signature. in this case, this
  function is 'internal', and should not be used.>
 
@@ -34,6 +36,12 @@ var errno: int
 
 {:if <condition true -- > (if-else {})}
 {:do-while <body condition -- > swap dup call while}
+
+{:switch <case [condition true]... -- >
+  (while {(ne dup case)} {}
+    if
+  ) drop
+}
 
 {:bool-of <a -- not not a> (if-else {true} {false})}
 {:not <a -- not a> (if-else {false} {true})}
@@ -150,6 +158,8 @@ var errno: int
 }
 
 {:puts <s -- > (while {(dup getc)} {putc}) drop}
+{:putb <b -- > (if-else {(puts "true")} {(puts "false")})}
+{:putl < -- > (putc '\n')}
 
 {:puti <n -- >
   (if (lt dup 0) {
@@ -161,7 +171,4 @@ var errno: int
   })
   (putc (add (mod 10) '0'))
 }
-
-{:putb <b -- > (if-else {(puts "true")} {(puts "false")})}
-{:putl < -- > (putc '\n')}
 

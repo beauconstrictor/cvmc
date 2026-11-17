@@ -6,7 +6,7 @@ syntax keyword cvm_loop
       \ while do-while
 
 syntax keyword cvm_if
-      \ if if-else
+      \ if if-else switch case
 
 syntax keyword cvm_keyword
       \ size len

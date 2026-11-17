@@ -1,8 +1,20 @@
 import std
 
-{:main
-  var buf[256]: char
+var buf[256]: char
+var parse: str
 
-  (puts "enter some text: ") (gets buf (size buf))
-  (puti (slen buf))
+{:next-char
+  (set parse (inc (get parse)))
+}
+
+{:main
+
+  (set parse buf)
+
+  (puts "rpn calculator") putl
+  (puts "> ") (gets buf (size buf)) 
+
+  (switch case
+    {
+  )
 }
