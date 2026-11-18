@@ -25,69 +25,6 @@ const char *mnemonics[] = {
 };
 #undef X
 
-bool verify_syntax(Tokens *toks, Error *error) {
-  static char buf[256];
-
-  int nesting = 0;
-  Token definition_tok;
-
-  for (size_t i = 0; i < toks->count; i++) {
-    Token tok = toks->items[i];
-
-    Token next;
-    bool has_next = i < toks->count - 1;
-    if (has_next) next = toks->items[i+1];
-
-    if (tok.kind != TOKEN_LBRACE && nesting < 1)
-      GIVE_ERROR("unexpected word outside of definition", tok);
-
-    switch (tok.kind) {
-      case TOKEN_STRING:
-      case TOKEN_ASSIGN:
-      case TOKEN_CONST:
-      case TOKEN_LPARA:
-      case TOKEN_RPARA:
-      case TOKEN_VAR: {
-        GIVE_ERROR_WITH_LEXEME("unexpected '%.*s'", tok);
-      } break;
-
-      case TOKEN_LBRACE: {
-        nesting++;
-
-        if (!has_next) 
-          GIVE_ERROR("expected definition name after '{'", tok);
-        else if (has_next && next.kind != TOKEN_DEFINITION)
-          GIVE_ERROR("expected definition name after '{'", next);
-      } break;
-
-      case TOKEN_DEFINITION: {
-        definition_tok = tok;
-      } break;
-
-      case TOKEN_RBRACE: {
-        nesting--;
-      } break;
-
-      case TOKEN_ADDR: {
-         if (!has_next)
-           GIVE_ERROR_WITH_LEXEME("expected word after '%.*s'", tok);
-         else if (has_next && next.kind != TOKEN_WORD)
-           GIVE_ERROR_WITH_LEXEME("expected word after '%.*s'", next);
-      } break;
-
-      default: break;
-    }
-
-    if (nesting > 1)
-      GIVE_ERROR("nested defintions are not allowed", tok);
-  }
-
-  if (nesting > 0)
-    GIVE_ERROR("unterminated definition", definition_tok);
-
-  return true;
-}
-
 int get_opcode(Token *tok) {
   char buf[256];
   snprintf(buf, sizeof(buf), "%.*s", (int)tok->length, tok->start);
@@ -106,6 +43,75 @@ int get_opcode(Token *tok) {
   #undef X
 
   return -1;
+}
+
+bool verify_syntax(Tokens *toks, Error *error) {
+  static char buf[256];
+
+  int nesting = 0;
+  Token definition_tok;
+
+  for (size_t i = 0; i < toks->count; i++) {
+    Token tok = toks->items[i];
+
+    Token next;
+    bool has_next = i < toks->count - 1;
+    if (has_next) next = toks->items[i+1];
+
+    if (tok.kind != TOKEN_LBRACE && nesting < 1)
+      GIVE_ERROR("unexpected word outside of definition", tok);
+
+    switch (tok.kind) {
+      case TOKEN_LSQUARE:
+      case TOKEN_RSQUARE:
+      case TOKEN_STRING:
+      case TOKEN_ASSIGN:
+      case TOKEN_IMPORT:
+      case TOKEN_CONST:
+      case TOKEN_LPARA:
+      case TOKEN_RPARA:
+      case TOKEN_COLON:
+      case TOKEN_VAR: {
+        GIVE_ERROR_WITH_LEXEME("unexpected '%.*s'", tok);
+      } break;
+
+      case TOKEN_LBRACE: {
+        nesting++;
+
+        if (!has_next) 
+          GIVE_ERROR("expected definition name after '{'", tok);
+        else if (has_next && next.kind != TOKEN_DEFINITION)
+          GIVE_ERROR("expected definition name after '{'", next);
+      } break;
+
+      case TOKEN_DEFINITION: {
+        if (get_opcode(&tok) != -1)
+          GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined as an isntruction", tok);
+        definition_tok = tok;
+      } break;
+
+      case TOKEN_RBRACE: {
+        nesting--;
+      } break;
+
+      case TOKEN_ADDR: {
+       if (!has_next)
+         GIVE_ERROR_WITH_LEXEME("expected word after '%.*s'", tok);
+       else if (has_next && next.kind != TOKEN_WORD)
+         GIVE_ERROR_WITH_LEXEME("expected word after '%.*s'", next);
+      } break;
+
+      default: break;
+    }
+
+    if (nesting > 1)
+      GIVE_ERROR("nested defintions are not allowed", tok);
+  }
+
+  if (nesting > 0)
+    GIVE_ERROR("unterminated definition", definition_tok);
+
+  return true;
 }
 
 bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks, Error *error) {
@@ -140,6 +146,7 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks, Error *erro
 
       case TOKEN_DEFINITION: {
         bool redefined = false;
+        if (tok.start[tok.length-1] == '*') tok.length--;
         if (!append_token_symbol(syms, &tok, pc, &redefined)) return false;
         if (redefined || lookup_symbol(tok.start, tok.length, vars, NULL))
           GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", tok);
@@ -198,6 +205,7 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks, Error *error)
 
     switch (tok.kind) {
       case TOKEN_DEFINITION: {
+        if (tok.start[tok.length-1] == '*') tok.length--;
         if (!lookup_symbol(tok.start, tok.length, syms, &pc))
           GIVE_ERROR_WITH_LEXEME("undefined symbol: '%.*s'", tok);
         fprintf(f, ":%04x ", (unsigned)pc);

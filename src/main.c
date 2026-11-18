@@ -20,8 +20,6 @@
  *       some of the std directly. if a definition is prefixed with !,
  *       then it is allowed to be 'overwritten' by one of these
  *       special instructions. meaning:
- * TODO: definitions not prefixed with ! need to throw if they are 
- *       named after an instruction
  * TODO: use an arena allocator, so i can actually start freeing
  *       things, like all good c programmers should
  * TODO: apparently malloc doesn't set errno. shit.
