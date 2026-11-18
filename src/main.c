@@ -14,8 +14,6 @@
 /*
  * before full release, do these things:
  *
- * TODO: compile the std into the compiler itself, so it doesn't need
- *       to be in cwd
  * TODO: allow you to specify from the command line that certain
  *       instructions exist (and give their opcodes), so the compiler
  *       can target more ambitious vm implementations that implement

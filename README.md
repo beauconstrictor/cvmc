@@ -18,7 +18,7 @@ There is a reference manual in the works that will provide more thorough details
 
 ## Installation
 
-To install `cvmc`, you will need to install `clang` and `make`. Then, just run these commands to build a binary which you can move into your PATH:
+To install `cvmc`, you will need to install `clang`,  `make` and `xxd`. Then, just run these commands to build a binary which you can move into your PATH:
 
 ```sh
 $ git clone https://github.com/beauconstrictor/cvmc

@@ -21,6 +21,8 @@
 #include "parser.h"
 #include "errors.h"
 
+#include "data.h"
+
 #include "preprocessor.h"
 
 /*
@@ -618,6 +620,13 @@ bool deanonymify(Tokens *toks, Error *error) {
   return true;
 }
 
+char *read_module(const char *path) {
+  if (strcmp(path, "std.cvm") == 0)
+    return (char *)src_std_std_cvm;
+  
+  return read_file(path);
+}
+
 bool deimport(Tokens *toks, Error *error) {
   (void)toks;
   (void)error;
@@ -647,7 +656,7 @@ bool deimport(Tokens *toks, Error *error) {
     if (!remove_token(toks, i)) return false;
     if (!remove_token(toks, i)) return false;
 
-    char *source = read_file(path);
+    char *source = read_module(path);
     if (source == NULL) GIVE_ERROR_WITH_LEXEME("no such file: '%.*s'", next);
 
     if (!lexer(source, path, &new_toks, error)) return false;

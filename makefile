@@ -15,6 +15,9 @@ build:
 build/%.o: src/%.c | build
 	$(CC) $(CFLAGS) $(DEPFLAGS) -Isrc -c $< -o $@
 
+build/std.h: src/std/std.cvm | build
+	xxd -i $< $@
+
 $(TARGET): $(OBJS)
 	$(CC) -g $(OBJS) -o $@
 
