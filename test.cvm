@@ -1,5 +1,7 @@
 import std
 
+const x-errno-stack = 32768
+
 var buf[256]: char
 var stack[16]: int
 var stack.top: ptr
@@ -7,13 +9,23 @@ var stack.top: ptr
 {:init-stack < -- > (set stack.top stack) }
 
 {:push <val -- >
-  (set (get stack.top) swap)
-  (set stack.top (add (get stack.top) int))
+  (if-else (eq (get stack.top) (add stack (size stack))) {
+    (set errno x-errno-stack)
+    drop
+  } {
+    (set (get stack.top) swap)
+    (set stack.top (add (get stack.top) int))
+  })
 }
 
 {:pop < -- val>
-  (set stack.top (sub (get stack.top) int))
-  (get (get stack.top))
+  (if-else (eq (get stack.top) stack) {
+    (set errno x-errno-stack)
+    -1
+  } {
+    (set stack.top (sub (get stack.top) int))
+    (get (get stack.top))
+  })
 }
 
 {:execute-token <token -- end>
