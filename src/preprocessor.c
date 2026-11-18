@@ -10,6 +10,7 @@
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -114,7 +115,10 @@ bool destringify(Tokens *toks, Error *error) {
 
     while (s < tok.start + tok.length) {
       char *num = malloc(4);
-      if (num == NULL) return false;
+      if (num == NULL) {
+        errno = ENOMEM;
+        return false;
+      }
 
       char c = *s;
 
@@ -222,6 +226,10 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
       if (is_nested) {   
         size_t len = snprintf(NULL, 0, "%s.%.*s", prefix, (int)next->length, next->start);
         char *prefixed = malloc(len + 1);
+        if (prefixed == NULL) {
+          errno = ENOMEM;
+          return false;
+        }
         snprintf(prefixed, len+1, "%s.%.*s", prefix, (int)next->length, next->start);
         next->length = len;
         next->start  = prefixed;
@@ -244,6 +252,10 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
 
       size_t len = snprintf(NULL, 0, "%s.%.*s", prefix, (int)tok->length, tok->start);
       char *prefixed = malloc(len + 1);
+      if (prefixed == NULL)  {
+        errno = ENOMEM;
+        return false;
+      }
       snprintf(prefixed, len+1, "%s.%.*s", prefix, (int)tok->length, tok->start);
       tok->length = len;
       tok->start  = prefixed;
@@ -278,7 +290,10 @@ bool substitute(Tokens *toks, Symbols *syms) {
 
     int len = snprintf(NULL, 0, "%ld", value);
     char *s = malloc(len + 1);
-    if (s == NULL) return false;
+    if (s == NULL) {
+      errno = ENOMEM;
+      return false;
+    }
 
     snprintf(s, len + 1, "%ld", value);
 
@@ -409,6 +424,10 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
       GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", tok);
 
     char *sizeof_name = malloc(lval.length + 2);
+    if (sizeof_name == NULL) {
+      errno = ENOMEM;
+      return false;
+    }
     snprintf(sizeof_name, lval.length + 2, "#%.*s", (int)lval.length, lval.start);
 
     if (!append_symbol((Symbol) {
@@ -418,6 +437,10 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
     }, syms, NULL)) return false;
 
     char *lenof_name = malloc(lval.length + 2);
+    if (lenof_name == NULL) {
+      errno = ENOMEM;
+      return false;
+    }
     snprintf(lenof_name, lval.length + 2, "$%.*s", (int)lval.length, lval.start);
     if (!append_symbol((Symbol) {
       .name = lenof_name,
@@ -454,7 +477,10 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
 
     size_t len = snprintf(NULL, 0, "%c%.*s", prefix, (int)tok->length, tok->start) + 1;
     char *name = malloc(len);
-    if (name == NULL) return false;
+    if (name == NULL) {
+      errno = ENOMEM;
+      return false;
+    }
     snprintf(name, len, "%c%.*s", prefix, (int)tok->length, tok->start);
     tok->start = name;
     tok->length = len-1;
@@ -550,7 +576,10 @@ static bool deanonymify_inner(Tokens *toks, struct Blocks *blocks,
     );
 
     char *name = malloc(len + 1);
-    if (name == NULL) return false;
+    if (name == NULL) {
+      errno = ENOMEM;
+      return false;
+    }
 
     snprintf(name, len + 1, ANON_PREFIX "%zu", (*anon_count)++);
     if (!append_block(block, blocks)) return false;
@@ -591,7 +620,10 @@ bool deanonymify(Tokens *toks, Error *error) {
     int len = snprintf(NULL, 0, ANON_PREFIX "%zu", i);
 
     char *name = malloc(len + 1);
-    if (name == NULL) return false;
+    if (name == NULL) {
+      errno = ENOMEM;
+      return false;
+    }
 
     snprintf(name, len + 1, ANON_PREFIX "%zu", i);
 
@@ -648,6 +680,10 @@ bool deimport(Tokens *toks, Error *error) {
       GIVE_ERROR("expected name after import", next);
 
     char *path = malloc(PATH_MAX);
+    if (path == NULL) {
+      errno = ENOMEM;
+      return false;
+    }
     Tokens new_toks = {0};
     snprintf(path, PATH_MAX, "%.*s.cvm", (int)next.length, next.start);
 

@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,7 +33,10 @@ bool append_token(Token tok, Tokens *tokens) {
   size_t new_capa = tokens->capacity;
   new_capa = new_capa > 0 ? new_capa*2 : 1;
   Token *new = realloc(tokens->items, sizeof(Token) * new_capa);
-  if (new == NULL) return false;
+  if (new == NULL) {
+    errno = ENOMEM;
+    return false;
+  }
 
   tokens->items = new;
   tokens->capacity = new_capa;
@@ -42,13 +46,18 @@ bool append_token(Token tok, Tokens *tokens) {
 }
 
 bool insert_token(Tokens *tokens, size_t index, Token tok) {
-  if (index > tokens->count)
+  if (index > tokens->count) {
+    errno = EINVAL;
     return false;
+  }
 
 if (tokens->count == tokens->capacity) {
     size_t new_capa = tokens->capacity ? tokens->capacity * 2 : 1;
     Token *new = realloc(tokens->items, sizeof(Token) * new_capa);
-    if (!new) return false;
+    if (new == NULL) {
+      errno = ENOMEM;
+      return false;
+    }
 
     tokens->items = new;
     tokens->capacity = new_capa;
@@ -64,8 +73,10 @@ if (tokens->count == tokens->capacity) {
 }
 
 bool remove_token(Tokens *tokens, size_t index) {
-  if (index >= tokens->count)
+  if (index >= tokens->count) {
+    errno = EINVAL;
     return false;
+  }
 
   memmove(&tokens->items[index], &tokens->items[index + 1],
     (tokens->count - index - 1) * sizeof(Token));
@@ -316,9 +327,6 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
   return true;
 }
 
-// currently, delex writes to a FILE*. this is to remove the need for
-// complex allocation, and suits all the needs i can think of. maybe
-// i will make a string version in the future
 void delexer(Tokens *toks, FILE *f) {
   int nesting = 0;
   bool declaration = false;

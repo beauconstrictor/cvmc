@@ -16,7 +16,6 @@
  *
  * TODO: use an arena allocator, so i can actually start freeing
  *       things, like all good c programmers should
- * TODO: apparently malloc doesn't set errno; manually set ENOMEM
  * TODO: make simulator.execute use a return stack, so the debugger
  *       can print stack traces
  */

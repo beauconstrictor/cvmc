@@ -35,7 +35,10 @@ bool append_symbol(Symbol sym, Symbols *syms, bool *redefined) {
   size_t new_capa = syms->capacity;
   new_capa = new_capa > 0 ? new_capa*2 : 1;
   Symbol *new = realloc(syms->items, sizeof(Symbol) * new_capa);
-  if (new == NULL) return false;
+  if (new == NULL) {
+    errno = ENOMEM;
+    return false;
+  }
 
   syms->items = new;
   syms->capacity = new_capa;
@@ -114,9 +117,8 @@ long read_number(const Token *tok, Error *error) {
 char *read_file(const char *path) {
   FILE *file = fopen(path, "rb");
 
-  if (file == NULL) {
+  if (file == NULL)
     return NULL;
-  }
 
   fseek(file, 0, SEEK_END);
   long size = ftell(file);
