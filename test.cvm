@@ -4,6 +4,8 @@ var buf[256]: char
 var stack[16]: int
 var stack.top: ptr
 
+{:init-stack < -- > (set stack.top stack) }
+
 {:push <val -- >
   (set (get stack.top) swap)
   (set stack.top (add (get stack.top) int))
@@ -49,7 +51,7 @@ var stack.top: ptr
 }
 
 {:main
-  (set stack.top stack)
+  init-stack
 
   (while {true} {
     (gets buf (size buf))
