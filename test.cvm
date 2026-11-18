@@ -11,14 +11,14 @@ import std
   (if (eq dup '-') {(sub drop)})
   (if (eq dup '*') {(mul drop)})
   (if (eq dup '/') {(div drop)})
+
 }
 
 {:main
   var buf[256]: char
 
-  (puts "calculator!") putl
-
-  (while {true} {
+  (puts "") putl
+  (do-while {
     (gets buf (size buf))
     (putc '=') (puti (calculate buf)) putl
   })

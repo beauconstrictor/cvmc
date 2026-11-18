@@ -35,7 +35,7 @@ const errno-div-zero = 1
 var errno: int
 
 {:if <condition true -- > (if-else {})}
-{:do-while <body condition -- > swap dup call while}
+{:do-while <body -- > (while {})}
 
 {:switch <case [condition true]... -- >
   (while {(ne dup case)} {}
@@ -158,7 +158,7 @@ var errno: int
   })
 }
 
-{:puts <s -- > (while {(dup getc)} {putc dup}) drop drop}
+{:puts <s -- > (while {(dup getc)} {putc}) drop drop}
 {:putb <b -- > (if-else {(puts "true")} {(puts "false")})}
 {:putl < -- > (putc '\n')}
 
