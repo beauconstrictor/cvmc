@@ -40,9 +40,15 @@ var stack.top: ptr
   
   (gets buf (size buf))
 
+  (clear errno)
+
   buf (do-while {
     (dup (execute-token))
   })
 
-  (puti pop)
+  (if-else (eq errno errno-success) {
+    (putc '=') (puti pop) putl
+  } {
+    (puts "error.") putl
+  })
 }
