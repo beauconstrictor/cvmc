@@ -29,7 +29,9 @@ const str = 2
 
  errno values from 32768 and above will not be used, so you can use
  them for custom error handling in your programs, if you want to
- handle errors from your own code and the stdlib in one place>
+ handle errors from your own code and the stdlib in one place. when
+ creating constants for these custom errors, you should prefix them
+ with x-errno->
 
 const errno-success  = 0
 const errno-div-zero = 1
