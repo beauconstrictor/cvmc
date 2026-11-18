@@ -38,16 +38,18 @@ var stack.top: ptr
 
 {:main
   (set stack.top stack)
-  
-  (gets buf (size buf))
 
-  buf (do-while {
-    (dup (execute-token))
-  })
+  (while {true} {
+    (gets buf (size buf))
 
-  (if-else (eq (get errno) errno-success) {
-    (putc '=') (puti pop) putl
-  } {
-    (puts "error") putl
+    buf (do-while {
+      (dup (execute-token))
+    })
+
+    (if-else (eq (get errno) errno-success) {
+      (putc '=') (puti pop) putl
+    } {
+      (puts "error") putl
+    })
   })
 }
