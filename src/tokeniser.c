@@ -235,6 +235,21 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       start++;
       FLUSH_TOK(TOKEN_DEFINITION);
       continue;
+    } else if (s[0] == '"' && s[1] == '"' && start == s) {
+        Token tok = (Token) {
+          .kind = TOKEN_STRING,
+          .start = "",
+          .length = 0,
+          .location = {
+            .path = path,
+            .line = line,
+            .col = start - linestart + 1,
+          }
+        };
+        if (!append_token(tok, toks)) return false;
+        s += 2;
+        start = s;
+        continue;
     } else if (*s == '"' && start == s) {
       // TODO: these strings should probably be their own helper
       //       function
