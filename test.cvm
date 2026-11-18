@@ -14,7 +14,7 @@ var stack.top: ptr
   (get (get stack.top))
 }
 
-{:execute-token <buf -- res>
+{:execute-token <token -- end>
   (geti dup)
   rot rot
 
@@ -36,20 +36,23 @@ var stack.top: ptr
   })
 }
 
+{:evaluate <buf -- >
+  (do-while {
+    (dup (execute-token))
+  })
+
+  (if-else (eq (get errno) errno-success) {
+    (putc '=') (puti pop) putl
+  } {
+    (puts "error") putl
+  })
+}
+
 {:main
   (set stack.top stack)
 
   (while {true} {
     (gets buf (size buf))
-
-    buf (do-while {
-      (dup (execute-token))
-    })
-
-    (if-else (eq (get errno) errno-success) {
-      (putc '=') (puti pop) putl
-    } {
-      (puts "error") putl
-    })
+    (evaluate buf)
   })
 }
