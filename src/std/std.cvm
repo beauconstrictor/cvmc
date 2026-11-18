@@ -15,8 +15,6 @@ const ptr = 2
 const callable = 2
 const str = 2
 
-const case = 0 <stack sentinel>
-
 <some std functions do not have a signature. in this case, this
  function is 'internal', and should not be used.>
 
@@ -34,48 +32,42 @@ const errno-div-zero = 1
 
 var errno: int
 
-{:if <condition true -- > (if-else {})}
-{:do-while <body -- > (while {})}
+{:if* <condition true -- > (if-else {})}
+{:do-while* <body -- > (while {})}
 
-{:switch <case [condition true]... -- >
-  (while {(ne dup case)} {}
-    if
-  ) drop
-}
+{:bool-of* <a -- not not a> (if-else {true} {false})}
+{:not* <a -- not a> (if-else {false} {true})}
+{:and* <a b -- a and b> (if-else {(if-else {true} {false})} {drop false})}
+{:nand* <a b -- a nand b> (not and)}
+{:or* <a b -- a or b> (if-else {true} {if-else {true} {false}})}
+{:nor* <a b -- a nor b> (not or)}
 
-{:bool-of <a -- not not a> (if-else {true} {false})}
-{:not <a -- not a> (if-else {false} {true})}
-{:and <a b -- a and b> (if-else {(if-else {true} {false})} {drop false})}
-{:nand <a b -- a nand b> (not and)}
-{:or <a b -- a or b> (if-else {true} {if-else {true} {false}})}
-{:nor <a b -- a nor b> (not or)}
+{:eq* <a b -- a == b> sub (if-else {false} {true})}
+{:ne* <a b -- a != b> sub (if-else {true} {false})}
+{:lt* <a b -- a lt b> (gt swap)}
+{:le* <a b -- a le b> (not gt)}
+{:ge* <a b -- a ge b> (not lt)}
 
-{:eq <a b -- a == b> sub (if-else {false} {true})}
-{:ne <a b -- a != b> sub (if-else {true} {false})}
-{:lt <a b -- a lt b> (gt swap)}
-{:le <a b -- a le b> (not gt)}
-{:ge <a b -- a ge b> (not lt)}
+{:ucmp* <a b -- a-32768 b-32768> (sub 32768) swap (sub 32768) swap}
 
-{:ucmp <a b -- a-32768 b-32768> (sub 32768) swap (sub 32768) swap}
+{:at* <arr size idx -- ptr> (add mul)}
+{:clear* <ptr -- > (set 0)}
 
-{:at <arr size idx -- ptr> (add mul)}
-{:clear <ptr -- > (set 0)}
+{:check-err* < -- errno!=0> (ne (get errno) errno-success)}
 
-{:check-err < -- errno!=0> (ne (get errno) errno-success)}
+{:over* <a b -- a b a> swap dup rot swap}
 
-{:over <a b -- a b a> swap dup rot swap}
+{:dec* <n -- n-1> (sub 1)}
+{:inc* <n -- n+1> (add 1)}
 
-{:dec <n -- n-1> (sub 1)}
-{:inc <n -- n+1> (add 1)}
-
-{:neg <n -- -n> (sub (swap 0))}
-{:abs <n -- |n|> (if (lt dup 0) {neg})}
-{:sgn <n -- n'> 
+{:neg* <n -- -n> (sub (swap 0))}
+{:abs* <n -- |n|> (if (lt dup 0) {neg})}
+{:sgn* <n -- n'> 
   (if (ne dup 0) {
     (if-else (gt 0) {1} {-1})
   })
 }
-{:set-sgn <a b -- a'>
+{:set-sgn* <a b -- a'>
   (if-else (eq dup 0) {
     drop drop 0
   } {
@@ -85,7 +77,7 @@ var errno: int
 
 <somehow, this actually does work with signed values, despite no
  specific handling for them>
-{:mul <a b -- a*b>
+{:mul* <a b -- a*b>
   (swap 0)
 
   (while {dup} {
@@ -125,11 +117,11 @@ var errno: int
     (swap (set-sgn rot rot swap))
     })
 }
-{:div <a b -- a/b> <sets errno> (drop div-mod)}
-{:mod <a b -- a%b> <sets errno> (drop (swap div-mod))}
+{:div* <a b -- a/b> <sets errno> (drop div-mod)}
+{:mod* <a b -- a%b> <sets errno> (drop (swap div-mod))}
 
-{:getc <buf -- after c> (load dup) swap inc swap}
-{:geti <buf -- after i>
+{:getc* <buf -- after c> (load dup) swap inc swap}
+{:geti* <buf -- after i>
   var acc: int
   (set acc 0)
 
@@ -145,10 +137,10 @@ var errno: int
   (get acc)
 }
 
-{:send <s -- end> (while &getc {}) dec}
-{:slen <s -- len> (dec (sub dup send swap))}
+{:send* <s -- end> (while &getc {}) dec}
+{:slen* <s -- len> (dec (sub dup send swap))}
 
-{:scpy <src dst -- >
+{:scpy* <src dst -- >
   var dst: str
   (set dst swap)
 
@@ -158,11 +150,11 @@ var errno: int
   })
 }
 
-{:puts <s -- > (while {(dup getc)} {putc}) drop drop}
-{:putb <b -- > (if-else {(puts "true")} {(puts "false")})}
-{:putl < -- > (putc '\n')}
+{:puts* <s -- > (while {(dup getc)} {putc}) drop drop}
+{:putb* <b -- > (if-else {(puts "true")} {(puts "false")})}
+{:putl* < -- > (putc '\n')}
 
-{:puti <n -- >
+{:puti* <n -- >
   (if (lt dup 0) {
     (putc '-')
   })

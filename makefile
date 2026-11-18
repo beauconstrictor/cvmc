@@ -18,7 +18,7 @@ build/%.o: src/%.c | build
 build/std.h: src/std/std.cvm | build
 	xxd -i $< $@
 
-$(TARGET): $(OBJS)
+$(TARGET): build/std.h $(OBJS)
 	$(CC) -g $(OBJS) -o $@
 
 .PHONY: clean

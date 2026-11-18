@@ -25,9 +25,13 @@ const char *mnemonics[] = {
 };
 #undef X
 
-int get_opcode(Token *tok) {
+int get_opcode(Token *tok, Symbols *custom_opcodes) {
   char buf[256];
   snprintf(buf, sizeof(buf), "%.*s", (int)tok->length, tok->start);
+
+  long opcode;
+  if (lookup_symbol(tok->start, tok->length, custom_opcodes, &opcode))
+    return opcode;
 
   // prevent duplicate opcodes at compile time (i'm stupid, so i need
   // this)
@@ -45,7 +49,7 @@ int get_opcode(Token *tok) {
   return -1;
 }
 
-bool verify_syntax(Tokens *toks, Error *error) {
+bool verify_syntax(Tokens *toks, Error *error, Symbols *custom_opcodes) {
   static char buf[256];
 
   int nesting = 0;
@@ -85,8 +89,8 @@ bool verify_syntax(Tokens *toks, Error *error) {
       } break;
 
       case TOKEN_DEFINITION: {
-        if (get_opcode(&tok) != -1)
-          GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined as an isntruction", tok);
+        if (tok.start[tok.length-1] != '*' && get_opcode(&tok, custom_opcodes) != -1)
+          GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined as an instruction", tok);
         definition_tok = tok;
       } break;
 
@@ -114,7 +118,8 @@ bool verify_syntax(Tokens *toks, Error *error) {
   return true;
 }
 
-bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks, Error *error) {
+bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
+    Error *error, Symbols *custom_opcodes) {
   static char buf[256];
 
   uint16_t pc = PC_MIN;
@@ -159,7 +164,7 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks, Error *erro
       } break;
 
       case TOKEN_WORD: {
-        int opcode = get_opcode(&tok);
+        int opcode = get_opcode(&tok, custom_opcodes);
         if (opcode != -1) {
           pc++;
           break;
@@ -185,8 +190,9 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks, Error *erro
   return true;
 }
 
-bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks, Error *error) {
-  if (!arrange_definitions(syms, vars, toks, error)) return false;
+bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
+    Error *error, Symbols *custom_opcodes) {
+  if (!arrange_definitions(syms, vars, toks, error, custom_opcodes)) return false;
 
   #define EMIT_BYTE(byte) fprintf(f,"%02x ", byte &   0xff);
   #define EMIT_WORD(word) fprintf(f,"%02x %02x ", (word & 0xff00) >> 8, word & 0xff);
@@ -224,7 +230,7 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks, Error *error)
       case TOKEN_ADDR: {
         long addr;
         if (!lookup_symbol(next.start, next.length, syms, &addr)) {
-          if (get_opcode(&next) != -1) {
+          if (get_opcode(&next, custom_opcodes) != -1) {
             GIVE_ERROR_WITH_LEXEME("'%.*s' is an instruction, not a function and does not have an address", next);
           } else
             GIVE_ERROR_WITH_LEXEME("undefined symbol: '%.*s'", next);
@@ -242,7 +248,7 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks, Error *error)
       } break;
 
       case TOKEN_WORD: {
-        int opcode = get_opcode(&tok);
+        int opcode = get_opcode(&tok, custom_opcodes);
         if (opcode >= 0) {
           EMIT_BYTE(opcode);
           break;

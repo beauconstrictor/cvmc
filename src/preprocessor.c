@@ -631,8 +631,6 @@ bool deimport(Tokens *toks, Error *error) {
   (void)toks;
   (void)error;
 
-  // for the error with lexeme
-  // TODO: i think this needs to be static, but maybe not? check back
   static char buf[256];
 
   for (size_t i = 0; i < toks->count; i++) {

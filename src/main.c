@@ -14,15 +14,9 @@
 /*
  * before full release, do these things:
  *
- * TODO: allow you to specify from the command line that certain
- *       instructions exist (and give their opcodes), so the compiler
- *       can target more ambitious vm implementations that implement
- *       some of the std directly. if a definition is prefixed with !,
- *       then it is allowed to be 'overwritten' by one of these
- *       special instructions. meaning:
  * TODO: use an arena allocator, so i can actually start freeing
  *       things, like all good c programmers should
- * TODO: apparently malloc doesn't set errno. shit.
+ * TODO: apparently malloc doesn't set errno; manually set ENOMEM
  * TODO: make simulator.execute use a return stack, so the debugger
  *       can print stack traces
  */
@@ -45,6 +39,7 @@
              "\t-pX Stop compilation after a specific preprocessing stage (0 for all)\n" \
              "\t-c  Fully compile program (default)\n" \
              "\t-i  Immediately interpret program\n" \
+             "\t-DX Pass 'MNEMONIC=OPCODE to define a new opcode\n" \
              "\n" \
              "Use '-' in place of paths to use the standard output.\n" \
 
@@ -118,12 +113,13 @@ int main(int argc, char **argv) {
   char symtable[PATH_MAX];
 
   CompilationMode mode = MODE_COMPILE;
+  Symbols custom_opcodes = {0};
 
   bool raw_tokens = false;
   bool dump_syms  = false;
   int  pp_stage   = 0;
 
-  while ((opt = getopt(argc, argv, "hvo:tp:lcis:")) != -1) {
+  while ((opt = getopt(argc, argv, "hvo:tp:lcis:D:")) != -1) {
     switch (opt) {
       case 'h': {
         show_help(argv[0]);
@@ -157,6 +153,20 @@ int main(int argc, char **argv) {
         dump_syms = true;
         snprintf(symtable, sizeof(symtable), "%s", optarg);
       } break;
+      case 'D': {
+        char *mnemonic = malloc(32);
+        int opcode;
+        bool redefined;
+        if (sscanf(optarg, "%31[^1=]=%d", mnemonic, &opcode) != 2)
+          cli_error(USAGE, argv[0]);
+        append_symbol((Symbol){
+            .name = mnemonic,
+            .length = strlen(mnemonic),
+            .value = opcode,
+        }, &custom_opcodes, &redefined);
+        if (redefined)
+          cli_error("an instruction cannoth have multiple definitions", argv[0]);
+      } break;
     }
   }
 
@@ -182,12 +192,12 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  if (!verify_syntax(&toks, &error)) check_error(&error);
+  if (!verify_syntax(&toks, &error, &custom_opcodes)) check_error(&error);
 
   Symbols syms = {0};
   FILE *out = get_handle(output, argv[0], false);
 
-  if (!assemble(out, &syms, &vars, &toks, &error)) check_error(&error);
+  if (!assemble(out, &syms, &vars, &toks, &error, &custom_opcodes)) check_error(&error);
 
   long main_addr;
   if (!lookup_symbol(ENTRY_POINT, sizeof(ENTRY_POINT)-1, &syms, &main_addr))
