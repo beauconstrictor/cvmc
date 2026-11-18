@@ -17,7 +17,7 @@ var stack.top: ptr
 {:execute-token <buf -- res>
   (geti dup)
   rot rot
-  
+
   (over swap)
   
   (if-else (eq over) {
@@ -25,9 +25,9 @@ var stack.top: ptr
     (load dup)
     (drop rot)
     (if (eq dup '+') {(push (add pop pop))})
-    (if (eq dup '-') {(push (sub pop pop))})
+    (if (eq dup '-') {(push (sub pop pop swap))})
     (if (eq dup '*') {(push (mul pop pop))})
-    (if (eq dup '/') {(push (div pop pop))})
+    (if (eq dup '/') {(push (div pop pop swap))})
     (if-else (eq '\0') {drop 0} &inc)
   } {
     (push rot)
@@ -43,5 +43,6 @@ var stack.top: ptr
   buf (do-while {
     (dup (execute-token))
   })
+
   (puti pop)
 }
