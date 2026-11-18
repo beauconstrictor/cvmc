@@ -1,20 +1,25 @@
 import std
 
-var buf[256]: char
-var parse: str
+{:calculate <buf -- res>
+  (geti)
+  (getc swap)
+  (geti swap)
+  (drop swap)
+  swap
 
-{:next-char
-  (set parse (inc (get parse)))
+  (if (eq dup '+') {(add drop)})
+  (if (eq dup '-') {(sub drop)})
+  (if (eq dup '*') {(mul drop)})
+  (if (eq dup '/') {(div drop)})
 }
 
 {:main
+  var buf[256]: char
 
-  (set parse buf)
+  (puts "calculator!") putl
 
-  (puts "rpn calculator") putl
-  (puts "> ") (gets buf (size buf)) 
-
-  (switch case
-    {
-  )
+  (while {true} {
+    (gets buf (size buf))
+    (putc '=') (puti (calculate buf)) putl
+  })
 }

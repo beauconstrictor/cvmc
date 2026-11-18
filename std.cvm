@@ -140,11 +140,12 @@ var errno: int
     (add (sub '0'))
     (set acc swap)
   }) drop
-  
+ 
+  dec
   (get acc)
 }
 
-{:send <s -- end> (while &getc {}) }
+{:send <s -- end> (while &getc {}) dec}
 {:slen <s -- len> (dec (sub dup send swap))}
 
 {:scpy <src dst -- >
@@ -157,7 +158,7 @@ var errno: int
   })
 }
 
-{:puts <s -- > (while {(dup getc)} {putc}) drop}
+{:puts <s -- > (while {(dup getc)} {putc dup}) drop drop}
 {:putb <b -- > (if-else {(puts "true")} {(puts "false")})}
 {:putl < -- > (putc '\n')}
 

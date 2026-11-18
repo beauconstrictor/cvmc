@@ -107,10 +107,6 @@ bool destringify(Tokens *toks, Error *error) {
 
     if (!remove_token(toks, i--)) return false;
 
-    // TODO: this leaks memory if tokens are removed. that's not
-    // really a problem though for a short-lived compiler like this,
-    // so i think it's fine. maybe revisit?
-
     const char *s = tok.start;
     bool in_escape = false;
 
