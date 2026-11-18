@@ -1,25 +1,47 @@
 import std
 
-{:calculate <buf -- res>
-  (geti)
-  (getc swap)
-  (geti swap)
-  (drop swap)
-  swap
+var buf[256]: char
+var stack[16]: int
+var stack.top: ptr
 
-  (if (eq dup '+') {(add drop)})
-  (if (eq dup '-') {(sub drop)})
-  (if (eq dup '*') {(mul drop)})
-  (if (eq dup '/') {(div drop)})
+{:push <val -- >
+  (set (get stack.top) swap)
+  (set stack.top (add (get stack.top) int))
+}
 
+{:pop < -- val>
+  (set stack.top (sub (get stack.top) int))
+  (get (get stack.top))
+}
+
+{:execute-token <buf -- res>
+  (geti dup)
+  rot rot
+  
+  (over swap)
+  
+  (if-else (eq over) {
+    drop
+    (load dup)
+    (drop rot)
+    (if (eq dup '+') {(push (add pop pop))})
+    (if (eq dup '-') {(push (sub pop pop))})
+    (if (eq dup '*') {(push (mul pop pop))})
+    (if (eq dup '/') {(push (div pop pop))})
+    (if-else (eq '\0') {drop 0} &inc)
+  } {
+    (push rot)
+    drop
+  })
 }
 
 {:main
-  var buf[256]: char
+  (set stack.top stack)
+  
+  (gets buf (size buf))
 
-  (puts "") putl
-  (do-while {
-    (gets buf (size buf))
-    (putc '=') (puti (calculate buf)) putl
+  buf (do-while {
+    (dup (execute-token))
   })
+  (puti pop)
 }
