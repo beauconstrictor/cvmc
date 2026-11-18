@@ -16,8 +16,6 @@
  *
  * TODO: use an arena allocator, so i can actually start freeing
  *       things, like all good c programmers should
- * TODO: make simulator.execute use a return stack, so the debugger
- *       can print stack traces
  */
 
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \
