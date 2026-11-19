@@ -8,7 +8,6 @@
 #include "assembler.h"
 
 /*
- * TODO: don't emit unreferenced subroutines into the binary?
  * TODO: deduplicate subroutines with the same instructions
  */
 
@@ -189,6 +188,44 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
   return true;
 }
 
+void find_referenced_inner(Symbols *referenced, Tokens *toks,
+    const char *func, size_t len) {
+  if (lookup_symbol(func, len, referenced, NULL)) return;
+
+  Token definition;
+  bool found = false;
+  size_t idx = 0;
+  for (size_t i = 0; i < toks->count; i++) {
+    definition = toks->items[i];
+    if (definition.kind != TOKEN_DEFINITION) continue;
+    if (definition.start[definition.length-1] == '*') definition.length--;
+    if (definition.length != len
+        || memcmp(definition.start, func, len) != 0)
+      continue;
+    found = true;
+    idx = i;
+    break;
+  }
+  if (!found) return;
+
+  bool redefined;
+  append_token_symbol(referenced, &definition, 0, &redefined);
+
+  for (size_t i = idx; i < toks->count; i++) {
+    Token tok = toks->items[i];
+    if (tok.kind != TOKEN_WORD) continue;
+    if (tok.kind == TOKEN_LBRACE) break;
+    find_referenced_inner(referenced, toks, tok.start, tok.length);
+  }
+}
+
+Symbols find_referenced(Tokens *toks) {
+  Symbols referenced = {0};
+  find_referenced_inner(&referenced, toks, ENTRY_POINT,
+      sizeof(ENTRY_POINT)-1);
+  return referenced;
+}
+
 bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
     Error *error, Symbols *custom_opcodes) {
   if (!arrange_definitions(syms, vars, toks, error, custom_opcodes)) return false;
@@ -199,7 +236,11 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
   static char buf[256];
   long pc;
 
+  Symbols referenced = find_referenced(toks);
+
   fprintf(f, "T\n");
+
+  bool should_emit = true;
 
   for (size_t i = 0; i < toks->count; i++) {
     Token tok = toks->items[i];
@@ -208,12 +249,17 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
     bool has_next = i < toks->count - 1;
     if (has_next) next = toks->items[i+1];
 
+    if (!should_emit) {
+      if (tok.kind == TOKEN_RBRACE) should_emit = true;
+      continue;
+    }
     switch (tok.kind) {
       case TOKEN_DEFINITION: {
         if (tok.start[tok.length-1] == '*') tok.length--;
         if (!lookup_symbol(tok.start, tok.length, syms, &pc))
           GIVE_ERROR_WITH_LEXEME("undefined symbol: '%.*s'", tok);
-        fprintf(f, ":%04x ", (unsigned)pc);
+        should_emit = lookup_symbol(tok.start, tok.length, &referenced, NULL);
+        if (should_emit) fprintf(f, ":%04x ", (unsigned)pc);
       } break;
 
       case TOKEN_RBRACE: {

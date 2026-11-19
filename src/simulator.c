@@ -522,7 +522,8 @@ const char *simulate(const char *s, Symbols *syms) {
       addr = read_hex_addr(s);
       s += 4;
     } else if (c == '!') {
-      const char *error = execute(&dstack, read_hex_addr(s), memory, sizeof(memory), syms);
+      const char *error = execute(&dstack, read_hex_addr(s), memory,
+          sizeof(memory), syms);
       if (error) return error;
     }
   }

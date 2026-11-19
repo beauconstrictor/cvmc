@@ -272,9 +272,6 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
         start = s;
         continue;
     } else if (*s == '"' && start == s) {
-      // TODO: these strings should probably be their own helper
-      //       function
-
       while (true) {
         s++;
 

@@ -7,6 +7,7 @@
  * 4. delocalisation: give all variables global names from their positions
  * 5. desymbolisation: remove constants and variables (resolve to their values)
  * 6. deanonymification: extract nested anonymous blocks into the global scope
+ * 7. deunreferencing: remove unreferenced subroutines
  */
 
 #include <stdio.h>
@@ -628,6 +629,37 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
   }
 
   return true;
+}
+
+void deunreference_inner(Symbols *referenced, Tokens *toks,
+    const char *func, size_t len) {
+  if (lookup_symbol(func, len, referenced, NULL)) return;
+
+  Token definition;
+  bool found = false;
+  size_t idx = 0;
+  for (size_t i = 0; i < toks->count; i++) {
+    definition = toks->items[i];
+    if (definition.kind != TOKEN_DEFINITION) continue;
+    if (definition.start[definition.length-1] == '*') definition.length--;
+    if (definition.length != len
+        || memcmp(definition.start, func, len) != 0)
+      continue;
+    found = true;
+    idx = i;
+    break;
+  }
+  if (!found) return;
+
+  bool redefined;
+  append_token_symbol(referenced, &definition, 0, &redefined);
+
+  for (size_t i = idx; i < toks->count; i++) {
+    Token tok = toks->items[i];
+    if (tok.kind != TOKEN_WORD) continue;
+    if (tok.kind == TOKEN_LBRACE) break;
+    deunreference_inner(referenced, toks, tok.start, tok.length);
+  }
 }
 
 bool preprocessor(Arena *arena, Tokens *toks, Symbols *syms,
