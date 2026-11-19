@@ -208,14 +208,14 @@ int main(int argc, char **argv) {
   
   if (out != stdout) fclose(out);
 
-  arena_free(&arena);
-
   if (mode == MODE_INTERPRET) {
     char *tape = read_file(&arena, output);
     if (tape == NULL) cli_error("no such file", argv[0]);
     const char *error = simulate(tape, &syms);
     if (error) cli_error(error, argv[0]);
   }
+
+  arena_free(&arena);
 
   return 0;
 }
