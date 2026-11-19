@@ -7,7 +7,6 @@
  * 4. delocalisation: give all variables global names from their positions
  * 5. desymbolisation: remove constants and variables (resolve to their values)
  * 6. deanonymification: extract nested anonymous blocks into the global scope
- * 7. deunreferencing: remove unreferenced subroutines
  */
 
 #include <stdio.h>
