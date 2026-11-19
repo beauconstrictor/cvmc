@@ -56,7 +56,10 @@ var stack.top: ptr
   })
 
   (if-else (eq (get errno) errno-success) {
-    (putc '=') (puti pop) putl
+    pop
+    init-stack
+    (push dup)
+    (putc '=') (puti) putl
   } {
     (puts "error") putl
   })
