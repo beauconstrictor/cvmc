@@ -235,6 +235,11 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
     } if (isaspace(*s)) {
       FLUSH_TOK(TOKEN_WORD);
       start = s + 1;
+    } else if (s[0] == '0' && s[1] == 'x' && start == s) {
+      s++;
+      EXHAUST_CHRS("0123456789abcdefABCDEF");
+      FLUSH_TOK(TOKEN_NUMBER);
+      continue;
     } else if ((isdigit((unsigned char)*s)
         || (*s == '-' && isdigit((unsigned char)s[1])))
         && start == s) {

@@ -107,7 +107,7 @@ long read_number(const Token *tok, Error *error) {
   snprintf(buf, sizeof(buf), "%.*s", (int)tok->length, tok->start);
   char *end;
   errno = 0;
-  long value = strtol(buf, &end, 10);
+  long value = strtol(buf, &end, 0);
 
   if (tok->length == 3 && tok->start[0] == '\'' && tok->start[2] == '\'')
     return (long)tok->start[1];

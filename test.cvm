@@ -38,7 +38,7 @@ var stack.top: ptr
     drop
     (load dup)
     (drop rot)
-    (if (eq dup '+') {(push (add pop pop))})
+    (if (eq dup 0x2b) {(push (add pop pop))})
     (if (eq dup '-') {(push (sub pop pop swap))})
     (if (eq dup '*') {(push (mul pop pop))})
     (if (eq dup '/') {(push (div pop pop swap))})
