@@ -14,8 +14,6 @@
 /*
  * before full release, do these things:
  *
- * TODO: use an arena allocator, so i can actually start freeing
- *       things, like all good c programmers should
  */
 
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \
