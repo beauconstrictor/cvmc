@@ -9,7 +9,7 @@
 #include "arena.h"
 
 /*
- * TODO: if compilation starts getting low, implement binary search
+ * TODO: if compilation starts getting slow, implement binary search
  *       in the symbol resolution system (or maybe even a hashmap)
  */
 

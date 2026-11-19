@@ -10,7 +10,6 @@
  */
 
 #include <stdio.h>
-#include <errno.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,10 +25,6 @@
 
 #include "preprocessor.h"
 
-/*
- * TODO: use GIVE_ERROR everywhere
- */
-
 #define ALLOC_START 0x38b0
 #define ALLOC_MAX   0x6fff
 
@@ -40,14 +35,8 @@ bool deparenthesise(Tokens *toks, Error *error) {
     Token tok = toks->items[i];
 
     if (tok.kind == TOKEN_LPARA) {
-      if (i + 1 >= toks->count) {
-        *error = (Error) {
-          .location = tok.location,
-          .message = "expected word after '('",
-          .set = true,
-        };
-        return false;
-      }
+      if (i + 1 >= toks->count)
+        GIVE_ERROR("expected word after '('", tok);
 
       if (!append_token(toks->items[i+1], &prefix_words)) return false;
       if (!remove_token(toks, i)) return false;
@@ -55,24 +44,12 @@ bool deparenthesise(Tokens *toks, Error *error) {
       i -= 2;
     } else if (tok.kind == TOKEN_RPARA) {
       if (!remove_token(toks, i--)) return false;
-      if (prefix_words.count == 0) {
-        *error = (Error) {
-          .location = tok.location,
-          .message = "unexpected ')'",
-          .set = true,
-        };
-        return false;
-      }
+      if (prefix_words.count == 0)
+        GIVE_ERROR("unexpected ')'", tok);
 
       Token word = prefix_words.items[prefix_words.count - 1];
-      if (word.kind != TOKEN_WORD) {
-        *error = (Error) {
-          .location = word.location,
-          .message = "expected word after '('",
-          .set = true,
-        };
-        return false;
-      }
+      if (word.kind != TOKEN_WORD)
+        GIVE_ERROR("expected word after '('", word);
 
       if (!remove_token(&prefix_words, prefix_words.count - 1))
         return false;
@@ -83,12 +60,8 @@ bool deparenthesise(Tokens *toks, Error *error) {
   }
 
   if (prefix_words.count > 0) {
-      *error = (Error) {
-        .location = prefix_words.items[prefix_words.count - 1].location,
-        .message = "unterminated parenthesis",
-        .set = true,
-      };
-      return false;
+    Token location = prefix_words.items[prefix_words.count - 1];
+    GIVE_ERROR("unterminated parenthesis", location);
   }
 
   return true;
@@ -321,16 +294,10 @@ bool desymbolise(Arena *arena, Tokens *toks, Symbols *syms,
     }
 
     if (toks->count < i + 4
-      || toks->items[i+1].kind != TOKEN_WORD
-      || toks->items[i+2].kind != TOKEN_ASSIGN
-      || toks->items[i+3].kind != TOKEN_NUMBER) {
-      *error = (Error) {
-        .location = tok.location,
-        .message = "expected assignment after " CONST_WORD,
-        .set = true,
-      };
-      return false;
-    }
+        || toks->items[i+1].kind != TOKEN_WORD
+        || toks->items[i+2].kind != TOKEN_ASSIGN
+        || toks->items[i+3].kind != TOKEN_NUMBER)
+      GIVE_ERROR("expected assignment after " CONST_WORD, tok);
 
     Token lval  = toks->items[i+1];
     Token rval = toks->items[i+3];
@@ -395,14 +362,8 @@ bool desymbolise(Arena *arena, Tokens *toks, Symbols *syms,
     }
     size *= length;
 
-    if (allocator + size > ALLOC_MAX) {
-      *error = (Error) {
-        .location = tok.location,
-        .message = "insufficient space for variable allocation" VAR_WORD,
-        .set = true,
-      };
-      return false;
-    }
+    if (allocator + size > ALLOC_MAX)
+      GIVE_ERROR("static variable allocation space is exhausted", tok);
   
     if (!verify_symbol_name(&lval, error)) return false;
     bool redefined = false;
@@ -474,7 +435,6 @@ struct Blocks {
   size_t capacity;
 };
 
-// TODO: maybe move all these dynamic arrays into a macro?
 bool append_block(Tokens block, struct Blocks *blocks) {
   if (blocks->count < blocks->capacity) {
     blocks->items[blocks->count++] = block;
@@ -517,14 +477,8 @@ static bool deanonymify_inner(Arena *arena, Tokens *toks,
       end++;
     }
 
-    if (depth != 0) {
-      *error = (Error) {
-        .location = opening.location,
-        .message = "unterminated block",
-        .set = true,
-      };
-      return false;
-    }
+    if (depth != 0)
+      GIVE_ERROR("unterminated block", opening);
 
     Tokens block = create_tokens();
 

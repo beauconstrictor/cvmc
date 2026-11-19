@@ -56,7 +56,7 @@ var stack.top: ptr
   (do-while {
     (dup (execute-token))
   })
-	
+
   (if-else (eq (get errno) errno-success) {
     pop
     init-stack

@@ -10,7 +10,6 @@
 /*
  * TODO: don't emit unreferenced subroutines into the binary?
  * TODO: deduplicate subroutines with the same instructions
- * TODO: mandatory 'main' entry point
  */
 
 #define PC_MIN 0x0800
@@ -262,8 +261,6 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
         EMIT_WORD((int)addr);
         EMIT_BYTE(OPCODE_CALL);
       } break;
-
-      // TODO: add base words
 
       default: break;
     }
