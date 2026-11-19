@@ -85,9 +85,10 @@ const char *get_name(uint16_t addr, int *len, Symbols *syms) {
 
   for (size_t i = 0; i < syms->count; i++) {
     Symbol s = syms->items[i];
-    if (s.value > addr) break;
+    if (s.value != addr) continue;
     name = s.name;
     *len = s.length;
+    break
   }
 
   return name;
