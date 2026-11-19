@@ -180,10 +180,6 @@ char *read_file(Arena *arena, const char *path) {
 
   contents[bytes_read] = '\0';
 
-  if (bytes_read > 0 && contents[bytes_read - 1] == '\n') {
-    contents[--bytes_read] = '\0';
-  }
-
   return contents;
 }
 

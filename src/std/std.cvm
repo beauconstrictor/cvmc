@@ -31,7 +31,7 @@ const str = 2
  them for custom error handling in your programs, if you want to
  handle errors from your own code and the stdlib in one place. when
  creating constants for these custom errors, you should prefix them
- with x-errno->
+ with x-errno-*>
 
 const errno-success  = 0
 const errno-div-zero = 1

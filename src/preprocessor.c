@@ -581,9 +581,23 @@ bool deanonymify(Arena *arena, Tokens *toks, Error *error) {
 }
 
 char *read_module(Arena *arena, const char *path) {
-  if (strcmp(path, "std.cvm") == 0)
-    return (char *)src_std_std_cvm;
-  
+  bool is_std = false;
+  char *buf;
+  size_t len;
+
+  if (strcmp(path, "std.cvm") == 0) {
+    buf = (char *)src_std_std_cvm;
+    len = src_std_std_cvm_len;
+    is_std = true;
+  }
+
+  if (is_std) {
+    char *source = arena_alloc(arena, len + 1);
+    memcpy(source, buf, len);
+    buf[len] = '\0';
+    return buf;
+  }
+
   return read_file(arena, path);
 }
 

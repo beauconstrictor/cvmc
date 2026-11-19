@@ -27,7 +27,7 @@
   X(WORD) \
   X(ADDR) \
   X(BYTE) \
-  X(VAR) \
+  X(VAR)
 
 #define X(name) TOKEN_##name,
 

@@ -150,6 +150,10 @@ int main(int argc, char **argv) {
         bool redefined;
         if (sscanf(optarg, "%31[^1=]=%d", mnemonic, &opcode) != 2)
           cli_error(USAGE, argv[0]);
+        if (opcode < 0)
+          cli_error("defined opcode must be positive", argv[0]);
+        if (opcode > 0xff)
+          cli_error("defined opcode must be a single byte", argv[0]);
         append_symbol((Symbol){
             .name = mnemonic,
             .length = strlen(mnemonic),

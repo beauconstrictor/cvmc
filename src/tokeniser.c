@@ -210,6 +210,10 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
     }
 
     if (comment_level > 0 || *s == '>') {
+      if (*s == '\n') {
+        line++;
+        linestart = s + 1;
+      }
       s++;
       start = s;
       continue;
@@ -282,7 +286,7 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
 
         if (*s == '\n') {
           line++;
-          linestart = s;
+          linestart = s + 1;
         }
 
         if (s[-1] != '\\' && *s == '"') break;

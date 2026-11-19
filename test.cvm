@@ -6,7 +6,7 @@ var buf[256]: char
 var stack[16]: int
 var stack.top: ptr
 
-{:init-stack < -- > (put stack stack.top) }
+{:init-stack < -- > (put stack stack.top)}
 
 {:push <val -- >
   (if-else (eq (get stack.top) (add stack (size stack))) {

@@ -61,7 +61,7 @@ bool verify_syntax(Tokens *toks, Error *error, Symbols *custom_opcodes) {
     if (has_next) next = toks->items[i+1];
 
     if (tok.kind != TOKEN_LBRACE && nesting < 1)
-      GIVE_ERROR("unexpected word outside of definition", tok);
+      GIVE_ERROR_WITH_LEXEME("unexpected word outside of definition: '%.*s'", tok);
 
     switch (tok.kind) {
       case TOKEN_LSQUARE:
