@@ -102,6 +102,31 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
   const char *linestart = s;
   int    line = 1;
 
+  while (*s) {
+    if (*s == '\n') {
+      line++;
+      linestart = s+1;
+    }
+    if (*s != '\t') {
+      s++;
+      continue;
+    }
+    *error = (Error) {
+      .location = {
+        .path = path,
+        .line = line,
+        .col = linestart - s + 1,
+      },
+      .message = "tabs are not allowed in source",
+      .set = true,
+    };
+    return false;
+  }
+
+  s = start;
+  linestart = s;
+  line = 1;
+
   #define FLUSH_TOK(type) \
     do { \
       if (start < s)  { \
@@ -200,21 +225,6 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
     if (*s == '=') FLUSH_WITH_BRACK(ASSIGN);
     if (*s == '&') FLUSH_WITH_BRACK(ADDR);
 
-    if (*s == '\t') {
-      // TODO: also ban tabs in strings, forcing \t instead (but
-      //       esapes aren't supported at all yet, so this isn't done
-      *error = (Error) {
-        .location = {
-          .line = line,
-          .col = s - linestart + 1,
-          .path = path,
-        },
-        .message = "tabs are not allowed in source",
-        .set = true,
-      };
-      return false;
-    }
- 
     if (*s == '\n') {
       FLUSH_TOK(TOKEN_WORD);
       line++;
