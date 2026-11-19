@@ -27,7 +27,7 @@
 #define OPCODE_ROT   0x0b
 
 #define OPCODE_GET   0x0c
-#define OPCODE_SET   0x0d
+#define OPCODE_PUT   0x0d
 #define OPCODE_LOAD  0x0e
 #define OPCODE_STORE 0x0f
 
@@ -52,7 +52,7 @@
   X("rot",     OPCODE_ROT)   \
                              \
   X("get",     OPCODE_GET)   \
-  X("set",     OPCODE_SET)   \
+  X("put",     OPCODE_PUT)   \
   X("load",    OPCODE_LOAD)  \
   X("store",   OPCODE_STORE) \
                              \

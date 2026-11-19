@@ -12,7 +12,7 @@ syntax keyword cvm_keyword
       \ size len
       \ var const
       \ import
-      \ get set load store at clear
+      \ get put load store at clear
       \ break
       \ errno
 

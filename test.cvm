@@ -6,24 +6,24 @@ var buf[256]: char
 var stack[16]: int
 var stack.top: ptr
 
-{:init-stack < -- > (set stack.top stack) }
+{:init-stack < -- > (put stack stack.top) }
 
 {:push <val -- >
   (if-else (eq (get stack.top) (add stack (size stack))) {
-    (set errno x-errno-stack)
+    (put x-errno-stack errno)
     drop
   } {
-    (set (get stack.top) swap)
-    (set stack.top (add (get stack.top) int))
+    (put (get stack.top))
+    (put (add (get stack.top) int) stack.top)
   })
 }
 
 {:pop < -- val>
   (if-else (eq (get stack.top) stack) {
-    (set errno x-errno-stack)
+    (put x-errno-stack errno)
     -1
   } {
-    (set stack.top (sub (get stack.top) int))
+    (put (sub (get stack.top) int) stack.top)
     (get (get stack.top))
   })
 }
@@ -51,6 +51,8 @@ var stack.top: ptr
 }
 
 {:evaluate <buf -- >
+  (clear errno)
+
   (do-while {
     (dup (execute-token))
   })

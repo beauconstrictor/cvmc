@@ -368,10 +368,10 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
       } break;
 
       case OPCODE_STORE: {
-        uint16_t val;
-        POP(val);
         uint16_t a;
         POP(a);
+        uint16_t val;
+        POP(val);
         memory[a] = val & 0xff;
         
         inst = (Instruction){
@@ -398,11 +398,11 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
         };
       } break;
 
-      case OPCODE_SET: {
-        uint16_t val;
-        POP(val);
+      case OPCODE_PUT: {
         uint16_t a;
         POP(a);
+        uint16_t val;
+        POP(val);
 
         if (a == 65535)
           return "memory write out of bounds";

@@ -57,7 +57,7 @@ var errno: int
 {:ucmp* <a b -- a-32768 b-32768> (sub 32768) swap (sub 32768) swap}
 
 {:at* <arr size idx -- ptr> (add mul)}
-{:clear* <ptr -- > (set 0)}
+{:clear* <ptr -- > (put 0 swap)}
 
 {:check-err* < -- errno!=0> (ne (get errno) errno-success)}
 
@@ -112,7 +112,7 @@ var errno: int
 
 {:div-mod
   (if-else (eq dup 0) {
-    (set errno errno-div-zero)
+    (put errno-div-zero errno)
   } {
     (sgn over)
     (sgn over)
@@ -129,14 +129,14 @@ var errno: int
 {:getc* <buf -- after c> (load dup) swap inc swap}
 {:geti* <buf -- after i>
   var acc: int
-  (set acc 0)
+  (put 0 acc)
 
   (while {(and (ge (dup getc) '0') (le over '9'))} {
     (get acc)
     (mul 10)
     swap
     (add (sub '0'))
-    (set acc swap)
+    (put acc)
   }) drop
  
   dec
@@ -148,11 +148,11 @@ var errno: int
 
 {:scpy* <src dst -- >
   var dst: str
-  (set dst swap)
+  (put dst)
 
   (while {(dup getc)} {
     (store (get dst) swap)
-    (set dst (inc (get dst)))
+    (put (inc (get dst)) swap)
   })
 }
 
