@@ -20,13 +20,10 @@
 #include "assembler.h"
 #include "parser.h"
 #include "errors.h"
-
+#include "mmap.h"
 #include "data.h"
 
 #include "preprocessor.h"
-
-#define ALLOC_START 0x38b0
-#define ALLOC_MAX   0x6fff
 
 bool deparenthesise(Tokens *toks, Error *error) {
   Tokens prefix_words = create_tokens();
@@ -282,7 +279,7 @@ bool desymbolise(Arena *arena, Tokens *toks, Symbols *syms,
     Error *error) {
   static char buf[256]; // for lexeme error message
 
-  size_t allocator = ALLOC_START;
+  size_t allocator = STATIC_ALLOC_START;
 
   size_t i = 0;
   while (i < toks->count) {
@@ -362,7 +359,7 @@ bool desymbolise(Arena *arena, Tokens *toks, Symbols *syms,
     }
     size *= length;
 
-    if (allocator + size > ALLOC_MAX)
+    if (allocator + size > STATIC_ALLOC_MAX)
       GIVE_ERROR("static variable allocation space is exhausted", tok);
   
     if (!verify_symbol_name(&lval, error)) return false;

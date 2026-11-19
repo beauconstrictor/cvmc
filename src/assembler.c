@@ -4,15 +4,13 @@
 
 #include "tokeniser.h"
 #include "parser.h"
+#include "mmap.h"
 
 #include "assembler.h"
 
 /*
  * TODO: deduplicate subroutines with the same instructions
  */
-
-#define PC_MIN 0x0800
-#define PC_MAX 0x38af
 
 #define X(mnemonic, opcode) \
   [opcode] = mnemonic,
@@ -120,13 +118,13 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
     Error *error, Symbols *custom_opcodes) {
   static char buf[256];
 
-  uint16_t pc = PC_MIN;
+  uint16_t pc = CODE_MIN;
   bool is_addr_of = false;
 
   for (size_t i = 0; i < toks->count; i++) {
     Token tok = toks->items[i];
 
-    if (pc > PC_MAX) {
+    if (pc > CODE_MAX) {
       if (i + 1 >= toks->count)
         GIVE_ERROR("insufficient space for code allocation", tok);
     }
