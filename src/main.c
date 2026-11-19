@@ -11,11 +11,6 @@
 #include "simulator.h"
 #include "preprocessor.h"
 
-/*
- * before full release, do these things:
- *
- */
-
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \
               "Try passing '-h' for more information.\n"
 

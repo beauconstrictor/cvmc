@@ -40,6 +40,7 @@ typedef struct {
   Symbol *items;
   size_t count;
   size_t capacity;
+  bool lookup_ready;
 } Symbols;
 
 typedef struct {

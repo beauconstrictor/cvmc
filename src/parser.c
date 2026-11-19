@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
@@ -7,11 +8,6 @@
 #include "tokeniser.h"
 #include "parser.h"
 #include "arena.h"
-
-/*
- * TODO: if compilation starts getting slow, implement binary search
- *       in the symbol resolution system (or maybe even a hashmap)
- */
 
 const int escapes[256] = {
   ['\\'] = '\\',
@@ -28,8 +24,10 @@ bool append_symbol(Symbol sym, Symbols *syms, bool *redefined) {
   if (lookup_symbol(sym.name, sym.length, syms, NULL) && redefined != NULL)
     *redefined = true;
 
+
   if (syms->count < syms->capacity) {
     syms->items[syms->count++] = sym;
+    syms->lookup_ready = false;
     return true;
   }
 
@@ -44,6 +42,7 @@ bool append_symbol(Symbol sym, Symbols *syms, bool *redefined) {
   syms->items = new;
   syms->capacity = new_capa;
   syms->items[syms->count++] = sym;
+  syms->lookup_ready = false;
 
   return true;
 }
@@ -56,18 +55,50 @@ bool append_token_symbol(Symbols *syms, Token *tok, long value, bool *redefined)
   }, syms, redefined);
 }
 
+int cmp_syms(const void *a, const void *b) {
+    const Symbol *sym1 = a;
+    const Symbol *sym2 = b;
+
+    size_t min_len = sym1->length < sym2->length ? sym1->length : sym2->length;
+    int result = strncmp(sym1->name, sym2->name, min_len);
+
+    if (result != 0) return result;
+
+    return (sym1->length > sym2->length) - (sym1->length < sym2->length);
+}
+
+void begin_lookups(Symbols *syms) {
+  qsort(syms->items, syms->count, sizeof(Symbol), cmp_syms);
+  syms->lookup_ready = true;
+}
+
 bool lookup_symbol(const char *s, size_t length, Symbols *syms, long *value) {
-  for (size_t i = 0; i < syms->count; i++) {
-    Symbol sym = syms->items[i];
+    if (!syms->lookup_ready) begin_lookups(syms);
+  
+    size_t lo = 0;
+    size_t hi = syms->count;
 
-    if (length != sym.length) continue;
-    if (strncmp(s, sym.name, length) != 0) continue;
+    while (lo < hi) {
+        size_t mid = lo + (hi - lo) / 2;
+        Symbol *sym = &syms->items[mid];
+        size_t min_len = length < sym->length ? length : sym->length;
+        int cmp = strncmp(s, sym->name, min_len);
 
-    if (value != NULL) *value = sym.value;
-    return true;
-  }
+        if (cmp == 0) {
+            if (length < sym->length) cmp = -1;
+            else if (length > sym->length) cmp = 1;
+        }
 
-  return false;
+        if (cmp == 0) {
+            if (value != NULL) *value = sym->value;
+            return true;
+        }
+
+        if (cmp < 0) hi = mid;
+        else lo = mid + 1;
+    }
+
+    return false;
 }
 
 long read_number(const Token *tok, Error *error) {
@@ -80,7 +111,8 @@ long read_number(const Token *tok, Error *error) {
 
   if (tok->length == 3 && tok->start[0] == '\'' && tok->start[2] == '\'')
     return (long)tok->start[1];
-  if (tok->length == 4 && tok->start[0] == '\'' && tok->start[1] == '\\' && tok->start[3] == '\'') {
+  if (tok->length == 4 && tok->start[0] == '\''
+      && tok->start[1] == '\\' && tok->start[3] == '\'') {
     char c = escapes[(unsigned char)tok->start[2]];
     if (c == 0) {
       *error = (Error) {
