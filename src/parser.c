@@ -21,9 +21,10 @@ const int escapes[256] = {
 };
 
 bool append_symbol(Symbol sym, Symbols *syms, bool *redefined) {
+  if (redefined != NULL)
+    *redefined = false;
   if (lookup_symbol(sym.name, sym.length, syms, NULL) && redefined != NULL)
     *redefined = true;
-
 
   if (syms->count < syms->capacity) {
     syms->items[syms->count++] = sym;
