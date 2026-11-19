@@ -172,7 +172,7 @@ bool delocalise(Arena *arena, Tokens *toks, Error *error, size_t start,
     Token *next;
     if (has_next) next = toks->items + i+1;
 
-    bool has_prev = toks->count > i-1;
+    bool has_prev = i > 0;
     Token *prev;
     if (has_prev) prev = toks->items + i-1;
 
