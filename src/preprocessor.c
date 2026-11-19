@@ -590,8 +590,8 @@ char *read_module(Arena *arena, const char *path) {
   if (is_std) {
     char *source = arena_alloc(arena, len + 1);
     memcpy(source, buf, len);
-    buf[len] = '\0';
-    return buf;
+    source[len] = '\0';
+    return source;
   }
 
   return read_file(arena, path);
