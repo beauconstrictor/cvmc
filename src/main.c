@@ -111,6 +111,7 @@ int main(int argc, char **argv) {
 
   CompilationMode mode = MODE_COMPILE;
   Symbols custom_opcodes = {0};
+  Arena arena = {0};
 
   bool raw_tokens = false;
   bool dump_syms  = false;
@@ -151,7 +152,7 @@ int main(int argc, char **argv) {
         snprintf(symtable, sizeof(symtable), "%s", optarg);
       } break;
       case 'D': {
-        char *mnemonic = malloc(32);
+        char *mnemonic = arena_alloc(&arena, 32);
         int opcode;
         bool redefined;
         if (sscanf(optarg, "%31[^1=]=%d", mnemonic, &opcode) != 2)
@@ -170,7 +171,7 @@ int main(int argc, char **argv) {
   if (argc - optind != 1)
     cli_error(USAGE, argv[0]);
   char *filename = argv[optind];
-  char *source = read_file(filename);
+  char *source = read_file(&arena, filename);
 
   if (source == NULL) cli_error(strerror(errno), argv[0]);
 
@@ -183,7 +184,7 @@ int main(int argc, char **argv) {
     return 0;
   }
   Symbols vars = {0};
-  if (!preprocessor(&toks, &vars, &error, pp_stage)) check_error(&error);
+  if (!preprocessor(&arena, &toks, &vars, &error, pp_stage)) check_error(&error);
   if (mode == MODE_PREPROCESS) {
     show_ir(&toks, mode, raw_tokens, dump_syms, argv[0]);
     return 0;
@@ -210,8 +211,10 @@ int main(int argc, char **argv) {
   
   if (out != stdout) fclose(out);
 
+  arena_free(&arena);
+
   if (mode == MODE_INTERPRET) {
-    char *tape = read_file(output);
+    char *tape = read_file(&arena, output);
     if (tape == NULL) cli_error("no such file", argv[0]);
     const char *error = simulate(tape, &syms);
     if (error) cli_error(error, argv[0]);

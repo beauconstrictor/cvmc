@@ -94,7 +94,7 @@ bool deparenthesise(Tokens *toks, Error *error) {
   return true;
 }
 
-bool destringify(Tokens *toks, Error *error) {
+bool destringify(Arena *arena, Tokens *toks, Error *error) {
   (void) error; // doesn't actually produce any errors yet, but will
 
   for (size_t i = 0; i < toks->count; i++) {
@@ -114,11 +114,8 @@ bool destringify(Tokens *toks, Error *error) {
     bool in_escape = false;
 
     while (s < tok.start + tok.length) {
-      char *num = malloc(4);
-      if (num == NULL) {
-        errno = ENOMEM;
-        return false;
-      }
+      char *num = arena_alloc(arena, 4);
+      if (num == NULL) return false;
 
       char c = *s;
 
@@ -176,7 +173,7 @@ bool destringify(Tokens *toks, Error *error) {
   return true;
 }
 
-bool delocalise(Tokens *toks, Error *error, size_t start,
+bool delocalise(Arena *arena, Tokens *toks, Error *error, size_t start,
     const char *initial_prefix, bool is_nested) {
   (void)error;
 
@@ -225,11 +222,8 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
 
       if (is_nested) {   
         size_t len = snprintf(NULL, 0, "%s.%.*s", prefix, (int)next->length, next->start);
-        char *prefixed = malloc(len + 1);
-        if (prefixed == NULL) {
-          errno = ENOMEM;
-          return false;
-        }
+        char *prefixed = arena_alloc(arena, len + 1);
+        if (prefixed == NULL) return false;
         snprintf(prefixed, len+1, "%s.%.*s", prefix, (int)next->length, next->start);
         next->length = len;
         next->start  = prefixed;
@@ -251,11 +245,8 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
       }
 
       size_t len = snprintf(NULL, 0, "%s.%.*s", prefix, (int)tok->length, tok->start);
-      char *prefixed = malloc(len + 1);
-      if (prefixed == NULL)  {
-        errno = ENOMEM;
-        return false;
-      }
+      char *prefixed = arena_alloc(arena, len + 1);
+      if (prefixed == NULL) return false;
       snprintf(prefixed, len+1, "%s.%.*s", prefix, (int)tok->length, tok->start);
       tok->length = len;
       tok->start  = prefixed;
@@ -274,13 +265,13 @@ bool delocalise(Tokens *toks, Error *error, size_t start,
     if (nesting < 0) break;
 
     if (tok.kind != TOKEN_LBRACE) continue;
-    if (nesting == 1) delocalise(toks, error, i+1, prefix, true);
+    if (nesting == 1) delocalise(arena, toks, error, i+1, prefix, true);
   }
 
   return true;
 }
 
-bool substitute(Tokens *toks, Symbols *syms) {
+bool substitute(Arena *arena, Tokens *toks, Symbols *syms) {
   for (size_t i = 0; i < toks->count; i++) {
     Token tok = toks->items[i];
     if (tok.kind != TOKEN_WORD) continue;
@@ -289,12 +280,8 @@ bool substitute(Tokens *toks, Symbols *syms) {
     if (!lookup_symbol(tok.start, tok.length, syms, &value)) continue;
 
     int len = snprintf(NULL, 0, "%ld", value);
-    char *s = malloc(len + 1);
-    if (s == NULL) {
-      errno = ENOMEM;
-      return false;
-    }
-
+    char *s = arena_alloc(arena, len + 1);
+    if (s == NULL) return false;
     snprintf(s, len + 1, "%ld", value);
 
     if (!remove_token(toks, i)) return false;
@@ -318,7 +305,8 @@ bool verify_symbol_name(Token *tok, Error *error) {
   return true;
 }
 
-bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
+bool desymbolise(Arena *arena, Tokens *toks, Symbols *syms,
+    Error *error) {
   static char buf[256]; // for lexeme error message
 
   size_t allocator = ALLOC_START;
@@ -362,7 +350,7 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
       if (!remove_token(toks, i)) return false;
   }
 
-  if (!substitute(toks, syms)) return false;
+  if (!substitute(arena, toks, syms)) return false;
 
   i = 0;
   while (i < toks->count) {
@@ -423,11 +411,8 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
     if (redefined)
       GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", tok);
 
-    char *sizeof_name = malloc(lval.length + 2);
-    if (sizeof_name == NULL) {
-      errno = ENOMEM;
-      return false;
-    }
+    char *sizeof_name = arena_alloc(arena, lval.length + 2);
+    if (sizeof_name == NULL) return false;
     snprintf(sizeof_name, lval.length + 2, "#%.*s", (int)lval.length, lval.start);
 
     if (!append_symbol((Symbol) {
@@ -436,11 +421,8 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
       .value = size
     }, syms, NULL)) return false;
 
-    char *lenof_name = malloc(lval.length + 2);
-    if (lenof_name == NULL) {
-      errno = ENOMEM;
-      return false;
-    }
+    char *lenof_name = arena_alloc(arena, lval.length + 2);
+    if (lenof_name == NULL) return false;
     snprintf(lenof_name, lval.length + 2, "$%.*s", (int)lval.length, lval.start);
     if (!append_symbol((Symbol) {
       .name = lenof_name,
@@ -475,18 +457,15 @@ bool desymbolise(Tokens *toks, Symbols *syms, Error *error) {
     char prefix = next->start[0] == 's' ? '#' : '$';
     remove_token(toks, i+1);
 
-    size_t len = snprintf(NULL, 0, "%c%.*s", prefix, (int)tok->length, tok->start) + 1;
-    char *name = malloc(len);
-    if (name == NULL) {
-      errno = ENOMEM;
-      return false;
-    }
-    snprintf(name, len, "%c%.*s", prefix, (int)tok->length, tok->start);
+    size_t len = snprintf(NULL, 0, "%c%.*s", prefix, (int)tok->length, tok->start);
+    char *name = arena_alloc(arena, len + 1);
+    if (name == NULL) return false;
+    snprintf(name, len + 1, "%c%.*s", prefix, (int)tok->length, tok->start);
     tok->start = name;
-    tok->length = len-1;
+    tok->length = len;
   }
 
-  return substitute(toks, syms);
+  return substitute(arena, toks, syms);
 }
 
 struct Blocks {
@@ -514,8 +493,8 @@ bool append_block(Tokens block, struct Blocks *blocks) {
   return true;
 }
 
-static bool deanonymify_inner(Tokens *toks, struct Blocks *blocks,
-    size_t *anon_count, Error *error) {
+static bool deanonymify_inner(Arena *arena, Tokens *toks,
+    struct Blocks *blocks, size_t *anon_count, Error *error) {
   size_t i = 0;
 
   while (i < toks->count) {
@@ -553,7 +532,7 @@ static bool deanonymify_inner(Tokens *toks, struct Blocks *blocks,
       if (!append_token(toks->items[x], &block)) return false;
     }
 
-    if (!deanonymify_inner(&block, blocks, anon_count, error))
+    if (!deanonymify_inner(arena, &block, blocks, anon_count, error))
       return false;
 
     bool named =
@@ -575,11 +554,8 @@ static bool deanonymify_inner(Tokens *toks, struct Blocks *blocks,
       NULL, 0, ANON_PREFIX "%zu", (*anon_count)
     );
 
-    char *name = malloc(len + 1);
-    if (name == NULL) {
-      errno = ENOMEM;
-      return false;
-    }
+    char *name = arena_alloc(arena, len + 1);
+    if (name == NULL) return false;
 
     snprintf(name, len + 1, ANON_PREFIX "%zu", (*anon_count)++);
     if (!append_block(block, blocks)) return false;
@@ -607,11 +583,11 @@ static bool deanonymify_inner(Tokens *toks, struct Blocks *blocks,
   return true;
 }
 
-bool deanonymify(Tokens *toks, Error *error) {
+bool deanonymify(Arena *arena, Tokens *toks, Error *error) {
   struct Blocks blocks = {0};
   size_t anon_count = 0;
 
-  if (!deanonymify_inner(toks, &blocks, &anon_count, error))
+  if (!deanonymify_inner(arena, toks, &blocks, &anon_count, error))
     return false;
 
   // add back the anonymous blocks the the end of the main
@@ -619,11 +595,8 @@ bool deanonymify(Tokens *toks, Error *error) {
   for (size_t i = 0; i < blocks.count; i++) {
     int len = snprintf(NULL, 0, ANON_PREFIX "%zu", i);
 
-    char *name = malloc(len + 1);
-    if (name == NULL) {
-      errno = ENOMEM;
-      return false;
-    }
+    char *name = arena_alloc(arena, len + 1);
+    if (name == NULL) return false;
 
     snprintf(name, len + 1, ANON_PREFIX "%zu", i);
 
@@ -652,14 +625,14 @@ bool deanonymify(Tokens *toks, Error *error) {
   return true;
 }
 
-char *read_module(const char *path) {
+char *read_module(Arena *arena, const char *path) {
   if (strcmp(path, "std.cvm") == 0)
     return (char *)src_std_std_cvm;
   
-  return read_file(path);
+  return read_file(arena, path);
 }
 
-bool deimport(Tokens *toks, Error *error) {
+bool deimport(Arena *arena, Tokens *toks, Error *error) {
   (void)toks;
   (void)error;
 
@@ -679,18 +652,15 @@ bool deimport(Tokens *toks, Error *error) {
     else if (next.kind != TOKEN_WORD)
       GIVE_ERROR("expected name after import", next);
 
-    char *path = malloc(PATH_MAX);
-    if (path == NULL) {
-      errno = ENOMEM;
-      return false;
-    }
+    char *path = arena_alloc(arena, PATH_MAX);
+    if (path == NULL) return false;
     Tokens new_toks = {0};
     snprintf(path, PATH_MAX, "%.*s.cvm", (int)next.length, next.start);
 
     if (!remove_token(toks, i)) return false;
     if (!remove_token(toks, i)) return false;
 
-    char *source = read_module(path);
+    char *source = read_module(arena, path);
     if (source == NULL) GIVE_ERROR_WITH_LEXEME("no such file: '%.*s'", next);
 
     if (!lexer(source, path, &new_toks, error)) return false;
@@ -706,20 +676,20 @@ bool deimport(Tokens *toks, Error *error) {
   return true;
 }
 
-bool preprocessor(Tokens *toks, Symbols *syms, Error *error, int stage) {
-  (void)syms;
-
-  if (!deimport(toks, error))                 return false;
+bool preprocessor(Arena *arena, Tokens *toks, Symbols *syms,
+    Error *error, int stage) {
+  if (!deimport(arena, toks, error))          return false;
   if (stage == 1)                             return true;
   if (!deparenthesise(toks, error))           return false;
   if (stage == 2)                             return true;
-  if (!destringify(toks, error))              return false;
+  if (!destringify(arena, toks, error))       return false;
   if (stage == 3)                             return true;
-  if (!delocalise(toks, error, 0, "", false)) return false;
+  if (!delocalise(arena, toks, error, 0, "",
+        false))                               return false;
   if (stage == 4)                             return true;
-  if (!desymbolise(toks, syms, error))        return false;
+  if (!desymbolise(arena, toks, syms, error)) return false;
   if (stage == 5)                             return true;
-  if (!deanonymify(toks, error))              return false;
+  if (!deanonymify(arena, toks, error))       return false;
   if (stage == 6)                             return true;
 
   return true;

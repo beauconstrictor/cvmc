@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "tokeniser.h"
+#include "arena.h"
 
 #define GIVE_ERROR(msg, tok) \
   do { \
@@ -59,7 +60,7 @@ bool lookup_symbol(const char *s, size_t length, Symbols *syms, long *value);
 
 long read_number(const Token *tok, Error *error);
 
-char *read_file(const char *path);
+char *read_file(Arena *arena, const char *path);
 
 bool colour_allowed(void);
 Colours get_colours(void);

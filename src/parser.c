@@ -6,6 +6,7 @@
 
 #include "tokeniser.h"
 #include "parser.h"
+#include "arena.h"
 
 /*
  * TODO: if compilation starts getting low, implement binary search
@@ -114,7 +115,7 @@ long read_number(const Token *tok, Error *error) {
   return value;
 }
 
-char *read_file(const char *path) {
+char *read_file(Arena *arena, const char *path) {
   FILE *file = fopen(path, "rb");
 
   if (file == NULL)
@@ -129,7 +130,7 @@ char *read_file(const char *path) {
     return NULL;
   }
 
-  char *contents = malloc((size_t)size + 1);
+  char *contents = arena_alloc(arena, (size_t)size + 1);
 
   if (contents == NULL) {
     fclose(file);
