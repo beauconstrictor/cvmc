@@ -31,8 +31,6 @@ void print_error(const Error *error) {
     }
   }
 
-  // TODO: this looks fucked with tabs
-
   int col = error->location.col;
 
   fprintf(stderr, "%5zu %s|%s %s", error->location.line, cols.dim,
