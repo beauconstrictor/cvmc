@@ -115,7 +115,7 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       .location = {
         .path = path,
         .line = line,
-        .col = linestart - s + 1,
+        .col = s - linestart + 1,
       },
       .message = "tabs are not allowed in source",
       .set = true,
