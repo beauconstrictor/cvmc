@@ -88,7 +88,7 @@ const char *get_name(uint16_t addr, int *len, Symbols *syms) {
     if (s.value != addr) continue;
     name = s.name;
     *len = s.length;
-    break
+    break;
   }
 
   return name;

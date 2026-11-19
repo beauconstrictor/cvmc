@@ -211,8 +211,8 @@ void find_referenced_inner(Symbols *referenced, Tokens *toks,
 
   for (size_t i = idx; i < toks->count; i++) {
     Token tok = toks->items[i];
-    if (tok.kind != TOKEN_WORD) continue;
     if (tok.kind == TOKEN_LBRACE) break;
+    if (tok.kind != TOKEN_WORD) continue;
     find_referenced_inner(referenced, toks, tok.start, tok.length);
   }
 }
