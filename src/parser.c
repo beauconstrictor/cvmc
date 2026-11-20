@@ -23,8 +23,21 @@ const int escapes[256] = {
 bool append_symbol(Symbol sym, Symbols *syms, bool *redefined) {
   if (redefined != NULL)
     *redefined = false;
-  if (lookup_symbol(sym.name, sym.length, syms, NULL) && redefined != NULL)
-    *redefined = true;
+
+  for (size_t i = 0; i < syms->count; i++) {
+    Symbol *existing = &syms->items[i];
+
+    if (existing->length == sym.length &&
+        memcmp(existing->name, sym.name, sym.length) == 0) {
+
+      existing->value = sym.value;
+
+      if (redefined != NULL)
+        *redefined = true;
+
+      return true;
+    }
+  }
 
   if (syms->count < syms->capacity) {
     syms->items[syms->count++] = sym;

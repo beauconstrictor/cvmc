@@ -1,6 +1,6 @@
 import std
 
-const x-errno-stack = 32768
+enum errno: (x-stack)
 
 var buf[256]: char
 var stack[16]: int
@@ -60,7 +60,7 @@ var stack.top: ptr
     (dup (execute-token))
   })
 
-  (if-else (eq (get errno) errno-success) {
+  (if-else (eq (get errno) errno.success) {
     pop
     init-stack
     (push dup)

@@ -2,11 +2,12 @@
  * preprocessing steps:
  *
  * 1. deimportation: insert the contents of imported files (namespacing in the future?)
- * 2. deparenthesisation: convert prefix expressions to postfix
- * 3. destringification: convert string literals to blocks containing immediate bytes
- * 4. delocalisation: give all variables global names from their positions
- * 5. desymbolisation: remove constants and variables (resolve to their values)
- * 6. deanonymification: extract nested anonymous blocks into the global scope
+ * 2. deenumeration: replace all enum statements with consts
+ * 3. deparenthesisation: convert prefix expressions to postfix
+ * 4. destringification: convert string literals to blocks containing immediate bytes
+ * 5. delocalisation: give all variables global names from their positions
+ * 6. desymbolisation: remove constants and variables (resolve to their values)
+ * 7. deanonymification: extract nested anonymous blocks into the global scope
  */
 
 #include <stdio.h>
@@ -264,6 +265,75 @@ bool substitute(Arena *arena, Tokens *toks, Symbols *syms) {
   }
   
   return true;
+}
+
+bool deenumerate(Arena *arena, Tokens *toks, Symbols *syms, Error *error) {
+  static char buf[256];
+
+  for (size_t i = 0; i < toks->count; i++) {
+    Token tok = toks->items[i];
+
+    if (tok.kind != TOKEN_ENUM) continue;
+
+    if (toks->count < i + 4
+        || toks->items[i+1].kind != TOKEN_WORD
+        || toks->items[i+2].kind != TOKEN_COLON
+        || toks->items[i+3].kind != TOKEN_LPARA)
+      GIVE_ERROR_WITH_LEXEME("expected enum definition after '%.*s'", tok);
+
+    Token name = toks->items[i+1];
+
+    size_t type_len = name.length + 2;
+    char *type_name = arena_alloc(arena, type_len + 1);
+    snprintf(type_name, type_len + 1, "%.*s-t", (int)name.length,
+        name.start);
+
+    append_symbol((Symbol) {
+      .name = type_name,
+      .length = type_len,
+      .value = 2, // all enum-ts are just integer values
+    }, syms, NULL);
+
+    // TODO: store this in the symbol table so enums can have
+    //       new values added later
+    long enum_count = 0; 
+
+    size_t x = i + 4;
+    while (true) {
+      if (x == toks->count)
+        GIVE_ERROR("unterminated enum definition", tok);
+
+      Token ele = toks->items[x];
+      if (!remove_token(toks, x)) return false;
+
+      if (ele.kind == TOKEN_RPARA) break;
+
+      if (ele.kind != TOKEN_WORD)
+          GIVE_ERROR_WITH_LEXEME("expected enum value, got '%.*s'", ele);
+
+      size_t value_len = snprintf(NULL, 0, "%.*s.%.*s",
+          (int)name.length, name.start, (int)ele.length,
+          ele.start);
+      char *value_name = arena_alloc(arena, value_len+1);
+      snprintf(value_name, value_len+1, "%.*s.%.*s",
+          (int)name.length, name.start, (int)ele.length,
+          ele.start);
+
+      bool redefined = false;
+      append_symbol((Symbol) {
+          .name = value_name,
+          .length = value_len,
+          .value = enum_count++,
+      }, syms, &redefined);
+      if (redefined)
+        GIVE_ERROR_WITH_LEXEME("duplicate enum value: '%.*s'", ele);
+    }
+
+    for (size_t y = 0; y < 4; y++)
+      if (!remove_token(toks, i)) return false;
+  }
+
+  return substitute(arena, toks, syms);
 }
 
 bool verify_symbol_name(Token *tok, Error *error) {
@@ -678,22 +748,25 @@ bool preprocessor(Arena *arena, Tokens *toks, Symbols *syms,
   VERBOSE("preprocessor", "desugaring imports...");
   if (!deimport(arena, toks, error))          return false;
   if (stage == 1)                             return true;
+  VERBOSE("preprocessor", "desugaring enums...");
+  if (!deenumerate(arena, toks, syms, error)) return false;
+  if (stage == 2)                             return true;
   VERBOSE("preprocessor", "desugaring parenthetical expressions...");
   if (!deparenthesise(toks, error))           return false;
-  if (stage == 2)                             return true;
+  if (stage == 3)                             return true;
   VERBOSE("preprocessor", "desugaring string literals...");
   if (!destringify(arena, toks, error))       return false;
-  if (stage == 3)                             return true;
+  if (stage == 4)                             return true;
   VERBOSE("preprocessor", "desugaring scopes...");
   if (!delocalise(arena, toks, error, 0, "",
         false))                               return false;
-  if (stage == 4)                             return true;
+  if (stage == 5)                             return true;
   VERBOSE("preprocessor", "desugaring variables and constants...");
   if (!desymbolise(arena, toks, syms, error)) return false;
-  if (stage == 5)                             return true;
+  if (stage == 6)                             return true;
   VERBOSE("preprocessor", "desugaring anonymous blocks...");
   if (!deanonymify(arena, toks, error))       return false;
-  if (stage == 6)                             return true;
+  if (stage == 7)                             return true;
 
   return true;
 }

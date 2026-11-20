@@ -8,6 +8,7 @@
 
 #define IMPORT_WORD "import"
 #define CONST_WORD "const"
+#define ENUM_WORD "enum"
 #define VAR_WORD "var"
 
 #define TOKEN_TYPES \
@@ -26,6 +27,7 @@
   X(COLON) \
   X(WORD) \
   X(ADDR) \
+  X(ENUM) \
   X(BYTE) \
   X(VAR)
 

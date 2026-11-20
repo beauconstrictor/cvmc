@@ -10,10 +10,10 @@ const bool = 1
 const i16 = 2
 const u16 = 2
 const int = 2
-const uint = 2
 const ptr = 2
-const callable = 2
 const str = 2
+const uint = 2
+const callable = 2
 
 -- some std functions do not have a signature. in this case, the
 -- function is 'internal', and should not be used.
@@ -23,17 +23,14 @@ const str = 2
 -- will always have the same net stack effect no matter what.
 -- if a function sets errno, this will be documented in the signature.
 
--- to check if a function returned an error, (clear errno) beforehand,
+-- to check if a function returned an error, (clear-errno) beforehand,
 -- and use (check-errno); if it is set, your function failed.
 
--- errno values from 32768 and above will not be used, so you can use
--- them for custom error handling in your programs. This allows you
--- to handle errors uniformly, no matter their source.
+-- you can define your own errno values
 
-const errno-success  = 0
-const errno-div-zero = 1
+enum errno: (success, div-zero)
 
-var errno: int
+var errno: errno-t
 
 {:if* <condition true -- > (if-else {})}
 {:do-while* <body -- > (while {})}
@@ -56,7 +53,8 @@ var errno: int
 {:at* <arr size idx -- ptr> (add mul)}
 {:clear* <ptr -- > (put 0 swap)}
 
-{:check-err* < -- errno!=0> (ne (get errno) errno-success)}
+{:check-errno* < -- errno!=0> (ne (get errno) errno.success)}
+{:clear-errno* < -- errno!=0> (put errno.success errno)}
 
 {:over* <a b -- a b a> swap dup rot swap}
 

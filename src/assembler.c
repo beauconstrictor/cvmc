@@ -68,6 +68,7 @@ bool verify_syntax(Tokens *toks, Error *error, Symbols *custom_opcodes) {
       case TOKEN_LPARA:
       case TOKEN_RPARA:
       case TOKEN_COLON:
+      case TOKEN_ENUM:
       case TOKEN_VAR: {
         GIVE_ERROR_WITH_LEXEME("unexpected '%.*s'", tok);
       } break;
@@ -182,6 +183,7 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
       case TOKEN_RPARA:
       case TOKEN_COLON:
       case TOKEN_ADDR:
+      case TOKEN_ENUM:
       case TOKEN_VAR:
         break;
 

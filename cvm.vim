@@ -10,7 +10,7 @@ syntax keyword cvm_if
 
 syntax keyword cvm_keyword
       \ size len
-      \ var const
+      \ var const enum
       \ import
       \ get put load store at clear
       \ break
@@ -31,8 +31,8 @@ syntax keyword cvm_builtin
       \ slen send scpy
 
 syntax keyword cvm_type
-      \ int uint i16 u16 ptr callable str
       \ char byte bool i8 u8
+      \ int uint i16 u16 ptr callable str errno-t
 
 highlight link cvm_loop Repeat
 highlight link cvm_if Conditional
