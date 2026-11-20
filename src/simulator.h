@@ -3,6 +3,8 @@
 
 #include "parser.h"
 
-const char *simulate(const char *s, Symbols *syms);
+#define DEFAULT_CALL_STACK_DEPTH 1024
+
+const char *simulate(const char *s, Symbols *syms, size_t depth);
 
 #endif // SIMULATOR_H

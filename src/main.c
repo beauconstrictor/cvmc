@@ -11,6 +11,10 @@
 #include "simulator.h"
 #include "preprocessor.h"
 
+/*
+ * TODO: remove duplicated subroutines (by content, not name)
+ */
+
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \
               "Try passing '-h' for more information.\n"
 
@@ -23,13 +27,14 @@
              "\t-t  Format IR as raw tokens\n" \
              "\t-s  File to write a table of function addresses to\n" \
              "\t-o  File to write binary or IR to\n" \
+             "\t-d  Maximum allowed call stack depth in the interpreter\n" \
+             "\t-DX Pass 'MNEMONIC=OPCODE to define a new opcode\n" \
              "\n" \
              "Modes:\n" \
              "\t-l  Stop compilation after lexing\n" \
              "\t-pX Stop compilation after a specific preprocessing stage (0 for all)\n" \
              "\t-c  Fully compile program (default)\n" \
              "\t-i  Immediately interpret program\n" \
-             "\t-DX Pass 'MNEMONIC=OPCODE to define a new opcode\n" \
              "\n" \
              "Use '-' in place of paths to use the standard output.\n" \
 
@@ -99,16 +104,16 @@ void dump_symbols(Symbols *syms, FILE *f) {
 
 int main(int argc, char **argv) {
   int opt;
+
   char output[PATH_MAX] = "a.out";
   char symtable[PATH_MAX];
-
   CompilationMode mode = MODE_COMPILE;
   Symbols custom_opcodes = {0};
   Arena arena = {0};
-
   bool raw_tokens = false;
   bool dump_syms  = false;
-  int  pp_stage   = 0;
+  int pp_stage   = 0;
+  size_t call_stack_depth = DEFAULT_CALL_STACK_DEPTH;
 
   while ((opt = getopt(argc, argv, "hvo:tp:lcis:D:")) != -1) {
     switch (opt) {
@@ -130,6 +135,8 @@ int main(int argc, char **argv) {
         mode = MODE_PREPROCESS;
         if (strlen(optarg) > 0)
           pp_stage = atoi(optarg);
+        else
+          cli_error(USAGE, argv[0]);
       } break;
       case 'c': {
         mode = MODE_COMPILE;
@@ -139,6 +146,13 @@ int main(int argc, char **argv) {
       } break;
       case 't': {
         raw_tokens = true;
+      } break;
+      case 'd': {
+        mode = MODE_PREPROCESS;
+        if (strlen(optarg) > 0)
+          call_stack_depth = atoi(optarg);
+        else
+          cli_error(USAGE, argv[0]);
       } break;
       case 's': {
         dump_syms = true;
@@ -211,7 +225,7 @@ int main(int argc, char **argv) {
   if (mode == MODE_INTERPRET) {
     char *tape = read_file(&arena, output);
     if (tape == NULL) cli_error("no such file", argv[0]);
-    const char *error = simulate(tape, &syms);
+    const char *error = simulate(tape, &syms, call_stack_depth);
     if (error) cli_error(error, argv[0]);
   }
 

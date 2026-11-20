@@ -158,7 +158,7 @@ DebuggerMode debugger(Instruction inst, DStack *dstack, Symbols *syms) {
 }
 
 const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
-    int memsize, Symbols *syms) {
+    int memsize, Symbols *syms, size_t stack_depth, size_t max_depth) {
   static char err_msg[256];
 
   #define POP(var) \
@@ -186,9 +186,16 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
   #define CALL(addr) \
     do { \
         const char *error = execute(dstack, addr, memory, \
-            memsize, syms); \
+            memsize, syms, stack_depth+1, max_depth); \
         if (error) return error; \
     } while (false)
+
+  if (stack_depth > max_depth) {
+    snprintf(err_msg, sizeof(err_msg),
+        "call stack exhausted (max. of %zu nested calls are allowed)",
+        max_depth);
+    return err_msg;
+  }
 
   bool single_step = false;
 
@@ -500,9 +507,10 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
 
   #undef PUSH
   #undef POP
+  #undef CALL
 }
 
-const char *simulate(const char *s, Symbols *syms) {
+const char *simulate(const char *s, Symbols *syms, size_t depth) {
   int addr = -1;
 
   uint8_t memory[65536] = {0};
@@ -524,7 +532,7 @@ const char *simulate(const char *s, Symbols *syms) {
       s += 4;
     } else if (c == '!') {
       const char *error = execute(&dstack, read_hex_addr(s), memory,
-          sizeof(memory), syms);
+          sizeof(memory), syms, 0, depth);
       if (error) return error;
     }
   }
