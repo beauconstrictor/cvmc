@@ -1,0 +1,5 @@
+import std
+
+{:main
+  (putu (mul 20000 2)) putl
+}

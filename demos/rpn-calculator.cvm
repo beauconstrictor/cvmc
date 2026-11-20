@@ -43,6 +43,7 @@ var stack.top: ptr
     (if (eq dup 0x2b) {(push (add pop pop))})
     (if (eq dup '-') {(push (sub pop pop swap))})
     (if (eq dup '*') {(push (mul pop pop))})
+    (if (eq dup '^') {(push (pow pop pop swap))})
     (if (eq dup '/') {(push (div pop pop swap))})
     (if (eq dup '%') {(push (mod pop pop swap))})
     (if-else (eq '\0') {drop 0} {inc})
@@ -71,6 +72,8 @@ var stack.top: ptr
 
 {:main
   init-stack
+
+  (puts "rpn calculator") putl
 
   (while {true} {
     (gets buf (size buf))

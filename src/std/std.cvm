@@ -92,11 +92,23 @@ var errno: int
   drop swap drop
 }
 
--- does not correctly handle negatives
-{:raw-div-mod <a b -- a/b a%b>
+{:pow* <a b -- a^b>
+  (swap 1)
+
+  (while {dup} {
+    rot rot
+    swap dup rot mul
+    rot dec
+  })
+  
+  drop swap drop
+}
+
+
+{:udiv-mod <a b -- a/b a%b>
   (rot (rot 0))
 
-  (while {(ge over over)} {
+  (while {(ge (ucmp over over))} {
     over over
     sub
     rot
@@ -106,6 +118,8 @@ var errno: int
 
   drop
 }
+{:udiv* <a b -- a/b> <sets errno> (drop udiv-mod)}
+{:umod* <a b -- a%b> <sets errno> (drop (swap udiv-mod))}
 
 {:div-mod
   (if-else (eq dup 0) {
@@ -116,9 +130,21 @@ var errno: int
     (if-else (eq) {1} {-1})
     (abs rot)
     (abs rot)
-    raw-div-mod
-    (swap (set-sgn rot rot swap))
+
+    (rot (rot 0))
+
+    (while {(ge over over)} {
+      over over
+      sub
+      rot
+      drop swap rot inc
+      rot rot
     })
+
+    drop
+
+    (swap (set-sgn rot rot swap))
+  })
 }
 {:div* <a b -- a/b> <sets errno> (drop div-mod)}
 {:mod* <a b -- a%b> <sets errno> (drop (swap div-mod))}
@@ -166,5 +192,12 @@ var errno: int
     (puti (div dup 10))
   })
   (putc (add (mod 10) '0'))
+}
+
+{:putu* <n -- >
+  (if (gt (ucmp dup 9)) {
+    (puti (udiv dup 10))
+  })
+  (putc (add (umod 10) '0'))
 }
 
