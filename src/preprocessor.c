@@ -681,6 +681,8 @@ char *read_module(Arena *arena, const char *path) {
 bool deimport(Arena *arena, Tokens *toks, Error *error) {
   static char buf[256];
 
+  Symbols imported = {0};
+
   size_t i = 0;
   while (i < toks->count) {
     Token tok = toks->items[i];
@@ -702,10 +704,20 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
     char *path = arena_alloc(arena, PATH_MAX);
     if (path == NULL) return false;
     Tokens new_toks = {0};
-    snprintf(path, PATH_MAX, "%.*s.cvm", (int)next.length, next.start);
+    size_t path_len = snprintf(path, PATH_MAX, "%.*s.cvm",
+        (int)next.length, next.start);
 
     if (!remove_token(toks, i)) return false;
     if (!remove_token(toks, i)) return false;
+
+    bool reimported = false;
+    append_symbol((Symbol) {
+        .name = path,
+        .length = path_len,
+        .value = 0
+    }, &imported, &reimported);
+
+    if (reimported) continue;
 
     char *source = read_module(arena, path);
     if (source == NULL) GIVE_ERROR_WITH_LEXEME("no such file: '%.*s'", next);
