@@ -10,7 +10,7 @@ var stack.top: ptr
 
 {:add* break}
 
-{:push <val -- >
+{:push <val -- > <sets errno>
   (if-else (eq (get stack.top) (add stack (size stack))) {
     (put errno.x-stack errno)
     drop
@@ -20,7 +20,7 @@ var stack.top: ptr
   })
 }
 
-{:pop < -- val>
+{:pop < -- val> <sets errno>
   (if-else (eq (get stack.top) stack) {
     (put errno.x-stack errno)
     -1
@@ -53,7 +53,7 @@ var stack.top: ptr
   })
 }
 
-{:evaluate <buf -- >
+{:evaluate <buf -- > <clears errno>
   (clear-errno)
 
   (do-while {
