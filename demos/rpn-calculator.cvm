@@ -54,19 +54,19 @@ var stack.top: ptr
 }
 
 {:evaluate <buf -- >
-  (clear errno)
+  (clear-errno)
 
   (do-while {
     (dup (execute-token))
   })
 
-  (if-else (eq (get errno) errno.success) {
+  (if-else (check-errno) {
+    (puts "error") putl
+  } {
     pop
     init-stack
     (push dup)
     (putc '=') (puti) putl
-  } {
-    (puts "error") putl
   })
 }
 

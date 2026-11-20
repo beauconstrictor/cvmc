@@ -23,6 +23,7 @@ syntax keyword cvm_builtin
       \ gt lt ge le eq ne ucmp
       \ not and nand or nor bool-of
       \ dup drop swap over rot
+      \ clear-errno check-errno
       \ putc puti puts putl putb
       \ gets getc geti
       \ slen send scpy
