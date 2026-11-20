@@ -135,7 +135,19 @@ var num: int
 
 This is how you will usually use variables, with the second size coming from a type, and the first to optionally allocated multiple of that type in a row, creating an array.
 
-Unlike constants and enums, variables are _scoped_, meaning you can create a variable inside a function and it will only be accessible inside that function, allowing you to reuse common variables names. However, these are not truly local variables, so they will be overwritten in recursive functions - either avoid recursion entirely, or use the stack to store temporary data entirely.
+Unlike constants and enums, variables are _scoped_, meaning you can create a variable inside a function and it will only be accessible inside that function, allowing you to reuse common variables names. However, these are not truly local variables, so they will be overwritten in recursive functions - either avoid recursion entirely, or use the stack to store temporary data entirely, like this:
+
+```lisp
+{:foo
+  var x: int
+  (put 10 x)
+}
+
+{:bar
+  var x: int
+  (put 20 x)
+}
+```
 
 ### Enumerations
 
