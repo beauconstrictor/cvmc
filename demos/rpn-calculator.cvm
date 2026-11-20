@@ -12,7 +12,7 @@ var stack.top: ptr
 
 {:push <val -- >
   (if-else (eq (get stack.top) (add stack (size stack))) {
-    (put x-errno-stack errno)
+    (put errno.x-stack errno)
     drop
   } {
     (put (get stack.top))
@@ -22,7 +22,7 @@ var stack.top: ptr
 
 {:pop < -- val>
   (if-else (eq (get stack.top) stack) {
-    (put x-errno-stack errno)
+    (put errno.x-stack errno)
     -1
   } {
     (put (sub (get stack.top) int) stack.top)

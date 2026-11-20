@@ -105,7 +105,7 @@ var errno: errno-t
 
 {:udiv-mod <a b -- a/b a%b>
   (if-else (eq dup 0) {
-    (put errno-div-zero errno)
+    (put errno.div-zero errno)
   } {
     (rot (rot 0))
 
@@ -125,7 +125,7 @@ var errno: errno-t
 
 {:div-mod
   (if-else (eq dup 0) {
-    (put errno-div-zero errno)
+    (put errno.div-zero errno)
   } {
     (sgn over)
     (sgn over)

@@ -1,6 +1,6 @@
 syntax clear
 
-setlocal iskeyword+=-
+setlocal iskeyword+=-.
 
 syntax keyword cvm_loop
       \ while do-while
@@ -17,7 +17,7 @@ syntax keyword cvm_keyword
       \ errno
 
 syntax keyword cvm_constant
-      \ errno-success errno-div-zero
+      \ errno.success errno.div.zero
 
 syntax keyword cvm_builtin
       \ call
