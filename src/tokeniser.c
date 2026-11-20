@@ -187,13 +187,15 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
     } while (false)
 
   int comment_level = 0;
+  bool single_line_comment = false;
 
   while (*s) {
-    if (*s == '<') {
+    if (*s == '<' && !single_line_comment) {
       if (comment_level == 0) FLUSH_TOK(TOKEN_WORD);
       comment_level++;
     }
-    if (*s == '>') {
+
+    if (*s == '>' && !single_line_comment) {
       if (comment_level == 0) {
         *error = (Error) {
           .location = {
@@ -209,10 +211,16 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       comment_level--;
     }
 
-    if (comment_level > 0 || *s == '>') {
+    if (!single_line_comment && comment_level == 0
+        && s[0] == '-' && s[1] == '-')
+      single_line_comment = true;
+
+    if (comment_level > 0 || single_line_comment || *s == '>') {
       if (*s == '\n') {
         line++;
         linestart = s + 1;
+        if (single_line_comment)
+          single_line_comment = false;
       }
       s++;
       start = s;

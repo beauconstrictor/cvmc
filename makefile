@@ -27,7 +27,7 @@ clean:
 
 .PHONY: run
 run: $(TARGET)
-	$(TARGET) -s- test.cvm
+	$(TARGET) -i demos/rpn-calculator.cvm
 
 .PHONY: dbg
 dbg: $(TARGET)

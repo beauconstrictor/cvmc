@@ -40,8 +40,10 @@ highlight link cvm_keyword Keyword
 highlight link cvm_builtin Function
 highlight link cvm_constant Constant
 
-syntax region cvm_comment start=/</ end=/>/ contains=cvm_comment
-highlight link cvm_comment Comment
+syntax match cvm_comment_oneline "--.*"
+highlight link cvm_comment_oneline Comment
+syntax region cvm_comment_multiline start=/</ end=/>/ contains=cvm_comment_multiline
+highlight link cvm_comment_multiline Comment
 
 syntax region cvm_str_literal start=/"/ skip=/\\"/ end=/"/ contains=cvm_str_escape
 highlight link cvm_str_literal String

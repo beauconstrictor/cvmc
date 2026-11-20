@@ -15,23 +15,20 @@ const ptr = 2
 const callable = 2
 const str = 2
 
-<some std functions do not have a signature. in this case, this
- function is 'internal', and should not be used.>
+-- some std functions do not have a signature. in this case, the
+-- function is 'internal', and should not be used.
 
-<some functions set errno instead of returning normally. in this
- case, their actual return values may not make any sense, but they
- will always have the same net stack effect no matter what.
+-- some functions set errno instead of returning normally. in this
+-- case, their actual return values may not make any sense, but they
+-- will always have the same net stack effect no matter what.
+-- if a function sets errno, this will be documented in the signature.
 
- if a function sets errno, this will be documented in the signature.
+-- to check if a function returned an error, (clear errno) beforehand,
+-- and use (check-errno); if it is set, your function failed.
 
- to check if a function returned an error, (clear errno) beforehand,
- and use (check-errno); if it is set, your function failed
-
- errno values from 32768 and above will not be used, so you can use
- them for custom error handling in your programs, if you want to
- handle errors from your own code and the stdlib in one place. when
- creating constants for these custom errors, you should prefix them
- with x-errno-*>
+-- errno values from 32768 and above will not be used, so you can use
+-- them for custom error handling in your programs. This allows you
+-- to handle errors uniformly, no matter their source.
 
 const errno-success  = 0
 const errno-div-zero = 1
@@ -81,8 +78,8 @@ var errno: int
   })
 }
 
-<somehow, this actually does work with signed values, despite no
- specific handling for them>
+-- somehow, this actually does work with signed values, despite no
+-- specific handling for them
 {:mul* <a b -- a*b>
   (swap 0)
 
@@ -95,7 +92,7 @@ var errno: int
   drop swap drop
 }
 
-<does not correctly handle negatives>
+-- does not correctly handle negatives
 {:raw-div-mod <a b -- a/b a%b>
   (rot (rot 0))
 
