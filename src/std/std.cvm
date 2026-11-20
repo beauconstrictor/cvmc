@@ -32,7 +32,6 @@ const callable = 2
 
 enum errno: (success, div-zero)
 var errno: errno-t
-{:check-errno (ne (get errno) errno.success)}
 
 {:if* <condition true -- > (if-else {})}
 {:do-while* <body -- > (while {})}
