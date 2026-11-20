@@ -9,6 +9,6 @@
 #define SCOPE_PREFIX "___scope_"
 
 bool preprocessor(Arena *arena, Tokens *toks, Symbols *syms,
-    Error *error, int stage);
+    Error *error, int stage, bool verbose);
 
 #endif // PREPROCESSOR_H

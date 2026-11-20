@@ -152,12 +152,13 @@ Symbols find_referenced(Tokens *toks, Symbols *custom_opcodes) {
 }
 
 bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
-    Error *error, Symbols *custom_opcodes) {
+    Error *error, Symbols *custom_opcodes, bool verbose) {
   static char buf[256];
 
   uint16_t pc = CODE_MIN;
   bool is_addr_of = false;
 
+  VERBOSE("assembler", "eliminating unreferenced functions...");
   Symbols referenced = find_referenced(toks, custom_opcodes);
 
   for (size_t i = 0; i < toks->count; i++) {
@@ -228,15 +229,20 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
 }
 
 bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
-    Error *error, Symbols *custom_opcodes) {
+    Error *error, Symbols *custom_opcodes, bool verbose) {
   #define EMIT_BYTE(byte) fprintf(f,"%02x ", byte &   0xff);
   #define EMIT_WORD(word) fprintf(f,"%02x %02x ", (word & 0xff00) >> 8, word & 0xff);
 
-  if (!arrange_definitions(syms, vars, toks, error, custom_opcodes)) return false;
+  VERBOSE("assembler", "arranging subroutine addresses");
+  if (!arrange_definitions(syms, vars, toks, error, custom_opcodes,
+        verbose))
+    return false;
 
   static char buf[256];
   long pc;
   bool should_emit = true;
+
+  VERBOSE("assembler", "emitting tape image...");
 
   fprintf(f, "T\n");
 

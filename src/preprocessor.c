@@ -674,18 +674,24 @@ void deunreference_inner(Symbols *referenced, Tokens *toks,
 }
 
 bool preprocessor(Arena *arena, Tokens *toks, Symbols *syms,
-    Error *error, int stage) {
+    Error *error, int stage, bool verbose) {
+  VERBOSE("preprocessor", "desugaring imports...");
   if (!deimport(arena, toks, error))          return false;
   if (stage == 1)                             return true;
+  VERBOSE("preprocessor", "desugaring parenthetical expressions...");
   if (!deparenthesise(toks, error))           return false;
   if (stage == 2)                             return true;
+  VERBOSE("preprocessor", "desugaring string literals...");
   if (!destringify(arena, toks, error))       return false;
   if (stage == 3)                             return true;
+  VERBOSE("preprocessor", "desugaring scopes...");
   if (!delocalise(arena, toks, error, 0, "",
         false))                               return false;
   if (stage == 4)                             return true;
+  VERBOSE("preprocessor", "desugaring variables and constants...");
   if (!desymbolise(arena, toks, syms, error)) return false;
   if (stage == 5)                             return true;
+  VERBOSE("preprocessor", "desugaring anonymous blocks...");
   if (!deanonymify(arena, toks, error))       return false;
   if (stage == 6)                             return true;
 

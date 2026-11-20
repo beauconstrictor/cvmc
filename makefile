@@ -27,7 +27,7 @@ clean:
 
 .PHONY: run
 run: $(TARGET)
-	$(TARGET) -p1 demos/hello-world.cvm
+	$(TARGET) -Vi demos/hello-world.cvm
 
 .PHONY: dbg
 dbg: $(TARGET)

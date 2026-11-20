@@ -24,6 +24,7 @@
              "Options:\n" \
              "\t-h  Show this message and exit\n" \
              "\t-v  Show version number and license information\n" \
+             "\t-V  Show verbose compiler output\n" \
              "\t-t  Format IR as raw tokens\n" \
              "\t-s  File to write a table of function addresses to\n" \
              "\t-o  File to write binary or IR to\n" \
@@ -60,7 +61,7 @@ void show_version(const char *binary) {
 }
 
 void show_ir(Tokens *toks, CompilationMode mode, bool raw_tokens,
-    bool dump_syms, const char *binary) {
+    bool dump_syms, const char *binary, bool verbose) {
   if (dump_syms) {
     if (mode == MODE_LEXER)
       cli_error("cannot generate a symbol table in lexing mode", binary);
@@ -75,6 +76,7 @@ void show_ir(Tokens *toks, CompilationMode mode, bool raw_tokens,
     }
 
   } else {
+    VERBOSE("lexer", "serialising source code...");
     delexer(toks, stdout);
     printf("\n");
   }
@@ -112,10 +114,11 @@ int main(int argc, char **argv) {
   Arena arena = {0};
   bool raw_tokens = false;
   bool dump_syms  = false;
+  bool verbose    = true;
   int pp_stage   = 0;
   size_t call_stack_depth = DEFAULT_CALL_STACK_DEPTH;
 
-  while ((opt = getopt(argc, argv, "hvo:tp:lcis:D:")) != -1) {
+  while ((opt = getopt(argc, argv, "hvo:tp:lcis:D:V")) != -1) {
     switch (opt) {
       case 'h': {
         show_help(argv[0]);
@@ -146,6 +149,9 @@ int main(int argc, char **argv) {
       } break;
       case 't': {
         raw_tokens = true;
+      } break;
+      case 'V': {
+        verbose = true;
       } break;
       case 'd': {
         mode = MODE_PREPROCESS;
@@ -189,15 +195,16 @@ int main(int argc, char **argv) {
   Tokens toks = create_tokens();
   Error error = {0};
 
+  VERBOSE("lexer", "tokenising source code...");
   if (!lexer(source, filename, &toks, &error)) check_error(&error);
   if (mode == MODE_LEXER) {
-    show_ir(&toks, mode, raw_tokens, dump_syms, argv[0]);
+    show_ir(&toks, mode, raw_tokens, dump_syms, argv[0], verbose);
     return 0;
   }
   Symbols vars = {0};
-  if (!preprocessor(&arena, &toks, &vars, &error, pp_stage)) check_error(&error);
+  if (!preprocessor(&arena, &toks, &vars, &error, pp_stage, verbose)) check_error(&error);
   if (mode == MODE_PREPROCESS) {
-    show_ir(&toks, mode, raw_tokens, dump_syms, argv[0]);
+    show_ir(&toks, mode, raw_tokens, dump_syms, argv[0], verbose);
     return 0;
   }
 
@@ -206,7 +213,9 @@ int main(int argc, char **argv) {
   Symbols syms = {0};
   FILE *out = get_handle(output, argv[0], false);
 
-  if (!assemble(out, &syms, &vars, &toks, &error, &custom_opcodes)) check_error(&error);
+  if (!assemble(out, &syms, &vars, &toks, &error, &custom_opcodes,
+        verbose))
+    check_error(&error);
 
   long main_addr;
   if (!lookup_symbol(ENTRY_POINT, sizeof(ENTRY_POINT)-1, &syms, &main_addr))

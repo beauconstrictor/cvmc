@@ -31,6 +31,9 @@
   printf("%s %.*s\n", token_kind_name((tok)->kind), \
       (int)(tok)->length, (tok)->start);
 
+#define VERBOSE(stage, msg) \
+  if (verbose) fprintf(stderr, "%s: \t%s\n", (stage), (msg));
+
 typedef struct {
   const char *name;
   size_t length;
