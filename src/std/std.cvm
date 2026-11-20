@@ -106,17 +106,21 @@ var errno: int
 
 
 {:udiv-mod <a b -- a/b a%b>
-  (rot (rot 0))
+  (if-else (eq dup 0) {
+    (put errno-div-zero errno)
+  } {
+    (rot (rot 0))
 
-  (while {(ge (ucmp over over))} {
-    over over
-    sub
-    rot
-    drop swap rot inc
-    rot rot
+    (while {(ge (ucmp over over))} {
+      over over
+      sub
+      rot
+      drop swap rot inc
+      rot rot
+    })
+
+    drop
   })
-
-  drop
 }
 {:udiv* <a b -- a/b> <sets errno> (drop udiv-mod)}
 {:umod* <a b -- a%b> <sets errno> (drop (swap udiv-mod))}
