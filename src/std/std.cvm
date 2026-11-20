@@ -32,6 +32,7 @@ const callable = 2
 
 enum errno: (success, div-zero)
 var errno: errno-t
+{:check-errno (ne (get errno) errno.success)}
 
 {:if* <condition true -- > (if-else {})}
 {:do-while* <body -- > (while {})}
@@ -55,7 +56,7 @@ var errno: errno-t
 {:clear* <ptr -- > (put 0 swap)}
 
 {:check-errno* < -- errno!=0> (ne (get errno) errno.success)}
-{:clear-errno* < -- errno!=0> (put errno.success errno)}
+{:clear-errno* < -- errno=0> (put errno.success errno)}
 
 {:over* <a b -- a b a> swap dup rot swap}
 
