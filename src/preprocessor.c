@@ -288,6 +288,11 @@ bool deenumerate(Arena *arena, Tokens *toks, Symbols *syms, Error *error) {
     snprintf(type_name, type_len + 1, "%.*s-t", (int)name.length,
         name.start);
 
+    size_t counter_len = name.length + 1;
+    char *counter_name = arena_alloc(arena, counter_len + 1);
+    snprintf(counter_name, counter_len + 1, "$%.*s", (int)name.length,
+        name.start);
+
     append_symbol((Symbol) {
       .name = type_name,
       .length = type_len,
@@ -296,7 +301,10 @@ bool deenumerate(Arena *arena, Tokens *toks, Symbols *syms, Error *error) {
 
     // TODO: store this in the symbol table so enums can have
     //       new values added later
-    long enum_count = 0; 
+    long enum_count;
+    if (!lookup_symbol(counter_name, counter_len, syms,
+        &enum_count))
+      enum_count = 0;
 
     size_t x = i + 4;
     while (true) {
@@ -331,6 +339,12 @@ bool deenumerate(Arena *arena, Tokens *toks, Symbols *syms, Error *error) {
 
     for (size_t y = 0; y < 4; y++)
       if (!remove_token(toks, i)) return false;
+
+    append_symbol((Symbol) {
+        .name = counter_name,
+        .length = counter_len,
+        .value = enum_count,
+    }, syms, NULL);
   }
 
   return substitute(arena, toks, syms);

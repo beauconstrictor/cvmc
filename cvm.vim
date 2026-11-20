@@ -1,6 +1,6 @@
 syntax clear
 
-setlocal iskeyword+=-.
+setlocal iskeyword+=-
 
 syntax keyword cvm_loop
       \ while do-while
@@ -15,9 +15,6 @@ syntax keyword cvm_keyword
       \ get put load store at clear
       \ break
       \ errno
-
-syntax keyword cvm_constant
-      \ errno.success errno.div.zero
 
 syntax keyword cvm_builtin
       \ call
@@ -38,7 +35,6 @@ highlight link cvm_loop Repeat
 highlight link cvm_if Conditional
 highlight link cvm_keyword Keyword
 highlight link cvm_builtin Function
-highlight link cvm_constant Constant
 
 syntax match cvm_comment_oneline "--.*"
 highlight link cvm_comment_oneline Comment
