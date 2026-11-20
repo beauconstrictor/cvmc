@@ -598,15 +598,15 @@ char *read_module(Arena *arena, const char *path) {
 }
 
 bool deimport(Arena *arena, Tokens *toks, Error *error) {
-  (void)toks;
-  (void)error;
-
   static char buf[256];
+
+  bool import_found = false;
 
   for (size_t i = 0; i < toks->count; i++) {
     Token tok = toks->items[i];
 
     if (tok.kind != TOKEN_IMPORT) continue;
+    import_found = true;
 
     Token next;
     bool has_next = i < toks->count - 1;
@@ -637,6 +637,8 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
       if (!insert_token(toks, insert++, subtok)) return false;
     }
   }
+
+  if (import_found) deimport(arena, toks, error);
 
   return true;
 }
