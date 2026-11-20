@@ -1,0 +1,5 @@
+import std
+
+{:main
+  (puts "Hello, world!") putl
+}
