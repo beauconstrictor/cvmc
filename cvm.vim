@@ -24,7 +24,7 @@ syntax keyword cvm_builtin
       \ not and nand or nor bool-of
       \ dup drop swap over rot
       \ clear-errno check-errno
-      \ putc puti puts putl putb
+      \ putc puti puti puts putl putb
       \ gets getc geti
       \ slen send scpy
 
