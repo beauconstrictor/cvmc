@@ -21,21 +21,13 @@ const char *mnemonics[] = {
 };
 #undef X
 
-int get_opcode(Token *tok, Symbols *custom_opcodes) {
+int get_opcode(const char *name, size_t len, Symbols *custom_opcodes) {
   char buf[256];
-  snprintf(buf, sizeof(buf), "%.*s", (int)tok->length, tok->start);
+  snprintf(buf, sizeof(buf), "%.*s", (int)len, name);
 
   long opcode;
-  if (lookup_symbol(tok->start, tok->length, custom_opcodes, &opcode))
+  if (lookup_symbol(name, len, custom_opcodes, &opcode))
     return opcode;
-
-  // prevent duplicate opcodes at compile time (i'm stupid, so i need
-  // this)
-  #define X(mnemonic, opcode) \
-    [opcode] = mnemonic,
-  const char *instrs[] = { INSTRUCTIONS };
-  (void)instrs;
-  #undef X
 
   #define X(mnemonic, opcode) \
       if (strcmp(buf, mnemonic) == 0) return opcode;
@@ -43,6 +35,11 @@ int get_opcode(Token *tok, Symbols *custom_opcodes) {
   #undef X
 
   return -1;
+}
+
+
+int get_opcode_tok(Token *tok, Symbols *custom_opcodes) {
+  return get_opcode(tok->start, tok->length, custom_opcodes);
 }
 
 bool verify_syntax(Tokens *toks, Error *error, Symbols *custom_opcodes) {
@@ -85,7 +82,7 @@ bool verify_syntax(Tokens *toks, Error *error, Symbols *custom_opcodes) {
       } break;
 
       case TOKEN_DEFINITION: {
-        if (tok.start[tok.length-1] != '*' && get_opcode(&tok, custom_opcodes) != -1)
+        if (tok.start[tok.length-1] != '*' && get_opcode_tok(&tok, custom_opcodes) != -1)
           GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined as an instruction", tok);
         definition_tok = tok;
       } break;
@@ -114,12 +111,54 @@ bool verify_syntax(Tokens *toks, Error *error, Symbols *custom_opcodes) {
   return true;
 }
 
+void find_referenced_inner(Symbols *referenced, Tokens *toks,
+    const char *func, size_t len, Symbols *custom_opcodes) {
+  if (lookup_symbol(func, len, referenced, NULL)) return;
+  if (get_opcode(func, len, custom_opcodes) != -1) return;
+
+  Token definition;
+  bool found = false;
+  size_t idx = 0;
+  for (size_t i = 0; i < toks->count; i++) {
+    definition = toks->items[i];
+    if (definition.kind != TOKEN_DEFINITION) continue;
+    if (definition.start[definition.length-1] == '*') definition.length--;
+    if (definition.length != len
+        || memcmp(definition.start, func, len) != 0)
+      continue;
+    found = true;
+    idx = i;
+    break;
+  }
+  if (!found) return;
+
+  bool redefined;
+  append_token_symbol(referenced, &definition, 0, &redefined);
+
+  for (size_t i = idx; i < toks->count; i++) {
+    Token tok = toks->items[i];
+    if (tok.kind == TOKEN_LBRACE) break;
+    if (tok.kind != TOKEN_WORD) continue;
+    find_referenced_inner(referenced, toks, tok.start, tok.length,
+        custom_opcodes);
+  }
+}
+
+Symbols find_referenced(Tokens *toks, Symbols *custom_opcodes) {
+  Symbols referenced = {0};
+  find_referenced_inner(&referenced, toks, ENTRY_POINT,
+      sizeof(ENTRY_POINT)-1, custom_opcodes);
+  return referenced;
+}
+
 bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
     Error *error, Symbols *custom_opcodes) {
   static char buf[256];
 
   uint16_t pc = CODE_MIN;
   bool is_addr_of = false;
+
+  Symbols referenced = find_referenced(toks, custom_opcodes);
 
   for (size_t i = 0; i < toks->count; i++) {
     Token tok = toks->items[i];
@@ -148,6 +187,8 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
       case TOKEN_DEFINITION: {
         bool redefined = false;
         if (tok.start[tok.length-1] == '*') tok.length--;
+
+        if (!lookup_symbol(tok.start, tok.length, &referenced, NULL)) break;
         if (!append_token_symbol(syms, &tok, pc, &redefined)) return false;
         if (redefined || lookup_symbol(tok.start, tok.length, vars, NULL))
           GIVE_ERROR_WITH_LEXEME("'%.*s' is already defined", tok);
@@ -160,7 +201,7 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
       } break;
 
       case TOKEN_WORD: {
-        int opcode = get_opcode(&tok, custom_opcodes);
+        int opcode = get_opcode_tok(&tok, custom_opcodes);
         if (opcode != -1) {
           pc++;
           break;
@@ -186,59 +227,18 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
   return true;
 }
 
-void find_referenced_inner(Symbols *referenced, Tokens *toks,
-    const char *func, size_t len) {
-  if (lookup_symbol(func, len, referenced, NULL)) return;
-
-  Token definition;
-  bool found = false;
-  size_t idx = 0;
-  for (size_t i = 0; i < toks->count; i++) {
-    definition = toks->items[i];
-    if (definition.kind != TOKEN_DEFINITION) continue;
-    if (definition.start[definition.length-1] == '*') definition.length--;
-    if (definition.length != len
-        || memcmp(definition.start, func, len) != 0)
-      continue;
-    found = true;
-    idx = i;
-    break;
-  }
-  if (!found) return;
-
-  bool redefined;
-  append_token_symbol(referenced, &definition, 0, &redefined);
-
-  for (size_t i = idx; i < toks->count; i++) {
-    Token tok = toks->items[i];
-    if (tok.kind == TOKEN_LBRACE) break;
-    if (tok.kind != TOKEN_WORD) continue;
-    find_referenced_inner(referenced, toks, tok.start, tok.length);
-  }
-}
-
-Symbols find_referenced(Tokens *toks) {
-  Symbols referenced = {0};
-  find_referenced_inner(&referenced, toks, ENTRY_POINT,
-      sizeof(ENTRY_POINT)-1);
-  return referenced;
-}
-
 bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
     Error *error, Symbols *custom_opcodes) {
-  if (!arrange_definitions(syms, vars, toks, error, custom_opcodes)) return false;
-
   #define EMIT_BYTE(byte) fprintf(f,"%02x ", byte &   0xff);
   #define EMIT_WORD(word) fprintf(f,"%02x %02x ", (word & 0xff00) >> 8, word & 0xff);
 
+  if (!arrange_definitions(syms, vars, toks, error, custom_opcodes)) return false;
+
   static char buf[256];
   long pc;
-
-  Symbols referenced = find_referenced(toks);
+  bool should_emit = true;
 
   fprintf(f, "T\n");
-
-  bool should_emit = true;
 
   for (size_t i = 0; i < toks->count; i++) {
     Token tok = toks->items[i];
@@ -254,9 +254,7 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
     switch (tok.kind) {
       case TOKEN_DEFINITION: {
         if (tok.start[tok.length-1] == '*') tok.length--;
-        if (!lookup_symbol(tok.start, tok.length, syms, &pc))
-          GIVE_ERROR_WITH_LEXEME("undefined symbol: '%.*s'", tok);
-        should_emit = lookup_symbol(tok.start, tok.length, &referenced, NULL);
+        should_emit = lookup_symbol(tok.start, tok.length, syms, &pc);
         if (should_emit) fprintf(f, ":%04x ", (unsigned)pc);
       } break;
 
@@ -273,7 +271,7 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
       case TOKEN_ADDR: {
         long addr;
         if (!lookup_symbol(next.start, next.length, syms, &addr)) {
-          if (get_opcode(&next, custom_opcodes) != -1) {
+          if (get_opcode_tok(&next, custom_opcodes) != -1) {
             GIVE_ERROR_WITH_LEXEME("'%.*s' is an instruction, not a function and does not have an address", next);
           } else
             GIVE_ERROR_WITH_LEXEME("undefined symbol: '%.*s'", next);
@@ -291,7 +289,7 @@ bool assemble(FILE *f, Symbols *syms, Symbols *vars, Tokens *toks,
       } break;
 
       case TOKEN_WORD: {
-        int opcode = get_opcode(&tok, custom_opcodes);
+        int opcode = get_opcode_tok(&tok, custom_opcodes);
         if (opcode >= 0) {
           EMIT_BYTE(opcode);
           break;

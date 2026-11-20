@@ -8,6 +8,8 @@ var stack.top: ptr
 
 {:init-stack < -- > (put stack stack.top)}
 
+{:add* break}
+
 {:push <val -- >
   (if-else (eq (get stack.top) (add stack (size stack))) {
     (put x-errno-stack errno)
