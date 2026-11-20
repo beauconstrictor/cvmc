@@ -288,19 +288,16 @@ bool deenumerate(Arena *arena, Tokens *toks, Symbols *syms, Error *error) {
     snprintf(type_name, type_len + 1, "%.*s-t", (int)name.length,
         name.start);
 
-    size_t counter_len = name.length + 1;
+    size_t counter_len = type_len + 1;
     char *counter_name = arena_alloc(arena, counter_len + 1);
-    snprintf(counter_name, counter_len + 1, "$%.*s", (int)name.length,
-        name.start);
+    snprintf(counter_name, counter_len + 1, "$%s", type_name);
 
-    append_symbol((Symbol) {
+    if (!append_symbol((Symbol) {
       .name = type_name,
       .length = type_len,
       .value = 2, // all enum-ts are just integer values
-    }, syms, NULL);
+    }, syms, NULL)) return false;
 
-    // TODO: store this in the symbol table so enums can have
-    //       new values added later
     long enum_count;
     if (!lookup_symbol(counter_name, counter_len, syms,
         &enum_count))
@@ -328,11 +325,11 @@ bool deenumerate(Arena *arena, Tokens *toks, Symbols *syms, Error *error) {
           ele.start);
 
       bool redefined = false;
-      append_symbol((Symbol) {
+      if (!append_symbol((Symbol) {
           .name = value_name,
           .length = value_len,
           .value = enum_count++,
-      }, syms, &redefined);
+      }, syms, &redefined)) return false;
       if (redefined)
         GIVE_ERROR_WITH_LEXEME("duplicate enum value: '%.*s'", ele);
     }
@@ -340,11 +337,11 @@ bool deenumerate(Arena *arena, Tokens *toks, Symbols *syms, Error *error) {
     for (size_t y = 0; y < 4; y++)
       if (!remove_token(toks, i)) return false;
 
-    append_symbol((Symbol) {
+    if (!append_symbol((Symbol) {
         .name = counter_name,
         .length = counter_len,
         .value = enum_count,
-    }, syms, NULL);
+    }, syms, NULL)) return false;
   }
 
   return substitute(arena, toks, syms);

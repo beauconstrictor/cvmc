@@ -168,7 +168,7 @@ var errno: errno-t
   (get acc)
 }
 
-{:send* <s -- end> (while &getc {}) dec}
+{:send* <s -- end> (while {getc} {}) dec}
 {:slen* <s -- len> (dec (sub dup send swap))}
 
 {:scpy* <src dst -- >
