@@ -26,7 +26,9 @@ const callable = 2
 -- to check if a function returned an error, (clear-errno) beforehand,
 -- and use (check-errno); if it is set, your function failed.
 
--- you can define your own errno values
+-- you can define your own errno values, allowing you to have a
+-- single error-handling block that supports errors std, 3rd-party
+-- libraries, and your own code, all at once.
 
 enum errno: (success, div-zero)
 

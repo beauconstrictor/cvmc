@@ -1,6 +1,0 @@
-enum test: (t1, t2)
-
-test.t1
-test.t2
-
-var test: test-t
