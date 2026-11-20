@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
   Arena arena = {0};
   bool raw_tokens = false;
   bool dump_syms  = false;
-  bool verbose    = true;
+  bool verbose    = false;
   int pp_stage   = 0;
   size_t call_stack_depth = DEFAULT_CALL_STACK_DEPTH;
 
