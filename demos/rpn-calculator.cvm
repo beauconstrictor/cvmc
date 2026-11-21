@@ -8,8 +8,6 @@ var stack.top: ptr
 
 {:init-stack < -- > (put stack stack.top)}
 
-{:add* break}
-
 {:push <val -- > <sets errno>
   (if-else (eq (get stack.top) (add stack (size stack))) {
     (put errno.x-stack errno)
@@ -30,7 +28,7 @@ var stack.top: ptr
   })
 }
 
-{:execute-token <token -- end>
+{:execute-token <token -- end> <sets errno>
   (geti dup)
   rot rot
 
@@ -53,7 +51,7 @@ var stack.top: ptr
   })
 }
 
-{:evaluate <buf -- > <clears errno>
+{:evaluate <buf -- > <sets errno>
   (clear-errno)
 
   (do-while {
