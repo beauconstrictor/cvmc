@@ -206,3 +206,5 @@ var errno: errno-t
 
 {:shl <n count -- n shl count> (mul (pow 2 swap))}
 {:shr <n count -- n shr count> (udiv (pow 2 swap))}
+
+{:bnot <n -- ~n> (sub neg 1)}
