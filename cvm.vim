@@ -20,6 +20,7 @@ syntax keyword cvm_builtin
       \ call
       \ neg abs sgn set-sgn
       \ add sub inc dec mul div udiv mod umod pow
+      \ shl shr
       \ gt lt ge le eq ne ucmp
       \ not and nand or nor bool-of
       \ dup drop swap over rot

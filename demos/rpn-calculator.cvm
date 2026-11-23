@@ -44,6 +44,8 @@ var stack.top: ptr
     (if (eq dup '^') {(push (pow pop pop swap))})
     (if (eq dup '/') {(push (div pop pop swap))})
     (if (eq dup '%') {(push (mod pop pop swap))})
+    (if (eq dup '<') {(push (shl pop pop swap))})
+    (if (eq dup '>') {(push (shr pop pop swap))})
     (if-else (eq '\0') {drop 0} {inc})
   } {
     (push rot)

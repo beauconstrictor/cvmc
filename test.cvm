@@ -1,0 +1,6 @@
+import std
+
+{:main
+  (puti (shl 16 3))
+  (puti (shr 256 2))
+}

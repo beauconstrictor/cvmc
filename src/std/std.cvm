@@ -204,5 +204,5 @@ var errno: errno-t
   (putc (add (umod 10) '0'))
 }
 
-{:shl <n count -- n shl count> (pow 2 swap mul)}
-{:shl <n count -- n shl count> (pow 2 swap udiv)}
+{:shl <n count -- n shl count> (mul (pow 2 swap))}
+{:shr <n count -- n shr count> (udiv (pow 2 swap))}
