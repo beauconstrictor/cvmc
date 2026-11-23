@@ -77,8 +77,7 @@ var errno: errno-t
   })
 }
 
--- somehow, this actually does work with signed values, despite no
--- specific handling for them
+-- signed AND unsigned
 {:mul* <a b -- a*b>
   (swap 0)
 
@@ -91,6 +90,7 @@ var errno: errno-t
   drop swap drop
 }
 
+-- i believe this is signed and unsigned. deserves THOROUGH testing
 {:pow* <a b -- a^b>
   (swap 1)
 
@@ -204,3 +204,5 @@ var errno: errno-t
   (putc (add (umod 10) '0'))
 }
 
+{:shl <n count -- n shl count> (pow 2 swap mul)}
+{:shl <n count -- n shl count> (pow 2 swap udiv)}

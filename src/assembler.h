@@ -34,7 +34,8 @@
 #define OPCODE_PUTC  0x10
 #define OPCODE_GETS  0x11
 
-#define OPCODE_BREAK 0xff // NOT to be implemented in other vm implementations
+#define OPCODE_BREAK 0xff // can be ignored by vms that do not wish
+                          // to implement a debugger
 
 #define INSTRUCTIONS         \
   X("call",    OPCODE_CALL)  \
