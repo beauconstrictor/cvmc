@@ -1,8 +1,5 @@
 import std
 
 {:main
-  (while 0 {(lt dup 32)} {
-    (putu (b-xor 12 10)) putl
-    inc
-  }) drop
+  (puti (abs -32768)) putl
 }

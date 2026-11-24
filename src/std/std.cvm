@@ -194,11 +194,17 @@ var errno: errno-t
   (if (lt dup 0) {
     (putc '-')
   })
-  abs
-  (if (gt dup 9) {
-    (puti (div dup 10))
+
+  (if-else (eq dup -32768) {
+    (puts "32768") -- doesn't fit when abs'd, so we have to do it
+                   -- directly
+  } {
+    abs
+    (if (gt dup 9) {
+      (puti (div dup 10))
+    })
+    (putc (add (mod 10) '0'))
   })
-  (putc (add (mod 10) '0'))
 }
 
 {:putu* <n -- >
