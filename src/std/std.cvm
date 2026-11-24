@@ -35,12 +35,13 @@ var errno: errno-t
 
 {:if* <condition true -- > (if-else {})}
 {:do-while* <body -- > (while {})}
+{:do <op var -- (op)> (get dup) (call rot) (put swap)}
 
 {:bool-of* <a -- not not a> (if-else {true} {false})}
 {:not* <a -- not a> (if-else {false} {true})}
 {:and* <a b -- a and b> (if-else {(if-else {true} {false})} {drop false})}
 {:nand* <a b -- a nand b> (not and)}
-{:or* <a b -- a or b> (if-else {true} {if-else {true} {false}})}
+{:or* <a b -- a or b> (if-else {drop true} {(if-else {true} {false})})}
 {:nor* <a b -- a nor b> (not or)}
 
 {:eq* <a b -- a == b> sub (if-else {false} {true})}
@@ -207,4 +208,43 @@ var errno: errno-t
 {:shl <n count -- n shl count> (mul (pow 2 swap))}
 {:shr <n count -- n shr count> (udiv (pow 2 swap))}
 
-{:bnot <n -- ~n> (sub neg 1)}
+-- this function is for internal use only. this is because it is a
+-- combinator and uses variables, which you shouldn't do together
+-- unless you control which functions are passed
+-- TODO: make this less verbose
+{:bitwise <a b op -- n>
+  var op: callable
+  var a: int
+  var b: int
+  var acc: int
+  var i: int
+
+  (put op)
+  (put b)
+  (put a)
+
+  (put 0 acc)
+  (put 0 i)
+
+  (while {(lt (get i) 16)} {
+    (mod (get a) 2)
+    (mod (get b) 2)
+    (call (get op))
+    (mul (shl 1 (get i)))
+    (add (get acc))
+    (put acc)
+
+    (put (shr (get a) 1) a)
+    (put (shr (get b) 1) b)
+
+    (put (inc (get i)) i)
+  })
+
+  (get acc)
+}
+
+{:b-not <n -- ~n> (sub neg 1)}
+{:b-and* <a b -- a b-and b> (bitwise {and})}
+{:b-nand* <a b -- a b-nand b> (bitwise {nand})}
+{:b-or* <a b -- a b-or b> (bitwise {or})}
+{:b-nor* <a b -- a b-nor b> (bitwise {nor})}

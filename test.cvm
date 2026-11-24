@@ -1,5 +1,5 @@
 import std
 
 {:main
-  (puti (not 56)) putl
+  (puti (b-or 3 5)) putl
 }

@@ -12,7 +12,7 @@ syntax keyword cvm_keyword
       \ size len
       \ var const enum
       \ import
-      \ get put load store at clear
+      \ get put load store at clear do
       \ break
       \ errno
 
@@ -20,7 +20,7 @@ syntax keyword cvm_builtin
       \ call
       \ neg abs sgn set-sgn
       \ add sub inc dec mul div udiv mod umod pow
-      \ shl shr bnot
+      \ shl shr b-not b-and b-nand b-or b-nor
       \ gt lt ge le eq ne ucmp
       \ not and nand or nor bool-of
       \ dup drop swap over rot
@@ -33,10 +33,14 @@ syntax keyword cvm_type
       \ char byte bool i8 u8
       \ int uint i16 u16 ptr callable str errno-t
 
+syntax keyword cvm_internal
+      \ udiv-mode div-mod bitwise
+
 highlight link cvm_loop Repeat
 highlight link cvm_if Conditional
 highlight link cvm_keyword Keyword
 highlight link cvm_builtin Function
+highlight link cvm_internal Error
 
 syntax match cvm_comment_oneline "--.*"
 highlight link cvm_comment_oneline Comment
