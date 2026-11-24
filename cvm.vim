@@ -34,7 +34,7 @@ syntax keyword cvm_type
       \ int uint i16 u16 ptr callable str errno-t
 
 syntax keyword cvm_internal
-      \ udiv-mode div-mod bitwise
+      \ udiv-mod div-mod bitwise
 
 highlight link cvm_loop Repeat
 highlight link cvm_if Conditional
