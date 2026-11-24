@@ -1,8 +1,29 @@
 import std
 
-{:HELP "
-This is help!
-"}
+-- this is a pattern for multiline string literals; the inc skips the
+-- leading newline.
+{:help (inc "
+this calculator uses RPN, so operands come before operators.
+
+supported operations:
+- '+': add
+- '-': subtract
+- '*': multiply
+- '^': exponentiate
+- '/': divide
+- '%': modulo
+- '<': shift left
+- '>': shift right
+- '&': bitwise and
+- '|': bitwise or
+- 'x': bitwise xor
+- '~': bitwise not (only takes a single operand)
+
+for the bitwise operators, it is worth knowing that this calculator
+represents numbers as signed 16-bit values, with two's complement.
+")}
+
+{:prompt "> "}
 
 enum errno: (x-stack)
 
@@ -83,12 +104,17 @@ var stack.top: ptr
 {:main
   init-stack
 
-  (puts "CVM - RPN Calculator") putl
+  (puts "cvmc/demos - RPN Calculator") putl
   (puts "Type 'help' for help.") putl
   putl
 
   (while {true} {
+    (puts prompt)
     (gets buf (size buf))
-    (evaluate buf)
+    (if-else (scmp buf "help") {
+      (puts help)
+    } {
+      (evaluate buf)
+    })
   })
 }

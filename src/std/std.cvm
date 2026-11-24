@@ -51,7 +51,7 @@ var errno: errno-t
 {:le* <a b -- a le b> (not gt)}
 {:ge* <a b -- a ge b> (not lt)}
 
-{:ucmp* <a b -- a-32768 b-32768> (sub 32768) swap (sub 32768) swap}
+{:ucmp* <a b -- a' b'> (sub 32768) swap (sub 32768) swap}
 
 {:at* <arr size idx -- ptr> (add mul)}
 {:clear* <ptr -- > (put 0 swap)}
@@ -159,17 +159,34 @@ var errno: errno-t
 {:getc* <buf -- after c> (load dup) swap inc swap}
 {:geti* <buf -- after i>
   var acc: int
+  var is-neg: bool
+  var is-hyphen: bool
   (put 0 acc)
+  (put false is-neg)
 
-  (while {(and (ge (dup getc) '0') (le over '9'))} {
-    (get acc)
-    (mul 10)
-    swap
-    (add (sub '0'))
-    (put acc)
-  }) drop
- 
-  dec
+  (if (eq (load dup) '-') {
+    (store (not (isdigit (load (inc dup)))) is-hyphen)
+    drop
+    (store true is-neg)
+    inc
+  })
+
+  (if-else (load is-hyphen) {
+    dec
+  } {
+    (while {(isdigit getc)} {
+      (get acc)
+      (mul 10)
+      swap
+      (add (sub '0'))
+      (put acc)
+    }) drop
+
+    dec
+
+    (if (load is-neg) {(do {neg} acc)})
+  })
+
   (get acc)
 }
 
@@ -275,3 +292,5 @@ var errno: errno-t
 {:b-or* <a b -- a b-or b> (bitwise {or})}
 {:b-nor* <a b -- a b-nor b> (bitwise {nor})}
 {:b-xor* <a b -- a b-xor b> (bitwise {xor})}
+
+{:isdigit <c -- c'> (and (ge dup '0') (le over '9'))}
