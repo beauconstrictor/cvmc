@@ -1,5 +1,5 @@
 import std
 
 {:main
-  (putb (scmp "" "")) putl
+  (putb (isalnum 'G')) putl
 }
