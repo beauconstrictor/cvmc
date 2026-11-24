@@ -186,6 +186,21 @@ var errno: errno-t
   })
 }
 
+{:scmp <a b -- eq> 
+  (if-else (ne (slen over) (slen over)) {
+    drop drop
+    false
+  } {
+    (do-while {
+      inc
+      (swap (inc swap))
+      (eq (load over) (load over))
+    })
+    drop
+    (eq (send (dup dec)))
+  })
+}
+
 {:puts* <s -- > (while {(dup getc)} {putc}) drop drop}
 {:putb* <b -- > (if-else {(puts "true")} {(puts "false")})}
 {:putl* < -- > (putc '\n')}

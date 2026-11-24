@@ -1,5 +1,5 @@
 import std
 
 {:main
-  (puti (abs -32768)) putl
+  (putb (scmp "" "")) putl
 }

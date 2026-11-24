@@ -1,5 +1,9 @@
 import std
 
+{:HELP "
+This is help!
+"}
+
 enum errno: (x-stack)
 
 var buf[256]: char
@@ -46,8 +50,11 @@ var stack.top: ptr
     (if (eq dup '%') {(push (mod pop pop swap))})
     (if (eq dup '<') {(push (shl pop pop swap))})
     (if (eq dup '>') {(push (shr pop pop swap))})
+    (if (eq dup '&') {(push (b-and pop pop swap))})
+    (if (eq dup '|') {(push (b-or pop pop swap))})
+    (if (eq dup 'x') {(push (b-xor pop pop swap))})
 
-    (if (eq dup '~') {(push (bnot pop))})
+    (if (eq dup '~') {(push (b-not pop))})
 
     (if-else (eq '\0') {drop 0} {inc})
   } {
@@ -76,7 +83,9 @@ var stack.top: ptr
 {:main
   init-stack
 
-  (puts "rpn calculator") putl
+  (puts "CVM - RPN Calculator") putl
+  (puts "Type 'help' for help.") putl
+  putl
 
   (while {true} {
     (gets buf (size buf))
