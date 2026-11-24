@@ -161,10 +161,19 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
     int memsize, Symbols *syms, size_t stack_depth, size_t max_depth) {
   static char err_msg[256];
 
+  int name_len;
+  const char *name = get_name(addr, &name_len, syms);
+
   #define POP(var) \
-        if (!dstack_pop(dstack, &var)) return "stack underflow";
+        if (!dstack_pop(dstack, &var)) { \
+          snprintf(err_msg, sizeof(err_msg), "stack underflow in '%.*s'", (int)name_len, name); \
+          return err_msg; \
+        }
   #define PUSH(var) \
-        if (!dstack_push(dstack, var)) return "stack overflow";
+        if (!dstack_push(dstack, var)) {\
+          snprintf(err_msg, sizeof(err_msg), "stack overflow in '%.*s'", (int)name_len, name); \
+          return err_msg; \
+        }
 
   #define BINARY_OPERATOR(opcode, operation) \
         case OPCODE_##opcode: { \
