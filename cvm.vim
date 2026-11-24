@@ -20,9 +20,9 @@ syntax keyword cvm_builtin
       \ call
       \ neg abs sgn set-sgn
       \ add sub inc dec mul div udiv mod umod pow
-      \ shl shr b-not b-and b-nand b-or b-nor
+      \ shl shr b-not b-and b-nand b-or b-nor b-xor
       \ gt lt ge le eq ne ucmp
-      \ not and nand or nor bool-of
+      \ not and nand or nor xor bool-of
       \ dup drop swap over rot
       \ clear-errno check-errno
       \ putc puti puti puts putl putb

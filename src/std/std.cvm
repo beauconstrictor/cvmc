@@ -43,6 +43,7 @@ var errno: errno-t
 {:nand* <a b -- a nand b> (not and)}
 {:or* <a b -- a or b> (if-else {drop true} {(if-else {true} {false})})}
 {:nor* <a b -- a nor b> (not or)}
+{:xor* <a b -- a xor b> (if-else {(if-else {false} {true})} {(if-else {true} {false})})}
 
 {:eq* <a b -- a == b> sub (if-else {false} {true})}
 {:ne* <a b -- a != b> sub (if-else {true} {false})}
@@ -218,27 +219,29 @@ var errno: errno-t
   var op: callable
   var a: int
   var b: int
-  var acc: int
-  var i: int
 
   (put op)
   (put b)
   (put a)
 
+  var acc: int
+  var weight: int
+  var i: int
+
   (put 0 acc)
+  (put 1 weight)
   (put 0 i)
 
   (while {(lt (get i) 16)} {
-    (mod (get a) 2)
-    (mod (get b) 2)
-    (call (get op))
-    (mul (shl 1 (get i)))
-    (add (get acc))
-    (put acc)
+    (if (mod (get a) 2)
+        (mod (get b) 2)
+        (call (get op)) {
+      (do {(add (get weight))} acc)
+    })
 
+    (do {(add dup)} weight)
     (do {(shr 1)} a)
     (do {(shr 1)} b)
-
     (do {inc} i)
   })
 
@@ -250,3 +253,4 @@ var errno: errno-t
 {:b-nand* <a b -- a b-nand b> (bitwise {nand})}
 {:b-or* <a b -- a b-or b> (bitwise {or})}
 {:b-nor* <a b -- a b-nor b> (bitwise {nor})}
+{:b-xor* <a b -- a b-xor b> (bitwise {xor})}
