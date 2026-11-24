@@ -36,6 +36,7 @@ var errno: errno-t
 {:if* <condition true -- > (if-else {})}
 {:do-while* <body -- > (while {})}
 {:do <op var -- (op)> (get dup) (call rot) (put swap)}
+{:doc <op var -- (op)> (load dup) (call rot) (store swap)}
 
 {:bool-of* <a -- not not a> (if-else {true} {false})}
 {:not* <a -- not a> (if-else {false} {true})}
@@ -60,6 +61,8 @@ var errno: errno-t
 {:clear-errno* < -- errno=0> (put errno.success errno)}
 
 {:over* <a b -- a b a> swap dup rot swap}
+{:nip* <a b -- b> (drop swap)}
+{:tuck* <a b -- b a b> (over swap)}
 
 {:dec* <n -- n-1> (sub 1)}
 {:inc* <n -- n+1> (add 1)}
@@ -91,7 +94,7 @@ var errno: errno-t
     rot dec
   })
   
-  drop swap drop
+  drop nip
 }
 
 -- i believe this is signed and unsigned. deserves THOROUGH testing
@@ -104,7 +107,7 @@ var errno: errno-t
     rot dec
   })
   
-  drop swap drop
+  drop nip
 }
 
 
@@ -296,5 +299,5 @@ var errno: errno-t
 {:isdigit <c -- c'> (and (ge dup '0') (le over '9')) swap drop}
 {:islower <c -- c'> (and (ge dup 'a') (le over 'z')) swap drop}
 {:isupper <c -- c'> (and (ge dup 'A') (le over 'Z')) swap drop}
-{:isalpha <c -- c'> (or (islower dup) (isupper over)) swap drop}
-{:isalnum <c -- c'> (or (isalpha dup) (isdigit over)) swap drop}
+{:isalpha <c -- c'> (or (islower dup) (isupper over)) nip}
+{:isalnum <c -- c'> (or (isalpha dup) (isdigit over)) nip}

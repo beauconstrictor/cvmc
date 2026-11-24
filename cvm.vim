@@ -12,7 +12,7 @@ syntax keyword cvm_keyword
       \ size len
       \ var const enum
       \ import
-      \ get put load store at clear do
+      \ get put load store at clear do doc
       \ break
       \ errno
 
@@ -23,11 +23,12 @@ syntax keyword cvm_builtin
       \ shl shr b-not b-and b-nand b-or b-nor b-xor
       \ gt lt ge le eq ne ucmp
       \ not and nand or nor xor bool-of
-      \ dup drop swap over rot
+      \ dup drop swap over rot nip tuck
       \ clear-errno check-errno
       \ putc puti puti putu puts putl putb
       \ gets getc geti
       \ slen send scpy
+      \ isdigit islower isupper isalpha isalnum
 
 syntax keyword cvm_type
       \ char byte bool i8 u8
