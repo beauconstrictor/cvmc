@@ -205,8 +205,8 @@ var errno: errno-t
   (putc (add (umod 10) '0'))
 }
 
-{:shl <n count -- n shl count> (mul (pow 2 swap))}
-{:shr <n count -- n shr count> (udiv (pow 2 swap))}
+{:shl* <n count -- n shl count> (mul (pow 2 swap))}
+{:shr* <n count -- n shr count> (udiv (pow 2 swap))}
 
 -- this function is for internal use only. this is because it is a
 -- combinator and uses variables, which you shouldn't do together

@@ -1,5 +1,5 @@
 import std
 
 {:main
-  (puti (b-or 3 5)) putl
+  (putu (b-and 44444 55555)) putl
 }
