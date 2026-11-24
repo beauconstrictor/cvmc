@@ -234,10 +234,10 @@ var errno: errno-t
     (add (get acc))
     (put acc)
 
-    (put (shr (get a) 1) a)
-    (put (shr (get b) 1) b)
+    (do {(shr 1)} a)
+    (do {(shr 1)} b)
 
-    (put (inc (get i)) i)
+    (do {inc} i)
   })
 
   (get acc)
