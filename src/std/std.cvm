@@ -80,6 +80,8 @@ var errno: errno-t
 
 -- signed AND unsigned
 {:mul* <a b -- a*b>
+  (if (gt over over) {swap})
+
   (swap 0)
 
   (while {dup} {

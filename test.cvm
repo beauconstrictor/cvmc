@@ -1,5 +1,8 @@
 import std
 
 {:main
-  (putu (b-and 44444 55555)) putl
+  (while 0 {(lt dup 32)} {
+    (putu (mul 1 65535)) putl
+    inc
+  }) drop
 }
