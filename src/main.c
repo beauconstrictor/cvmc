@@ -13,6 +13,7 @@
 
 /*
  * TODO: remove duplicated subroutines (by content, not name)
+ * TODO: add tracebacks for stack errors in the simulator
  */
 
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \
