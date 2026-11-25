@@ -3,7 +3,7 @@ syntax clear
 setlocal iskeyword+=-
 
 syntax keyword cvm_loop
-      \ while do-while
+      \ while do-while forever
 
 syntax keyword cvm_if
       \ if if-else switch case
@@ -12,7 +12,8 @@ syntax keyword cvm_keyword
       \ size len
       \ var const enum
       \ import
-      \ get put load store at clear do doc
+      \ get put load store at clear
+      \ do doc
       \ break
       \ errno
 

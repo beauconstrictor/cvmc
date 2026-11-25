@@ -107,7 +107,7 @@ var stack.top: ptr
   (puts "Type 'help' for help.") putl
   putl
 
-  (while {true} {
+  (forever {
     (puts prompt)
     (gets buf (size buf))
     (if-else (scmp buf "help") {
