@@ -2,9 +2,10 @@
 #define SIMULATOR_H
 
 #include "parser.h"
+#include "arena.h"
 
 #define DEFAULT_CALL_STACK_DEPTH 1024
 
-const char *simulate(const char *s, Symbols *syms, size_t depth);
+bool simulate(Arena *arena, const char *s, Symbols *syms, size_t depth);
 
 #endif // SIMULATOR_H

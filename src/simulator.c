@@ -157,23 +157,37 @@ DebuggerMode debugger(Instruction inst, DStack *dstack, Symbols *syms) {
   }
 }
 
-const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
-    int memsize, Symbols *syms, size_t stack_depth, size_t max_depth) {
+const char *execute(Arena *arena, DStack *dstack, uint16_t addr,
+    uint8_t *memory, int memsize, Symbols *syms, size_t stack_depth,
+    size_t max_depth) {
   static char err_msg[256];
 
   int name_len;
   const char *name = get_name(addr, &name_len, syms);
 
+  Colours cols = get_colours();
+
+  #define THROW(msg) \
+        do { \
+          snprintf(err_msg, sizeof(err_msg), \
+              "  %sat%s '%s%.*s%s'\n\n%s%scvmc: %s%s in '%s%.*s%s'''", \
+              cols.dim, cols.reset, \
+              cols.yellow, (int)name_len, name, cols.reset, cols.red, \
+              cols.bold, cols.reset, msg, cols.yellow, (int)name_len, name, cols.reset); \
+          return err_msg; \
+        } while (false)
+
   #define POP(var) \
-        if (!dstack_pop(dstack, &var)) { \
-          snprintf(err_msg, sizeof(err_msg), "stack underflow in '%.*s'", (int)name_len, name); \
-          return err_msg; \
-        }
+        do { \
+          if (!dstack_pop(dstack, &var)) \
+            THROW("stack underflow"); \
+        } while (false)
+
   #define PUSH(var) \
-        if (!dstack_push(dstack, var)) {\
-          snprintf(err_msg, sizeof(err_msg), "stack overflow in '%.*s'", (int)name_len, name); \
-          return err_msg; \
-        }
+        do { \
+          if (!dstack_push(dstack, var)) \
+            THROW("stack overflow"); \
+        } while (false)
 
   #define BINARY_OPERATOR(opcode, operation) \
         case OPCODE_##opcode: { \
@@ -194,9 +208,18 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
 
   #define CALL(addr) \
     do { \
-        const char *error = execute(dstack, addr, memory, \
+        const char *error = execute(arena, dstack, addr, memory, \
             memsize, syms, stack_depth+1, max_depth); \
-        if (error) return error; \
+        if (error != NULL) { \
+          size_t size = snprintf(NULL, 0, "  %sat%s '%s%.*s%s'\n%s", \
+              cols.dim, cols.reset, cols.yellow, (int)name_len, \
+              name, cols.reset, error); \
+          char *msg = arena_alloc(arena, size); \
+          snprintf(msg, size, "  %sat%s '%s%.*s%s'\n%s", cols.dim, \
+              cols.reset, cols.yellow, (int)name_len, name, \
+              cols.reset, error); \
+          return msg; \
+        } \
     } while (false)
 
   if (stack_depth > max_depth) {
@@ -517,9 +540,11 @@ const char *execute(DStack *dstack, uint16_t addr, uint8_t *memory,
   #undef PUSH
   #undef POP
   #undef CALL
+  #undef THROW
 }
 
-const char *simulate(const char *s, Symbols *syms, size_t depth) {
+bool simulate(Arena *arena, const char *s, Symbols *syms,
+    size_t depth) {
   int addr = -1;
 
   uint8_t memory[65536] = {0};
@@ -540,11 +565,16 @@ const char *simulate(const char *s, Symbols *syms, size_t depth) {
       addr = read_hex_addr(s);
       s += 4;
     } else if (c == '!') {
-      const char *error = execute(&dstack, read_hex_addr(s), memory,
+      const char *error = execute(arena, &dstack, read_hex_addr(s), memory,
           sizeof(memory), syms, 0, depth);
-      if (error) return error;
+      if (error) {
+        Colours cols = get_colours();
+        fprintf(stderr, "%straceback (most recent call last): %s\n", cols.magenta, cols.reset);
+        fprintf(stderr, "%s", error);
+        return true;
+      }
     }
   }
 
-  return NULL;
+  return false;
 }

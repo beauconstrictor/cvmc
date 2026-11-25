@@ -13,7 +13,6 @@
 
 /*
  * TODO: remove duplicated subroutines (by content, not name)
- * TODO: add tracebacks for stack errors in the simulator
  */
 
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \
@@ -235,8 +234,7 @@ int main(int argc, char **argv) {
   if (mode == MODE_INTERPRET) {
     char *tape = read_file(&arena, output);
     if (tape == NULL) cli_error("no such file", argv[0]);
-    const char *error = simulate(tape, &syms, call_stack_depth);
-    if (error) cli_error(error, argv[0]);
+    if (!simulate(&arena, tape, &syms, call_stack_depth)) return 1;
   }
 
   arena_free(&arena);

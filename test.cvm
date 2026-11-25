@@ -1,5 +1,11 @@
 import std
 
+{:test1
+  {
+    rot
+  } call
+}
+
 {:main
-  (putb (isalnum 'G')) putl
+  (forever {1})
 }

@@ -1,6 +1,8 @@
 #ifndef ARENA_H
 #define ARENA_H
 
+#include <stdlib.h>
+
 struct ArenaAllocation {
   struct ArenaAllocation *next;
   struct ArenaAllocation *prev;
