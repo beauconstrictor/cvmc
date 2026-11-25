@@ -295,8 +295,8 @@ var errno: errno-t
 {:b-nor* <a b -- a b-nor b> (bitwise {nor})}
 {:b-xor* <a b -- a b-xor b> (bitwise {xor})}
 
-{:isdigit <c -- c'> (and (ge dup '0') (le over '9')) nip}
-{:islower <c -- c'> (and (ge dup 'a') (le over 'z')) nip}
-{:isupper <c -- c'> (and (ge dup 'A') (le over 'Z')) nip}
-{:isalpha <c -- c'> (or (islower dup) (isupper over)) nip}
-{:isalnum <c -- c'> (or (isalpha dup) (isdigit over)) nip}
+{:isdigit* <c -- c'> (and (ge dup '0') (le over '9')) nip}
+{:islower* <c -- c'> (and (ge dup 'a') (le over 'z')) nip}
+{:isupper* <c -- c'> (and (ge dup 'A') (le over 'Z')) nip}
+{:isalpha* <c -- c'> (or (islower dup) (isupper over)) nip}
+{:isalnum* <c -- c'> (or (isalpha dup) (isdigit over)) nip}
