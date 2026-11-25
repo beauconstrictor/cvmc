@@ -177,7 +177,7 @@ var errno: errno-t
   (if-else (load is-hyphen) {
     dec
   } {
-    (while {(isdigit getc)} {
+    (while {(isdigit (dup getc))} {
       (get acc)
       (mul 10)
       swap
