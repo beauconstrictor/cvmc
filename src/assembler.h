@@ -34,8 +34,10 @@
 #define OPCODE_PUTC  0x10
 #define OPCODE_GETS  0x11
 
-#define OPCODE_BREAK 0xff // can be ignored by vms that do not wish
-                          // to implement a debugger
+// opcodes for 0x80 onward are reserved for debuggers
+
+#define OPCODE_THROW 0x80
+#define OPCODE_BREAK 0x81
 
 #define INSTRUCTIONS         \
   X("call",    OPCODE_CALL)  \
@@ -60,6 +62,7 @@
   X("putc",    OPCODE_PUTC)  \
   X("gets",    OPCODE_GETS)  \
                              \
+  X("throw",   OPCODE_THROW) \
   X("break",   OPCODE_BREAK) \
 
 bool verify_syntax(Tokens *toks, Error *error, Symbols *custom_opcodes);

@@ -8,8 +8,6 @@
 
 #include "simulator.h"
 
-// #define TRACER
-
 int hex_nibble(char c) {
   if (c >= '0' && c <= '9')
       return c - '0';
@@ -80,8 +78,9 @@ void dump_stack(FILE *f, DStack *dstack) {
 }
 
 
-const char *get_name(uint16_t addr, int *len, Symbols *syms) {
-  const char *name = "unknown";
+const char *get_name(Arena *arena, uint16_t addr, int *len,
+    Symbols *syms) {
+  const char *name = NULL;
 
   for (size_t i = 0; i < syms->count; i++) {
     Symbol s = syms->items[i];
@@ -90,17 +89,22 @@ const char *get_name(uint16_t addr, int *len, Symbols *syms) {
     *len = s.length;
     break;
   }
+  if (name != NULL) return name;
 
-  return name;
+  *len = snprintf(NULL, 0, "%d (0x%04x)", addr, addr) ;
+  char *backup = arena_alloc(arena, *len + 1);
+  snprintf(backup, *len + 1, "%d (0x%04x)", addr, addr);
+  return backup;
 }
 
-void dump_inst(FILE *f, Instruction *inst, Symbols *syms) {
+void dump_inst(Arena *arena, FILE *f, Instruction *inst,
+    Symbols *syms) {
   Colours cols = get_colours();
 
   #define PRINT_OPERAND(letter) \
     do { \
       if (inst->letter##_is_callable) {\
-        name = get_name(inst->letter, &len, syms); \
+        name = get_name(arena, inst->letter, &len, syms); \
         fprintf(f, "%.*s ", len, name); \
       } else { \
         fprintf(f, "%d ", inst->letter); \
@@ -114,9 +118,12 @@ void dump_inst(FILE *f, Instruction *inst, Symbols *syms) {
   if (inst->op_count > 0) PRINT_OPERAND(a);
   if (inst->op_count > 1) PRINT_OPERAND(b);
   if (inst->op_count > 2) PRINT_OPERAND(c);
+
+  #undef PRINT_OPERAND
 }
 
-DebuggerMode debugger(Instruction inst, DStack *dstack, Symbols *syms) {
+DebuggerMode debugger(Arena *arena, Instruction inst, DStack *dstack,
+    Symbols *syms) {
   #define COMMAND(name) \
     (strcmp(buf, name) == 0 || (buf[0] == name[0] && buf[1] == '\0'))
 
@@ -124,7 +131,7 @@ DebuggerMode debugger(Instruction inst, DStack *dstack, Symbols *syms) {
 
   Colours cols = get_colours();
  
-  dump_inst(stderr, &inst, syms);
+  dump_inst(arena, stderr, &inst, syms);
   fprintf(stderr, "\t%sresulting stack: %s", cols.dim, cols.reset);
   dump_stack(stderr, dstack);
 
@@ -142,18 +149,18 @@ DebuggerMode debugger(Instruction inst, DStack *dstack, Symbols *syms) {
     fprintf(stderr, "step - execute a single instruction\n");
     fprintf(stderr, "continue - resume program\n");
     fprintf(stderr, "abort - exit to command line\n");
-    return debugger(inst, dstack, syms);
+    return debugger(arena, inst, dstack, syms);
   } else if (COMMAND("step")) {
     return DEBUGGER_STEP;
   } else if (COMMAND("continue")) {
     return DEBUGGER_CONTINUE;
   } else if (COMMAND("abort")) {
     cli_error("abort", "dbg");
-    exit(0);
+    exit(0); 
     return DEBUGGER_CONTINUE;
   } else {
     fprintf(stderr, "%s%sdbg: %sunknown command\n", cols.red, cols.bold, cols.reset);
-    return debugger(inst, dstack, syms);
+    return debugger(arena, inst, dstack, syms);
   }
 }
 
@@ -162,17 +169,17 @@ const char *execute(Arena *arena, DStack *dstack, uint16_t addr,
     size_t max_depth) {
 
   int name_len;
-  const char *name = get_name(addr, &name_len, syms);
+  const char *name = get_name(arena, addr, &name_len, syms);
 
   Colours cols = get_colours();
 
   #define THROW(msg) \
         do { \
           size_t size = snprintf(NULL, 0, \
-              "  %sat%s '%s%.*s%s'\n\n%s%scvmc: %s%s in '%s%.*s%s'''", \
-              cols.dim, cols.reset, \
-              cols.yellow, (int)name_len, name, cols.reset, cols.red, \
-              cols.bold, cols.reset, msg, cols.yellow, (int)name_len, name, cols.reset); \
+              "  %sat%s '%s%.*s%s'\n\n%s%scvmc: %s%s in '%s%.*s%s'", \
+              cols.dim, cols.reset, cols.yellow, (int)name_len, name, \
+              cols.reset, cols.red, cols.bold, cols.reset, msg, \
+              cols.yellow, (int)name_len, name, cols.reset)+1; \
           char *err_msg = arena_alloc(arena, size); \
           snprintf(err_msg, size, \
               "  %sat%s '%s%.*s%s'\n\n%s%scvmc: %s%s in '%s%.*s%s'", \
@@ -494,17 +501,26 @@ const char *execute(Arena *arena, DStack *dstack, uint16_t addr,
 
       } break;
 
+      case OPCODE_THROW: {
+        uint16_t ptr;
+        POP(ptr);
+        const char *msg = (const char *)memory + ptr;
+        char buf[256];
+        snprintf(buf, sizeof(buf), "%.*s", 65535-ptr, msg);
+        THROW(buf);
+      } break;
+
       case OPCODE_BREAK: {
         Colours cols = get_colours();
         int name_len;
-        const char *name = get_name(addr, &name_len, syms);
+        const char *name = get_name(arena, addr, &name_len, syms);
 
         fprintf(stderr, "%s%sdbg: %sbreakpoint hit in '%s%.*s%s' (address %d) \n",
             cols.red, cols.bold, cols.reset,
             cols.yellow, name_len, name, cols.reset,
             addr);
 
-        DebuggerMode mode = debugger(inst, dstack, syms);
+        DebuggerMode mode = debugger(arena, inst, dstack, syms);
 
         if (mode == DEBUGGER_STEP) 
           single_step = true;
@@ -528,7 +544,7 @@ const char *execute(Arena *arena, DStack *dstack, uint16_t addr,
     }
 
     if (single_step && memory[addr] != OPCODE_BREAK) {
-      DebuggerMode mode = debugger(inst, dstack, syms);
+      DebuggerMode mode = debugger(arena, inst, dstack, syms);
       single_step = mode == DEBUGGER_STEP;
     }
 
@@ -568,7 +584,7 @@ bool simulate(Arena *arena, const char *s, Symbols *syms,
       if (error) {
         Colours cols = get_colours();
         fprintf(stderr, "%straceback (most recent call last): %s\n", cols.magenta, cols.reset);
-        fprintf(stderr, "%s", error);
+        fprintf(stderr, "%s\n", error);
         return true;
       }
     }
