@@ -56,8 +56,7 @@ var stack.top: ptr
 {:execute-token <token -- end> <sets errno>
   (geti dup)
   rot rot
-
-  (over swap)
+  tuck
   
   (if-else (eq over) {
     drop

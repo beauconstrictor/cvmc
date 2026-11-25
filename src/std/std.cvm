@@ -169,7 +169,6 @@ var errno: errno-t
 
   (if (eq (load dup) '-') {
     (store (not (isdigit (load (inc dup)))) is-hyphen)
-    drop
     (store true is-neg)
     inc
   })
