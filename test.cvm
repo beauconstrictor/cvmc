@@ -1,11 +1,17 @@
 import std
 
-{:test1
-  {
-    rot
-  } call
-}
-
 {:main
-  (forever {1})
+  var found: bool
+  
+  3
+
+  (if (eq dup 1) {(puts "it's 1!") (store true found)})
+  (if (eq dup 2) {(puts "it's 2!") (store true found)})
+  (if (eq dup 3) {(puts "it's 3!") (store true found)})
+  (if (eq dup 4) {(puts "it's 4!") (store true found)})
+  (if (eq dup 5) {(puts "it's 5!") (store true found)})
+  (if (eq dup 6) {(puts "it's 6!") (store true found)})
+  drop
+  (if (not (load found)) {(puts "it's too big!")})
+  putl
 }

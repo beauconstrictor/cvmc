@@ -585,10 +585,10 @@ bool simulate(Arena *arena, const char *s, Symbols *syms,
         Colours cols = get_colours();
         fprintf(stderr, "%straceback (most recent call last): %s\n", cols.magenta, cols.reset);
         fprintf(stderr, "%s\n", error);
-        return true;
+        return false;
       }
     }
   }
 
-  return false;
+  return true;
 }
