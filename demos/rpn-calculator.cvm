@@ -92,6 +92,7 @@ var stack.top: ptr
 
   (if-else (check-errno) {
     (puts "error") putl
+    (forever {1})
   } {
     pop
     init-stack

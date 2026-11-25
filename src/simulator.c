@@ -160,7 +160,6 @@ DebuggerMode debugger(Instruction inst, DStack *dstack, Symbols *syms) {
 const char *execute(Arena *arena, DStack *dstack, uint16_t addr,
     uint8_t *memory, int memsize, Symbols *syms, size_t stack_depth,
     size_t max_depth) {
-  static char err_msg[256];
 
   int name_len;
   const char *name = get_name(addr, &name_len, syms);
@@ -169,8 +168,14 @@ const char *execute(Arena *arena, DStack *dstack, uint16_t addr,
 
   #define THROW(msg) \
         do { \
-          snprintf(err_msg, sizeof(err_msg), \
+          size_t size = snprintf(NULL, 0, \
               "  %sat%s '%s%.*s%s'\n\n%s%scvmc: %s%s in '%s%.*s%s'''", \
+              cols.dim, cols.reset, \
+              cols.yellow, (int)name_len, name, cols.reset, cols.red, \
+              cols.bold, cols.reset, msg, cols.yellow, (int)name_len, name, cols.reset); \
+          char *err_msg = arena_alloc(arena, size); \
+          snprintf(err_msg, size, \
+              "  %sat%s '%s%.*s%s'\n\n%s%scvmc: %s%s in '%s%.*s%s'", \
               cols.dim, cols.reset, \
               cols.yellow, (int)name_len, name, cols.reset, cols.red, \
               cols.bold, cols.reset, msg, cols.yellow, (int)name_len, name, cols.reset); \
@@ -213,7 +218,7 @@ const char *execute(Arena *arena, DStack *dstack, uint16_t addr,
         if (error != NULL) { \
           size_t size = snprintf(NULL, 0, "  %sat%s '%s%.*s%s'\n%s", \
               cols.dim, cols.reset, cols.yellow, (int)name_len, \
-              name, cols.reset, error); \
+              name, cols.reset, error) + 1; \
           char *msg = arena_alloc(arena, size); \
           snprintf(msg, size, "  %sat%s '%s%.*s%s'\n%s", cols.dim, \
               cols.reset, cols.yellow, (int)name_len, name, \
@@ -222,12 +227,8 @@ const char *execute(Arena *arena, DStack *dstack, uint16_t addr,
         } \
     } while (false)
 
-  if (stack_depth > max_depth) {
-    snprintf(err_msg, sizeof(err_msg),
-        "call stack exhausted (max. of %zu nested calls are allowed)",
-        max_depth);
-    return err_msg;
-  }
+  if (stack_depth > max_depth)
+    THROW("call stack exhausted");
 
   bool single_step = false;
 
@@ -522,10 +523,7 @@ const char *execute(Arena *arena, DStack *dstack, uint16_t addr,
           .op_count = 0,
         };
 
-        snprintf(err_msg, sizeof(err_msg),
-            "unsupported opcode: 0x%02x @ %d (0x%04x)", opcode,
-            addr, addr);
-        return err_msg;
+        THROW("unsupported opcode");
       } break;
     }
 
