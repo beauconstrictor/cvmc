@@ -14,7 +14,7 @@ syntax keyword cvm_keyword
       \ import
       \ get put load store at clear
       \ do doc
-      \ break throw
+      \ break throw assert
       \ errno
 
 syntax keyword cvm_builtin

@@ -35,9 +35,11 @@ var errno: errno-t
 
 {:if* <condition true -- > (if-else {})}
 {:do-while* <body -- > (while {})}
-{:do <op var -- (op)> (get dup) (call rot) (put swap)}
-{:doc <op var -- (op)> (load dup) (call rot) (store swap)}
-{:forever <body -- /> (while (swap {true}))}
+{:do* <op var -- (op)> (get dup) (call rot) (put swap)}
+{:doc* <op var -- (op)> (load dup) (call rot) (store swap)}
+{:forever* <body -- /> (while (swap {true}))}
+
+{:assert* <condition msg -- /> <debugger use only> (if-else swap {drop} {throw})}
 
 {:bool-of* <a -- not not a> (if-else {true} {false})}
 {:not* <a -- not a> (if-else {false} {true})}
