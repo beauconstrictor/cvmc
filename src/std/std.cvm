@@ -214,12 +214,11 @@ var errno: errno-t
     false
   } {
     (do-while {
-      inc
-      (swap (inc swap))
+      inc (swap (inc swap))
       (eq (load over) (load over))
     })
     drop
-    (eq (send (dup dec)))
+    (ge (send (dup dec)))
   })
 }
 
