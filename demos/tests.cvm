@@ -1,0 +1,118 @@
+import std
+
+var count: int
+var pass: int
+var fail: int
+
+var group: str
+
+{:test <assertion message -- > 
+  swap
+
+  (do {inc} count)
+
+  (if-else {
+    (puts "[PASS] ")
+    (do {inc} pass)
+  } {
+    (puts "[FAIL] ")
+    (do {inc} fail)
+  })
+
+  (puts (get group))
+  (puts ": ")
+  puts
+  putl
+}
+
+{:show-results
+  putl
+  (puts "Ran ")
+  (puti (load count))
+  (puts " tests.")
+  putl
+
+  (if-else (eq (get fail) 0) {
+    (puts "All tests passed.") putl
+  } {
+    (puts "Passed: ") 
+    (puti (load pass))
+    (puts " / ")
+    (puti (load count))
+    putl
+  })
+}
+
+{:test-mul
+  (put "mul" group)
+
+  (test (eq (mul 0 5) 0) "zero")
+  (test (eq (mul 1 5) 5) "identity")
+  (test (eq (mul 2 3) 6) "positive")
+  (test (eq (mul 7 8) 56) "larger positive")
+  (test (eq (mul -3 4) -12) "negative left")
+  (test (eq (mul 3 -4) -12) "negative right")
+  (test (eq (mul -3 -4) 12) "both negative")
+  (test (eq (mul 1 -1) -1) "negative one")
+}
+
+{:test-div
+  (put "div" group)
+
+  (test (eq (div 0 5) 0) "zero")
+  (test (eq (div 5 1) 5) "identity")
+  (test (eq (div 6 2) 3) "exact division")
+  (test (eq (div 7 2) 3) "positive remainder")
+  (test (eq (div 100 10) 10) "larger division")
+  (test (eq (div -6 2) -3) "negative numerator")
+  (test (eq (div 6 -2) -3) "negative denominator")
+  (test (eq (div -6 -2) 3) "both negative")
+  (test (eq (div -7 2) -3) "negative remainder")
+}
+
+{:test-pow
+  (put "pow" group)
+
+  (test (eq (pow 0 0) 1) "zero to zero")
+  (test (eq (pow 0 1) 0) "zero to one")
+  (test (eq (pow 1 0) 1) "one to zero")
+  (test (eq (pow 1 5) 1) "one to power")
+  (test (eq (pow 2 0) 1) "zero exponent")
+  (test (eq (pow 2 1) 2) "first power")
+  (test (eq (pow 2 2) 4) "square")
+  (test (eq (pow 2 3) 8) "cube")
+  (test (eq (pow 2 8) 256) "larger exponent")
+  (test (eq (pow 3 4) 81) "different base")
+  (test (eq (pow -2 2) 4) "negative base even")
+  (test (eq (pow -2 3) -8) "negative base odd")
+}
+
+{:test-isspace
+  (put "isspace" group)
+
+  (test (isspace ' ')  "space")
+  (test (isspace '\t') "tab")
+  (test (isspace '\n') "newline")
+  (test (isspace '\v') "vertical tab")
+  (test (isspace '\f') "form feed")
+  (test (isspace '\r') "carriage return")
+
+  (test (not (isspace 'a'))  "letter")
+  (test (not (isspace '0'))  "digit")
+  (test (not (isspace '\0')) "nul")
+  (test (not (isspace 127))  "del")
+  (test (not (isspace 255))  "maximum byte")
+}
+
+{:main
+  (put 0 count)
+  (put 0 pass)
+  (put 0 fail)
+
+  test-mul
+  test-div
+  test-isspace
+  test-isspace
+
+  show-results
+}
