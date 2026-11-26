@@ -27,7 +27,7 @@ clean:
 
 .PHONY: run
 run: $(TARGET)
-	$(TARGET) -i demos/tests.cvm
+	$(TARGET) -i demos/rpn-calculator.cvm
 
 .PHONY: test
 test: $(TARGET) | build
