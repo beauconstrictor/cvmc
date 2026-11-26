@@ -29,7 +29,7 @@ syntax keyword cvm_builtin
       \ putc puti puti putu puts putl putb
       \ gets getc geti
       \ slen send scpy
-      \ isdigit islower isupper isalpha isalnum
+      \ isdigit islower isupper isalpha isalnum isspace
 
 syntax keyword cvm_type
       \ char byte bool i8 u8

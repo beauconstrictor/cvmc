@@ -62,7 +62,7 @@ if-else
 However, you will generally combine anonymous functions with the parenthetical syntax to make this read more naturally:
 
 ```lisp
-(if-else (true) {
+(if-else true {
   (puts "true is true")
 } {
   (puts "false is true")

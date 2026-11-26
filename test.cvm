@@ -1,17 +1,71 @@
 import std
 
-{:main
-  vr found: bool
-  
-  3
+var count: int
+var pass: int
+var fail: int
 
-  (if (eq dup 1) {(puts "it's 1!") (store true found)})
-  (if (eq dup 2) {(puts "it's 2!") (store true found)})
-  (if (eq dup 3) {(puts "it's 3!") (store true found)})
-  (if (eq dup 4) {(puts "it's 4!") (store true found)})
-  (if (eq dup 5) {(puts "it's 5!") (store true found)})
-  (if (eq dup 6) {(puts "it's 6!") (store true found)})
-  drop
-  (if (not (load found)) {(puts "it's too big!")})
+var group: str
+
+{:test <assertion message -- > 
+  swap
+
+  (do {inc} count)
+
+  (if-else {
+    (puts "[PASS] ")
+    (do {inc} pass)
+  } {
+    (puts "[FAIL] ")
+    (do {inc} fail)
+  })
+
+  (puts (get group))
+  (putc '/')
+  puts
   putl
+}
+
+{:show-results
+  putl
+  (puts "Ran ")
+  (puti (load count))
+  (puts " tests.")
+  putl
+
+  (if-else (eq (get fail) 0) {
+    (puts "All tests passed.") putl
+  } {
+    (puts "Passed: ") 
+    (puti (load pass))
+    (puts " / ")
+    (puti (load count))
+    putl
+  })
+}
+
+{:test-isspace
+  (put "isspace" group)
+
+  (test (isspace ' ')  "space")
+  (test (isspace '\t') "tab")
+  (test (isspace '\n') "newline")
+  (test (isspace '\v') "vertical tab")
+  (test (isspace '\f') "form feed")
+  (test (isspace '\r') "carriage return")
+
+  (test (not (isspace 'a'))  "letter")
+  (test (not (isspace '0'))  "digit")
+  (test (not (isspace '\0')) "nul")
+  (test (not (isspace 127))  "del")
+  (test (not (isspace 255))  "maximum byte")
+}
+
+{:main
+  (put 0 count)
+  (put 0 pass)
+  (put 0 fail)
+
+  test-isspace
+
+  show-results
 }

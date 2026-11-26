@@ -303,3 +303,13 @@ var errno: errno-t
 {:isupper* <c -- c'> (and (ge dup 'A') (le over 'Z')) nip}
 {:isalpha* <c -- c'> (or (islower dup) (isupper over)) nip}
 {:isalnum* <c -- c'> (or (isalpha dup) (isdigit over)) nip}
+{:isspace* <c -- c'> 
+  false
+  (if (not dup) {drop (eq dup ' ')})
+  (if (not dup) {drop (eq dup '\t')})
+  (if (not dup) {drop (eq dup '\n')})
+  (if (not dup) {drop (eq dup '\v')})
+  (if (not dup) {drop (eq dup '\f')})
+  (if (not dup) {drop (eq dup '\r')})
+  nip
+}
