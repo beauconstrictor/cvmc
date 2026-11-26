@@ -29,6 +29,10 @@ clean:
 run: $(TARGET)
 	$(TARGET) -i demos/tests.cvm
 
+.PHONY: test
+test: $(TARGET) | build
+	$(TARGET) -i demos/tests.cvm 2>&1 | tee build/tests.txt
+
 .PHONY: dbg
 dbg: $(TARGET)
 	gdb $(TARGET)

@@ -3,10 +3,9 @@ import std
 var count: int
 var pass: int
 var fail: int
-
 var group: str
 
-{:test <assertion message -- > 
+{:test <assertion message -- >
   swap
 
   (do {inc} count)
@@ -33,27 +32,155 @@ var group: str
   putl
 
   (if-else (eq (get fail) 0) {
-    (puts "All tests passed.") putl
+    (puts "All tests passed.")
+    putl
   } {
-    (puts "Passed: ") 
-    (puti (get pass))
-    (puts " / ")
-    (puti (get count))
+    (puts "Failed: ")
+    (puti (get fail))
     putl
   })
+}
+
+{:test-bool
+  (put "bool" group)
+
+  (test (eq (bool-of 0) false) "zero")
+  (test (eq (bool-of 1) true) "one")
+  (test (eq (bool-of 2) true) "nonzero")
+  (test (eq (bool-of -1) true) "negative")
+
+  (test (eq (not true) false) "not true")
+  (test (eq (not false) true) "not false")
+  (test (eq (not (not true)) true) "double not")
+
+  (test (eq (and true true) true) "and true true")
+  (test (eq (and true false) false) "and true false")
+  (test (eq (and false true) false) "and false true")
+  (test (eq (and false false) false) "and false false")
+
+  (test (eq (nand true true) false) "nand true true")
+  (test (eq (nand true false) true) "nand true false")
+  (test (eq (nand false true) true) "nand false true")
+  (test (eq (nand false false) true) "nand false false")
+
+  (test (eq (or true true) true) "or true true")
+  (test (eq (or true false) true) "or true false")
+  (test (eq (or false true) true) "or false true")
+  (test (eq (or false false) false) "or false false")
+
+  (test (eq (nor true true) false) "nor true true")
+  (test (eq (nor true false) false) "nor true false")
+  (test (eq (nor false true) false) "nor false true")
+  (test (eq (nor false false) true) "nor false false")
+
+  (test (eq (xor true true) false) "xor true true")
+  (test (eq (xor true false) true) "xor true false")
+  (test (eq (xor false true) true) "xor false true")
+  (test (eq (xor false false) false) "xor false false")
+}
+
+{:test-comparisons
+  (put "comparisons" group)
+
+  (test (eq (eq 5 5) true) "equal")
+  (test (eq (eq 5 6) false) "not equal")
+
+  (test (eq (ne 5 6) true) "not equal")
+  (test (eq (ne 5 5) false) "not equal false")
+
+  (test (eq (lt 1 2) true) "less than")
+  (test (eq (lt 2 1) false) "less than false")
+  (test (eq (lt 2 2) false) "less than equal")
+
+  (test (eq (gt 2 1) true) "greater than")
+  (test (eq (gt 1 2) false) "greater than false")
+  (test (eq (gt 2 2) false) "greater than equal")
+
+  (test (eq (le 1 2) true) "less equal")
+  (test (eq (le 2 2) true) "less equal boundary")
+  (test (eq (le 3 2) false) "less equal false")
+
+  (test (eq (ge 2 1) true) "greater equal")
+  (test (eq (ge 2 2) true) "greater equal boundary")
+  (test (eq (ge 1 2) false) "greater equal false")
+}
+
+{:test-integer-helpers
+  (put "integer-helpers" group)
+
+  (test (eq (inc 0) 1) "inc zero")
+  (test (eq (inc 10) 11) "inc positive")
+  (test (eq (inc -10) -9) "inc negative")
+
+  (test (eq (dec 0) -1) "dec zero")
+  (test (eq (dec 10) 9) "dec positive")
+  (test (eq (dec -10) -11) "dec negative")
+
+  (test (eq (neg 0) 0) "neg zero")
+  (test (eq (neg 5) -5) "neg positive")
+  (test (eq (neg -5) 5) "neg negative")
+
+  (test (eq (abs 0) 0) "abs zero")
+  (test (eq (abs 5) 5) "abs positive")
+  (test (eq (abs -5) 5) "abs negative")
+
+  (test (eq (sgn 0) 0) "sgn zero")
+  (test (eq (sgn 5) 1) "sgn positive")
+  (test (eq (sgn -5) -1) "sgn negative")
+}
+
+{:test-memory-arithmetic
+  (put "memory-arithmetic" group)
+
+  (test (eq (at 100 1 0) 100) "first element")
+  (test (eq (at 100 1 5) 105) "byte indexing")
+  (test (eq (at 100 2 1) 102) "two byte indexing")
+  (test (eq (at 100 2 5) 110) "larger indexing")
+  (test (eq (at 100 4 3) 112) "four byte indexing")
 }
 
 {:test-mul
   (put "mul" group)
 
-  (test (eq (mul 0 5) 0) "zero")
+  (test (eq (mul 0 0) 0) "zero zero")
+  (test (eq (mul 0 5) 0) "zero positive")
+  (test (eq (mul 5 0) 0) "positive zero")
+
   (test (eq (mul 1 5) 5) "identity")
-  (test (eq (mul 2 3) 6) "positive")
+  (test (eq (mul 2 3) 6) "small positive")
   (test (eq (mul 7 8) 56) "larger positive")
-  (test (eq (mul -3 4) -12) "negative left")
-  (test (eq (mul 3 -4) -12) "negative right")
+  (test (eq (mul 100 100) 10000) "large positive")
+
+  (test (eq (mul -1 5) -5) "negative left")
+  (test (eq (mul 5 -1) -5) "negative right")
+  (test (eq (mul -3 4) -12) "negative left larger")
+  (test (eq (mul 3 -4) -12) "negative right larger")
   (test (eq (mul -3 -4) 12) "both negative")
-  (test (eq (mul 1 -1) -1) "negative one")
+
+  (test (eq (mul -1 -1) 1) "negative one")
+}
+
+{:test-pow
+  (put "pow" group)
+
+  (test (eq (pow 0 0) 1) "zero to zero")
+  (test (eq (pow 0 1) 0) "zero to one")
+  (test (eq (pow 1 0) 1) "one to zero")
+  (test (eq (pow 1 5) 1) "one to power")
+
+  (test (eq (pow 2 0) 1) "zero exponent")
+  (test (eq (pow 2 1) 2) "first power")
+  (test (eq (pow 2 2) 4) "square")
+  (test (eq (pow 2 3) 8) "cube")
+  (test (eq (pow 2 8) 256) "larger exponent")
+
+  (test (eq (pow 3 2) 9) "different base")
+  (test (eq (pow 3 4) 81) "larger exponent")
+
+  (test (eq (pow -2 2) 4) "negative base even")
+  (test (eq (pow -2 3) -8) "negative base odd")
+  (test (eq (pow -1 15) -1) "negative one odd")
+  (test (eq (pow -1 16) 1) "negative one even")
 }
 
 {:test-div
@@ -64,44 +191,220 @@ var group: str
   (test (eq (div 6 2) 3) "exact division")
   (test (eq (div 7 2) 3) "positive remainder")
   (test (eq (div 100 10) 10) "larger division")
+
   (test (eq (div -6 2) -3) "negative numerator")
   (test (eq (div 6 -2) -3) "negative denominator")
   (test (eq (div -6 -2) 3) "both negative")
   (test (eq (div -7 2) -3) "negative remainder")
+
+  (test (eq (mod 7 2) 1) "positive remainder")
+  (test (eq (mod 8 2) 0) "zero remainder")
+  (test (eq (mod 10 3) 1) "larger remainder")
+  (test (eq (mod -7 2) -1) "negative remainder")
+  (test (eq (mod 7 -2) 1) "negative divisor")
+  (test (eq (mod -7 -2) -1) "both negative")
 }
 
-{:test-pow
-  (put "pow" group)
+{:test-udiv
+  (put "udiv" group)
 
-  (test (eq (pow 0 0) 1) "zero to zero")
-  (test (eq (pow 0 1) 0) "zero to one")
-  (test (eq (pow 1 0) 1) "one to zero")
-  (test (eq (pow 1 5) 1) "one to power")
-  (test (eq (pow 2 0) 1) "zero exponent")
-  (test (eq (pow 2 1) 2) "first power")
-  (test (eq (pow 2 2) 4) "square")
-  (test (eq (pow 2 3) 8) "cube")
-  (test (eq (pow 2 8) 256) "larger exponent")
-  (test (eq (pow 3 4) 81) "different base")
-  (test (eq (pow -2 2) 4) "negative base even")
-  (test (eq (pow -2 3) -8) "negative base odd")
+  (test (eq (udiv 0 5) 0) "zero")
+  (test (eq (udiv 5 1) 5) "identity")
+  (test (eq (udiv 6 2) 3) "exact division")
+  (test (eq (udiv 7 2) 3) "remainder")
+  (test (eq (udiv 100 10) 10) "larger division")
+  (test (eq (udiv 65535 1) 65535) "maximum unsigned")
+
+  (test (eq (umod 7 2) 1) "remainder")
+  (test (eq (umod 8 2) 0) "zero remainder")
+  (test (eq (umod 65535 256) 255) "maximum unsigned remainder")
+}
+
+{:test-b-not
+  (put "b-not" group)
+
+  (test (eq (b-not 0) 65535) "zero")
+  (test (eq (b-not 65535) 0) "all bits")
+  (test (eq (b-not 255) 65280) "low byte")
+  (test (eq (b-not 65280) 255) "high byte")
+  (test (eq (b-not (b-not 12345)) 12345) "double complement")
+}
+
+{:test-b-and
+  (put "b-and" group)
+
+  (test (eq (b-and 0 0) 0) "zero zero")
+  (test (eq (b-and 255 0) 0) "and zero")
+  (test (eq (b-and 255 255) 255) "identity")
+  (test (eq (b-and 15 10) 10) "overlapping bits")
+  (test (eq (b-and 12 10) 8) "partial overlap")
+  (test (eq (b-and 1 2) 0) "no overlap")
+  (test (eq (b-and 65535 12345) 12345) "all bits")
+}
+
+{:test-b-nand
+  (put "b-nand" group)
+
+  (test (eq (b-nand 0 0) 65535) "zero zero")
+  (test (eq (b-nand 255 255) 65280) "same bits")
+  (test (eq (b-nand 15 10) 65525) "overlapping bits")
+  (test (eq (b-nand 65535 12345) 53190) "all bits")
+}
+
+{:test-b-or
+  (put "b-or" group)
+
+  (test (eq (b-or 0 0) 0) "zero")
+  (test (eq (b-or 255 0) 255) "identity")
+  (test (eq (b-or 255 255) 255) "same bits")
+  (test (eq (b-or 15 10) 15) "overlapping bits")
+  (test (eq (b-or 1 2) 3) "separate bits")
+  (test (eq (b-or 8 4) 12) "different bits")
+  (test (eq (b-or 65535 12345) 65535) "all bits")
+}
+
+{:test-b-nor
+  (put "b-nor" group)
+
+  (test (eq (b-nor 0 0) 65535) "zero zero")
+  (test (eq (b-nor 255 0) 65280) "identity")
+  (test (eq (b-nor 255 255) 65280) "same bits")
+  (test (eq (b-nor 15 10) 65520) "overlapping bits")
+  (test (eq (b-nor 1 2) 65532) "separate bits")
+}
+
+{:test-b-xor
+  (put "b-xor" group)
+
+  (test (eq (b-xor 0 0) 0) "zero")
+  (test (eq (b-xor 255 0) 255) "identity")
+  (test (eq (b-xor 255 255) 0) "same bits")
+  (test (eq (b-xor 15 10) 5) "overlapping bits")
+  (test (eq (b-xor 1 2) 3) "separate bits")
+  (test (eq (b-xor 12 10) 6) "partial overlap")
+  (test (eq (b-xor 65535 12345) 53190) "all bits")
+}
+
+{:test-shifts
+  (put "shifts" group)
+
+  (test (eq (shl 1 0) 1) "left zero")
+  (test (eq (shl 1 1) 2) "left one")
+  (test (eq (shl 1 4) 16) "left four")
+  (test (eq (shl 1 8) 256) "left byte")
+  (test (eq (shl 1 15) 32768) "left maximum bit")
+
+  (test (eq (shr 256 0) 256) "right zero")
+  (test (eq (shr 256 1) 128) "right one")
+  (test (eq (shr 256 4) 16) "right four")
+  (test (eq (shr 256 8) 1) "right byte")
+  (test (eq (shr 65535 1) 32767) "right maximum unsigned")
+}
+
+{:test-isdigit
+  (put "isdigit" group)
+
+  (test (isdigit '0') "zero")
+  (test (isdigit '1') "one")
+  (test (isdigit '5') "five")
+  (test (isdigit '9') "nine")
+
+  (test (not (isdigit '/')) "before digits")
+  (test (not (isdigit ':')) "after digits")
+  (test (not (isdigit 'a')) "letter")
+  (test (not (isdigit ' ')) "space")
+  (test (not (isdigit '\0')) "nul")
+}
+
+{:test-islower
+  (put "islower" group)
+
+  (test (islower 'a') "first lowercase")
+  (test (islower 'm') "middle lowercase")
+  (test (islower 'z') "last lowercase")
+
+  (test (not (islower '`')) "before lowercase")
+  (test (not (islower '{')) "after lowercase")
+  (test (not (islower 'A')) "uppercase")
+  (test (not (islower '0')) "digit")
+}
+
+{:test-isupper
+  (put "isupper" group)
+
+  (test (isupper 'A') "first uppercase")
+  (test (isupper 'M') "middle uppercase")
+  (test (isupper 'Z') "last uppercase")
+
+  (test (not (isupper '@')) "before uppercase")
+  (test (not (isupper '[')) "after uppercase")
+  (test (not (isupper 'a')) "lowercase")
+  (test (not (isupper '0')) "digit")
+}
+
+{:test-isalpha
+  (put "isalpha" group)
+
+  (test (isalpha 'a') "lowercase")
+  (test (isalpha 'z') "last lowercase")
+  (test (isalpha 'A') "uppercase")
+  (test (isalpha 'Z') "last uppercase")
+
+  (test (not (isalpha '0')) "digit")
+  (test (not (isalpha ' ')) "space")
+  (test (not (isalpha '!')) "punctuation")
+}
+
+{:test-isalnum
+  (put "isalnum" group)
+
+  (test (isalnum 'a') "lowercase")
+  (test (isalnum 'Z') "uppercase")
+  (test (isalnum '0') "zero")
+  (test (isalnum '9') "nine")
+
+  (test (not (isalnum ' ')) "space")
+  (test (not (isalnum '!')) "punctuation")
+  (test (not (isalnum '\0')) "nul")
 }
 
 {:test-isspace
   (put "isspace" group)
 
-  (test (isspace ' ')  "space")
+  (test (isspace ' ') "space")
   (test (isspace '\t') "tab")
   (test (isspace '\n') "newline")
   (test (isspace '\v') "vertical tab")
   (test (isspace '\f') "form feed")
   (test (isspace '\r') "carriage return")
 
-  (test (not (isspace 'a'))  "letter")
-  (test (not (isspace '0'))  "digit")
+  (test (not (isspace 'a')) "letter")
+  (test (not (isspace '0')) "digit")
   (test (not (isspace '\0')) "nul")
-  (test (not (isspace 127))  "del")
-  (test (not (isspace 255))  "maximum byte")
+  (test (not (isspace '\b')) "backspace")
+  (test (not (isspace 127)) "del")
+  (test (not (isspace 255)) "maximum byte")
+}
+
+{:test-strings
+  (put "strings" group)
+
+  (test (eq (slen "") 0) "empty string")
+  (test (eq (slen "a") 1) "single character")
+  (test (eq (slen "hello") 5) "ordinary string")
+  (test (eq (slen "hello world") 11) "string with space")
+  (test (eq (slen "1234567890") 10) "numeric string")
+
+  (test (scmp "" "") "empty equality")
+  (test (scmp "a" "a") "single equality")
+  (test (scmp "hello" "hello") "ordinary equality")
+  (test (scmp "hello world" "hello world") "long equality")
+
+  (test (not (scmp "a" "b")) "different characters")
+  (test (not (scmp "abc" "abd")) "different ending")
+  (test (not (scmp "abc" "abcd")) "different lengths")
+  (test (not (scmp "abcd" "abc")) "shorter second")
+  (test (not (scmp "hello" "world")) "different strings")
 }
 
 {:main
@@ -109,10 +412,32 @@ var group: str
   (put 0 pass)
   (put 0 fail)
 
+  test-bool
+  test-comparisons
+  test-integer-helpers
+  test-memory-arithmetic
+
   test-mul
+  test-pow
   test-div
+  test-udiv
+
+  test-b-not
+  test-b-and
+  test-b-nand
+  test-b-or
+  test-b-nor
+  test-b-xor
+  test-shifts
+
+  test-isdigit
+  test-islower
+  test-isupper
+  test-isalpha
+  test-isalnum
   test-isspace
-  test-isspace
+
+  test-strings
 
   show-results
 }
