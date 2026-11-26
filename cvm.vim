@@ -28,7 +28,7 @@ syntax keyword cvm_builtin
       \ clear-errno check-errno
       \ putc puti puti putu puts putl putb
       \ gets getc geti
-      \ slen send scpy
+      \ slen send scpy scmp
       \ isdigit islower isupper isalpha isalnum isspace
 
 syntax keyword cvm_type
