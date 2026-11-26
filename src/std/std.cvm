@@ -196,7 +196,7 @@ var errno: errno-t
 }
 
 {:send* <s -- end> (while {getc} {}) dec}
-{:slen* <s -- len> (dec (sub dup send swap))}
+{:slen* <s -- len> (sub dup send swap)}
 
 {:scpy* <src dst -- >
   var dst: str

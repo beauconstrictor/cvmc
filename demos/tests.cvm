@@ -197,6 +197,11 @@ var group: str
   (test (eq (div -6 -2) 3) "both negative")
   (test (eq (div -7 2) -3) "negative remainder")
 
+}
+
+{:test-mod
+  (put "mod" group)
+
   (test (eq (mod 7 2) 1) "positive remainder")
   (test (eq (mod 8 2) 0) "zero remainder")
   (test (eq (mod 10 3) 1) "larger remainder")
@@ -420,6 +425,7 @@ var group: str
   test-mul
   test-pow
   test-div
+  test-mod
   test-udiv
 
   test-b-not

@@ -27,11 +27,11 @@ clean:
 
 .PHONY: run
 run: $(TARGET)
-	$(TARGET) -i demos/rpn-calculator.cvm
+	$(TARGET) -i test.cvm
 
 .PHONY: test
 test: $(TARGET) | build
-	$(TARGET) -i demos/tests.cvm 2>&1 | tee build/tests.txt
+	stdbuf -oL $(TARGET) -i demos/tests.cvm 2>&1 | tee build/tests.txt
 
 .PHONY: dbg
 dbg: $(TARGET)
