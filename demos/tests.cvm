@@ -12,7 +12,7 @@ var group: str
   (do {inc} count)
 
   (if-else {
-    (puts "[PASS] ")
+    (puts "       ")
     (do {inc} pass)
   } {
     (puts "[FAIL] ")
@@ -28,7 +28,7 @@ var group: str
 {:show-results
   putl
   (puts "Ran ")
-  (puti (load count))
+  (puti (get count))
   (puts " tests.")
   putl
 
@@ -36,9 +36,9 @@ var group: str
     (puts "All tests passed.") putl
   } {
     (puts "Passed: ") 
-    (puti (load pass))
+    (puti (get pass))
     (puts " / ")
-    (puti (load count))
+    (puti (get count))
     putl
   })
 }
