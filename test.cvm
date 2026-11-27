@@ -1,5 +1,5 @@
 import std
 
 {:main
-  (puti (min 3 5)) putl
+  (puti (clamp 16 5 8)) putl
 }

@@ -72,6 +72,7 @@ var errno: errno-t
 
 {:min* <a b -- min(a b)> (if-else (gt over over) {nip} {drop})}
 {:max* <a b -- min(a b)> (if-else (gt over over) {drop} {nip})}
+{:clamp* <a lo hi -- a'> (max (min rot))}
 
 {:neg* <n -- -n> (sub (swap 0))}
 {:abs* <n -- |n|> (if (lt dup 0) {neg})}
