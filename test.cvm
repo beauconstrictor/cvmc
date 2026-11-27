@@ -1,5 +1,5 @@
 import std
 
 {:main
-  (putb (scmp "bsc" "asc")) putl
+  (puti (min 3 5)) putl
 }

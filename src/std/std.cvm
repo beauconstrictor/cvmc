@@ -70,6 +70,9 @@ var errno: errno-t
 {:dec* <n -- n-1> (sub 1)}
 {:inc* <n -- n+1> (add 1)}
 
+{:min* <a b -- min(a b)> (if-else (gt over over) {nip} {drop})}
+{:max* <a b -- min(a b)> (if-else (gt over over) {drop} {nip})}
+
 {:neg* <n -- -n> (sub (swap 0))}
 {:abs* <n -- |n|> (if (lt dup 0) {neg})}
 {:sgn* <n -- n'> 
