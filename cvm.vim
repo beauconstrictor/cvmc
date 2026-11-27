@@ -23,6 +23,7 @@ syntax keyword cvm_builtin
       \ add sub inc dec mul div udiv mod umod pow
       \ shl shr b-not b-and b-nand b-or b-nor b-xor
       \ gt lt ge le eq ne ucmp
+      \ min max
       \ not and nand or nor xor bool-of
       \ dup drop swap over rot nip tuck
       \ clear-errno check-errno
