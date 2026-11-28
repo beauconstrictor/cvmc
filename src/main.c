@@ -12,9 +12,10 @@
 #include "preprocessor.h"
 
 /*
- * TODO: remove duplicated subroutines (by content, not name)
- * TODO: allow requires after imports
- * TODO: allow vars and consts referenced before definition
+ * TODO:  remove duplicated subroutines (by content, not name)
+ * TODO:  allow vars and consts referenced before definition
+ * FIXME: Symbols and Tokens alloc their own memory, outside of the
+ *        arena
  */
 
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \

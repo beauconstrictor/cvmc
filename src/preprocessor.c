@@ -690,6 +690,7 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
   static char buf[256];
 
   Symbols imported = {0};
+  Tokens required = {0};
 
   size_t i = 0;
   while (i < toks->count) {
@@ -703,8 +704,7 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
       if (!has_next || next.kind != TOKEN_WORD)
         GIVE_ERROR_WITH_LEXEME("expected module name after '%.*s'", tok);
 
-      if (!lookup_symbol(next.start, next.length, &imported, NULL))
-        GIVE_ERROR_WITH_LEXEME("required module was never imported: '%.*s'", next);
+      insert_token(&required, 0, next);
 
       if (!remove_token(toks, i)) return false;
       if (!remove_token(toks, i)) return false;
@@ -756,6 +756,14 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
       if (!insert_token(toks, insert++, subtok)) return false;
     }
   }
+
+  for (size_t i = 0; i < required.count; i++) {
+      Token tok = required.items[i];
+      if (!lookup_symbol(tok.start, tok.length, &imported, NULL))
+        GIVE_ERROR_WITH_LEXEME("required module was never imported: '%.*s'", tok);
+  }
+
+  free(required.items);
 
   return true;
 }
