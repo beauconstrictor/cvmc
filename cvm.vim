@@ -61,7 +61,7 @@ highlight link cvm_char_literal Character
 syntax match cvm_definition /{:\zs[a-zA-Z0-9_.-]\+/
 highlight link cvm_definition Define
 
-syntax match cvm_internal /__\w*/
+syntax match cvm_internal /__[a-zA-Z0-9_-]*/
 highlight link cvm_internal Error
 
 syntax keyword cvm_bool true false
