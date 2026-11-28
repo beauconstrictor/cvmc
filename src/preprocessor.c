@@ -721,18 +721,19 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
     else if (next.kind != TOKEN_WORD)
       GIVE_ERROR("expected name after import", next);
 
-    bool already_imported = false;
-    append_token_symbol(&imported, &next, 0, &already_imported);
-    if (already_imported) continue;
-
     char *path = arena_alloc(arena, PATH_MAX);
     if (path == NULL) return false;
     Tokens new_toks = {0};
     size_t path_len = snprintf(path, PATH_MAX, "%.*s.cvm",
         (int)next.length, next.start);
 
+    bool already_imported = false;
+    append_token_symbol(&imported, &next, 0, &already_imported);
+
     if (!remove_token(toks, i)) return false;
     if (!remove_token(toks, i)) return false;
+
+    if (already_imported) continue;
 
     bool reimported = false;
     append_symbol((Symbol) {

@@ -13,6 +13,8 @@
 
 /*
  * TODO: remove duplicated subroutines (by content, not name)
+ * TODO: allow requires after imports
+ * TODO: allow vars and consts referenced before definition
  */
 
 #define USAGE "Usage: %s [OPTION]... [MODE] FILE \n" \
