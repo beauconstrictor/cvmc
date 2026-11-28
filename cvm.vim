@@ -36,14 +36,10 @@ syntax keyword cvm_type
       \ char byte bool i8 u8
       \ int uint i16 u16 ptr callable str errno-t
 
-syntax keyword cvm_internal
-      \ udiv-mod div-mod bitwise
-
 highlight link cvm_loop Repeat
 highlight link cvm_if Conditional
 highlight link cvm_keyword Keyword
 highlight link cvm_builtin Function
-highlight link cvm_internal Error
 
 syntax match cvm_comment_oneline "--.*"
 highlight link cvm_comment_oneline Comment
@@ -64,6 +60,9 @@ highlight link cvm_char_literal Character
 
 syntax match cvm_definition /{:\zs[a-zA-Z0-9_.-]\+/
 highlight link cvm_definition Define
+
+syntax match cvm_internal /__\w*/
+highlight link cvm_internal Error
 
 syntax keyword cvm_bool true false
 highlight link cvm_bool Boolean

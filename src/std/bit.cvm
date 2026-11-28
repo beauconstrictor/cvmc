@@ -3,7 +3,7 @@ require std
 {:shl* <n count -- n shl count> (mul (pow 2 swap))}
 {:shr* <n count -- n shr count> (udiv (pow 2 swap))}
 
-{:bitwise <a b op -- n>
+{:__bitwise <a b op -- n>
   var op: callable
   var a: int
   var b: int
@@ -37,9 +37,9 @@ require std
 }
 
 {:b-not <n -- ~n> (sub neg 1)}
-{:b-and* <a b -- a b-and b> (bitwise {and})}
-{:b-nand* <a b -- a b-nand b> (bitwise {nand})}
-{:b-or* <a b -- a b-or b> (bitwise {or})}
-{:b-nor* <a b -- a b-nor b> (bitwise {nor})}
-{:b-xor* <a b -- a b-xor b> (bitwise {xor})}
+{:b-and* <a b -- a b-and b>   (__bitwise {and})}
+{:b-nand* <a b -- a b-nand b> (__bitwise {nand})}
+{:b-or* <a b -- a b-or b>     (__bitwise {or})}
+{:b-nor* <a b -- a b-nor b>   (__bitwise {nor})}
+{:b-xor* <a b -- a b-xor b>   (__bitwise {xor})}
 

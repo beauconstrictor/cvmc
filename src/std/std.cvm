@@ -118,7 +118,7 @@ var errno: errno-t
 }
 
 
-{:udiv-mod <a b -- a/b a%b>
+{:__udiv-mod <a b -- a/b a%b>
   (if-else (eq dup 0) {
     (put errno.div-zero errno)
   } {
@@ -135,10 +135,10 @@ var errno: errno-t
     drop
   })
 }
-{:udiv* <a b -- a/b> <sets errno> (drop udiv-mod)}
-{:umod* <a b -- a%b> <sets errno> (drop (swap udiv-mod))}
+{:udiv* <a b -- a/b> <sets errno> (drop __udiv-mod)}
+{:umod* <a b -- a%b> <sets errno> (drop (swap __udiv-mod))}
 
-{:div-mod
+{:__div-mod
   (if-else (eq dup 0) {
     (put errno.div-zero errno)
   } {
@@ -163,6 +163,6 @@ var errno: errno-t
     (swap (set-sgn rot rot swap))
   })
 }
-{:div* <a b -- a/b> <sets errno> (drop div-mod)}
-{:mod* <a b -- a%b> <sets errno> (drop (swap div-mod))}
+{:div* <a b -- a/b> <sets errno> (drop __div-mod)}
+{:mod* <a b -- a%b> <sets errno> (drop (swap __div-mod))}
 
