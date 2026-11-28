@@ -268,7 +268,9 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
       s++;
       FLUSH_TOK(TOKEN_NUMBER);
       continue;
-    } else if (*s == ':' && isalnum((unsigned char)s[1]) && start == s) {
+    } else if (*s == ':'
+        && (isalnum((unsigned char)s[1]) || s[1] == '_')
+        && start == s) {
       EXHAUST_CHRS(UPPER_LETTERS LOWER_LETTERS DIGITS "-_.*");
       start++;
       FLUSH_TOK(TOKEN_DEFINITION);

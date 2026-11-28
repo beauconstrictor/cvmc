@@ -671,6 +671,9 @@ char *read_module(Arena *arena, const char *path) {
       }
 
   STD_MODULE(std)
+  STD_MODULE(bit)
+  STD_MODULE(str)
+  STD_MODULE(is)
   STD_MODULE(io)
 
   if (is_std) {
@@ -691,6 +694,12 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
   size_t i = 0;
   while (i < toks->count) {
     Token tok = toks->items[i];
+
+    if (tok.kind == TOKEN_REQUIRE) {
+      if (!remove_token(toks, i)) return false;
+      if (!remove_token(toks, i)) return false;
+      continue;
+    }
 
     if (tok.kind != TOKEN_IMPORT) {
       i++;

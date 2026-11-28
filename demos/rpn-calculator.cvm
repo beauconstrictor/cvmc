@@ -1,4 +1,7 @@
 import std
+import str
+import bit
+import io
 
 -- this is a pattern for multiline string literals; the inc skips the
 -- leading newline.

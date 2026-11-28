@@ -1,4 +1,5 @@
 import std
+import io
 
 {:main
   (puts "Hello, world!") putl
