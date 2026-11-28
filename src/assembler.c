@@ -61,6 +61,7 @@ bool verify_syntax(Tokens *toks, Error *error, Symbols *custom_opcodes) {
     switch (tok.kind) {
       case TOKEN_LSQUARE:
       case TOKEN_RSQUARE:
+      case TOKEN_REQUIRE:
       case TOKEN_STRING:
       case TOKEN_ASSIGN:
       case TOKEN_IMPORT:
@@ -172,21 +173,6 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
 
     switch (tok.kind) {
       // all eliminated by the preprocessor
-      case TOKEN_IMPORT:
-      case TOKEN_LSQUARE:
-      case TOKEN_RSQUARE:
-      case TOKEN_LBRACE:
-      case TOKEN_STRING:
-      case TOKEN_ASSIGN:
-      case TOKEN_CONST:
-      case TOKEN_LPARA:
-      case TOKEN_RPARA:
-      case TOKEN_COLON:
-      case TOKEN_ADDR:
-      case TOKEN_ENUM:
-      case TOKEN_VAR:
-        break;
-
       case TOKEN_DEFINITION: {
         bool redefined = false;
         if (tok.start[tok.length-1] == '*') tok.length--;
@@ -222,6 +208,8 @@ bool arrange_definitions(Symbols *syms, Symbols *vars, Tokens *toks,
         // inserts RAW bytes, not to be interpreted as opcodes
         pc++;
       } break;
+
+      default: break;
     }
 
     is_addr_of = tok.kind == TOKEN_ADDR;

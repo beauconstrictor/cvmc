@@ -2,5 +2,8 @@
 #define DATA_H
 
 #include "../build/std.h"
+#include "../build/bit.h"
+#include "../build/str.h"
+#include "../build/io.h"
 
 #endif // DATA_H

@@ -6,6 +6,7 @@
 
 #include "errors.h"
 
+#define REQUIRE_WORD "require"
 #define IMPORT_WORD "import"
 #define CONST_WORD "const"
 #define ENUM_WORD "enum"
@@ -15,6 +16,7 @@
   X(DEFINITION) \
   X(LSQUARE) \
   X(RSQUARE) \
+  X(REQUIRE) \
   X(IMPORT) \
   X(NUMBER) \
   X(STRING) \

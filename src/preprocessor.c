@@ -662,11 +662,16 @@ char *read_module(Arena *arena, const char *path) {
   char *buf;
   size_t len;
 
-  if (strcmp(path, "std.cvm") == 0) {
-    buf = (char *)src_std_std_cvm;
-    len = src_std_std_cvm_len;
-    is_std = true;
-  }
+  #define CONCAT3(a, b, c) a##b##c
+  #define STD_MODULE(name) \
+      if (!is_std && strcmp(path, #name ".cvm") == 0) { \
+        buf = (char *)CONCAT3(src_std_, name, _cvm); \
+        len = CONCAT3(src_std_, name, _cvm_len); \
+        is_std = true; \
+      }
+
+  STD_MODULE(std)
+  STD_MODULE(io)
 
   if (is_std) {
     char *source = arena_alloc(arena, len + 1);

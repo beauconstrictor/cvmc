@@ -1,0 +1,29 @@
+require std
+
+{:send* <s -- end> (while {getc} {}) dec}
+{:slen* <s -- len> (sub dup send swap)}
+
+{:scpy* <src dst -- >
+  var dst: str
+  (put dst)
+
+  (while {(dup getc)} {
+    (store (get dst) swap)
+    (put (inc (get dst)) swap)
+  })
+}
+
+{:scmp <a b -- eq> 
+  (if-else (ne (slen over) (slen over)) {
+    drop drop
+    false
+  } {
+    (do-while {
+      inc (swap (inc swap))
+      (eq (load over) (load over))
+    })
+    drop
+    (ge (send (dup dec)))
+  })
+}
+

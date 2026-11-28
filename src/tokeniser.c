@@ -325,6 +325,7 @@ bool lexer(const char *s, const char *path, Tokens *toks, Error *error) {
     SPECIAL_WORD(VAR_WORD, TOKEN_VAR);
     SPECIAL_WORD(IMPORT_WORD, TOKEN_IMPORT);
     SPECIAL_WORD(ENUM_WORD, TOKEN_ENUM);
+    SPECIAL_WORD(REQUIRE_WORD, TOKEN_REQUIRE);
 
     s++;
   }

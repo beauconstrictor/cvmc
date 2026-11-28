@@ -1,0 +1,63 @@
+require std
+
+{:puts* <s -- > (while {(dup getc)} {putc}) drop drop}
+{:putb* <b -- > (if-else {(puts "true")} {(puts "false")})}
+{:putl* < -- > (putc '\n')}
+
+{:puti* <n -- >
+  (if (lt dup 0) {
+    (putc '-')
+  })
+
+  (if-else (eq dup -32768) {
+    (puts "32768") -- doesn't fit when abs'd, so we have to do it
+                   -- directly
+  } {
+    abs
+    (if (gt dup 9) {
+      (puti (div dup 10))
+    })
+    (putc (add (mod 10) '0'))
+  })
+}
+
+{:putu* <n -- >
+  (if (gt (ucmp dup 9)) {
+    (puti (udiv dup 10))
+  })
+  (putc (add (umod 10) '0'))
+}
+
+
+{:getc* <buf -- after c> (load dup) swap inc swap}
+{:geti* <buf -- after i>
+  var acc: int
+  var is-neg: bool
+  var is-hyphen: bool
+  (put 0 acc)
+  (put false is-neg)
+
+  (if (eq (load dup) '-') {
+    (store (not (isdigit (load (inc dup)))) is-hyphen)
+    (store true is-neg)
+    inc
+  })
+
+  (if-else (load is-hyphen) {
+    dec
+  } {
+    (while {(isdigit (dup getc))} {
+      (get acc)
+      (mul 10)
+      swap
+      (add (sub '0'))
+      (put acc)
+    }) drop
+
+    dec
+
+    (if (load is-neg) {(do {neg} acc)})
+  })
+
+  (get acc)
+}

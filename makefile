@@ -5,6 +5,8 @@ TARGET = build/cvmc
 
 SRCS = $(wildcard src/*.c)
 OBJS = $(patsubst src/%.c,build/%.o,$(SRCS))
+STD_SRCS = $(wildcard src/std/*.cvm)
+STDS = $(patsubst src/std/%.cvm,build/%.h,$(STD_SRCS))
 
 .PHONY: all
 all: $(TARGET)
@@ -12,11 +14,11 @@ all: $(TARGET)
 build:
 	mkdir -p build
 
-build/%.o: src/%.c | build
-	$(CC) $(CFLAGS) $(DEPFLAGS) -Isrc -c $< -o $@
-
-build/std.h: src/std/std.cvm | build
+build/%.h: src/std/%.cvm | build
 	xxd -i $< $@
+
+build/%.o: src/%.c $(STDS) | build
+	$(CC) $(CFLAGS) $(DEPFLAGS) -Isrc -c $< -o $@
 
 $(TARGET): build/std.h $(OBJS)
 	$(CC) -g $(OBJS) -o $@

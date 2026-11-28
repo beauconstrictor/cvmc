@@ -1,4 +1,5 @@
 import std
+import io
 
 {:main
   (puti (clamp 16 5 8)) putl

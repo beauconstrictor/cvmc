@@ -11,7 +11,7 @@ syntax keyword cvm_if
 syntax keyword cvm_keyword
       \ size len
       \ var const enum
-      \ import
+      \ import require
       \ get put load store at clear
       \ do doc
       \ break throw assert
