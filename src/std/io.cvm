@@ -28,7 +28,7 @@ require std
   (putc (add (umod 10) '0'))
 }
 
-{:__isdigit <c -- c'> (and (ge dup '0') (le over '9')) nip}
+{:__isdigit* <c -- c'> (and (ge dup '0') (le over '9')) nip}
 
 {:getc* <buf -- after c> (load dup) swap inc swap}
 {:geti* <buf -- after i>

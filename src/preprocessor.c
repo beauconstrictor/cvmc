@@ -694,8 +694,18 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
   size_t i = 0;
   while (i < toks->count) {
     Token tok = toks->items[i];
+    Token next;
+    bool has_next = i < toks->count - 1;
+    if (has_next) next = toks->items[i+1];
+
 
     if (tok.kind == TOKEN_REQUIRE) {
+      if (!has_next || next.kind != TOKEN_WORD)
+        GIVE_ERROR_WITH_LEXEME("expected module name after '%.*s'", tok);
+
+      if (!lookup_symbol(next.start, next.length, &imported, NULL))
+        GIVE_ERROR_WITH_LEXEME("required module was never imported: '%.*s'", next);
+
       if (!remove_token(toks, i)) return false;
       if (!remove_token(toks, i)) return false;
       continue;
@@ -706,14 +716,14 @@ bool deimport(Arena *arena, Tokens *toks, Error *error) {
       continue;
     }
 
-    Token next;
-    bool has_next = i < toks->count - 1;
-    if (has_next) next = toks->items[i+1];
-
     if (!has_next)
       GIVE_ERROR("expected name after import", tok);
     else if (next.kind != TOKEN_WORD)
       GIVE_ERROR("expected name after import", next);
+
+    bool already_imported = false;
+    append_token_symbol(&imported, &next, 0, &already_imported);
+    if (already_imported) continue;
 
     char *path = arena_alloc(arena, PATH_MAX);
     if (path == NULL) return false;
